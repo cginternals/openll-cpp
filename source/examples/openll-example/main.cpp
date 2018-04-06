@@ -42,18 +42,19 @@ namespace
     R"(Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.)";
 
     // Configuration of text rendering
-    std::string g_fontFilename("opensansr36.fnt"); ///< Font file
-    std::string g_string(s_text);                  ///< Text to display
-    float       g_fontSize(16.0f);                 ///< Font size (in pt)
-    glm::vec2   g_origin(0.0f, 1.0f);              ///< Origin position ( (-1, -1)..(1, 1), relative to the defined viewport )
-    glm::vec4   g_margins(0.0f, 0.0f, 0.0f, 0.0f); ///< Margins (top/right/bottom/left, in pt)
-    float       g_pixelPerInch(96.0f);             ///< Number of pixels per inch
-    bool        g_wordWrap(true);                  ///< Wrap words at the line ending?
-    float       g_lineWidth(0.0f);                 ///< Width of a line (in pt)
-    Alignment   g_alignment(Alignment::Centered);  ///< Horizontal text alignment
-    LineAnchor  g_lineAnchor(LineAnchor::Ascent);  ///< Vertical line anchor
-    bool        g_optimized(true);                 ///< ???
-    glm::uvec2  g_viewport;                        ///< Viewport to draw in (in pixels)
+    std::string g_fontFilename("opensansr36.fnt");   ///< Font file
+    std::string g_string(s_text);                    ///< Text to display
+    float       g_fontSize(16.0f);                   ///< Font size (in pt)
+    glm::vec2   g_origin(0.0f, 1.0f);                ///< Origin position ( (-1, -1)..(1, 1), relative to the defined viewport )
+    glm::vec4   g_margins(0.0f, 0.0f, 0.0f, 0.0f);   ///< Margins (top/right/bottom/left, in pt)
+    float       g_pixelPerInch(96.0f);               ///< Number of pixels per inch
+    bool        g_wordWrap(true);                    ///< Wrap words at the line ending?
+    float       g_lineWidth(0.0f);                   ///< Width of a line (in pt)
+    Alignment   g_alignment(Alignment::Centered);    ///< Horizontal text alignment
+    LineAnchor  g_lineAnchor(LineAnchor::Ascent);    ///< Vertical line anchor
+    bool        g_optimized(true);                   ///< ???
+    glm::uvec2  g_viewport;                          ///< Viewport to draw in (in pixels)
+    glm::vec4   g_fontColor(0.0f, 0.0f, 0.0f, 1.0f); ///< Text color
 
     FontFace  * g_fontFace;
     std::vector<GlyphSequence> g_sequences;
@@ -90,6 +91,7 @@ void createSequence()
     g_sequences.front().setLineWidth(scaledLineWidth, scaledFontSize, *g_fontFace);
     g_sequences.front().setAlignment(g_alignment);
     g_sequences.front().setLineAnchor(g_lineAnchor);
+    g_sequences.front().setFontColor(g_fontColor);
 
     g_sequences.front().setTransform(g_origin, scaledFontSize, *g_fontFace, g_viewport, g_pixelPerInch, g_margins);
 }
