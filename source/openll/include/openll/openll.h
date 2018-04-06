@@ -13,7 +13,10 @@ namespace openll
 
 /**
 *  @brief
-*    Print information about the library to the console
+*    Get path to the openll data directory
+*
+*  @return
+*    Path to openll data directory
 */
 OPENLL_API const std::string & dataPath();
 
