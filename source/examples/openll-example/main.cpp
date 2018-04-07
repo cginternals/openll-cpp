@@ -45,15 +45,15 @@ namespace
     std::string g_fontFilename("opensansr36.fnt");   ///< Font file
     std::string g_string(s_text);                    ///< Text to display
     float       g_fontSize(16.0f);                   ///< Font size (in pt)
-    glm::vec2   g_origin(0.0f, 1.0f);                ///< Origin position ( (-1, -1)..(1, 1), relative to the defined viewport )
+    glm::vec2   g_origin(-1.0f, 1.0f);               ///< Origin position ( (-1, -1)..(1, 1), relative to the defined viewport )
     glm::vec4   g_margins(0.0f, 0.0f, 0.0f, 0.0f);   ///< Margins (top/right/bottom/left, in pt)
     float       g_pixelPerInch(96.0f);               ///< Number of pixels per inch
     bool        g_wordWrap(true);                    ///< Wrap words at the line ending?
     float       g_lineWidth(0.0f);                   ///< Width of a line (in pt)
-    Alignment   g_alignment(Alignment::Centered);    ///< Horizontal text alignment
+    Alignment   g_alignment(Alignment::LeftAligned); ///< Horizontal text alignment
     LineAnchor  g_lineAnchor(LineAnchor::Ascent);    ///< Vertical line anchor
     bool        g_optimized(true);                   ///< ???
-    glm::uvec2  g_viewport;                          ///< Viewport to draw in (in pixels)
+    glm::uvec2  g_size;                              ///< Viewport size (in pixels)
     glm::vec4   g_fontColor(0.0f, 0.0f, 0.0f, 1.0f); ///< Text color
 
     FontFace  * g_fontFace;
@@ -79,7 +79,7 @@ void loadFont(const std::string & filename)
 
 void createSequence()
 {
-    g_lineWidth = g_viewport.x / g_pixelPerInch * 72.0f;
+    g_lineWidth = g_size.x / g_pixelPerInch * 72.0f;
 
     const auto scaledFontSize = g_fontSize; // * 16.0f;
     const auto scaledLineWidth = g_lineWidth; // * 160.0f;
@@ -93,7 +93,7 @@ void createSequence()
     g_sequences.front().setLineAnchor(g_lineAnchor);
     g_sequences.front().setFontColor(g_fontColor);
 
-    g_sequences.front().setTransform(g_origin, scaledFontSize, *g_fontFace, g_viewport, g_pixelPerInch, g_margins);
+    g_sequences.front().setTransform(g_origin, scaledFontSize, *g_fontFace, g_size, g_pixelPerInch, g_margins);
 }
 
 void prepare()
@@ -178,12 +178,12 @@ void deinitialize()
 
 void resize()
 {
-    g_lineWidth = g_viewport.x / g_pixelPerInch * 72.0f;
+    g_lineWidth = g_size.x / g_pixelPerInch * 72.0f;
 
     const auto scaledFontSize = g_fontSize;
     const auto scaledLineWidth = g_lineWidth;
 
-    g_sequences.front().setTransform(g_origin, scaledFontSize, *g_fontFace, g_viewport, g_pixelPerInch, g_margins);
+    g_sequences.front().setTransform(g_origin, scaledFontSize, *g_fontFace, g_size, g_pixelPerInch, g_margins);
     g_sequences.front().setLineWidth(scaledLineWidth, scaledFontSize, *g_fontFace);
 
     auto vertexItr = g_vertexCloud->vertices().begin();
@@ -203,7 +203,7 @@ void draw()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Set viewport
-    gl::glViewport(0, 0, g_viewport.x, g_viewport.y);
+    gl::glViewport(0, 0, g_size.x, g_size.y);
 
     // Set rendering states
     gl::glDepthMask(gl::GL_FALSE);
@@ -228,7 +228,7 @@ void onError(int errnum, const char * errmsg)
 
 void onResize(GLFWwindow *, int width, int height)
 {
-    g_viewport = glm::uvec2(width, height);
+    g_size = glm::uvec2(width, height);
     resize();
 }
 
@@ -284,7 +284,7 @@ int main(int, char *[])
     // Get framebuffer size
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
-    g_viewport = glm::uvec2(width, height);
+    g_size = glm::uvec2(width, height);
 
     // Initialize OpenGL objects in context
     initialize();
