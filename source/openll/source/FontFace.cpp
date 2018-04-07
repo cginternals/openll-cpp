@@ -7,9 +7,9 @@ namespace openll
 
 
 FontFace::FontFace()
-: m_ascent (0.f)
-, m_descent(0.f)
-, m_linegap(0.f)
+: m_ascent (0.0f)
+, m_descent(0.0f)
+, m_linegap(0.0f)
 {
 }
 
@@ -30,7 +30,8 @@ float FontFace::ascent() const
 
 void FontFace::setAscent(const float ascent)
 {
-    assert(ascent > 0.f);
+    assert(ascent > 0.0f);
+
     m_ascent = ascent;
 }
 
@@ -43,7 +44,7 @@ void FontFace::setDescent(const float descent)
 {
     // Note: No assert here:
     // There might be fonts with their lowest descender above baseline.
-    // assert(descent < 0.f);
+    // assert(descent < 0.0f);
 
     m_descent = descent;
 }
@@ -60,8 +61,9 @@ void FontFace::setLinegap(const float linegap)
 
 float FontFace::linespace() const
 {
-    if (lineHeight() == 0.f)
+    if (lineHeight() == 0.0f) {
         return lineHeight();
+    }
 
     return size() / lineHeight();
 }
@@ -101,10 +103,10 @@ const glm::vec4 & FontFace::glyphTexturePadding() const
 
 void FontFace::setGlyphTexturePadding(const glm::vec4 & padding)
 {
-    assert(padding[0] >= 0.f);
-    assert(padding[1] >= 0.f);
-    assert(padding[2] >= 0.f);
-    assert(padding[3] >= 0.f);
+    assert(padding[0] >= 0.0f);
+    assert(padding[1] >= 0.0f);
+    assert(padding[2] >= 0.0f);
+    assert(padding[3] >= 0.0f);
 
     m_glyphTexturePadding = padding;
 }
@@ -116,7 +118,7 @@ globjects::Texture * FontFace::glyphTexture() const
 
 void FontFace::setGlyphTexture(std::unique_ptr<globjects::Texture> && texture)
 {
-    m_glyphTexture = move(texture);
+    m_glyphTexture = std::move(texture);
 }
 
 bool FontFace::hasGlyph(const GlyphIndex index) const
@@ -127,8 +129,9 @@ bool FontFace::hasGlyph(const GlyphIndex index) const
 Glyph & FontFace::glyph(const GlyphIndex index)
 {
     const auto existing = m_glyphs.find(index);
-    if (existing != m_glyphs.cend())
+    if (existing != m_glyphs.cend()) {
         return existing->second;
+    }
 
     auto glyph = Glyph();
     glyph.setIndex(index);
@@ -140,8 +143,9 @@ Glyph & FontFace::glyph(const GlyphIndex index)
 const Glyph & FontFace::glyph(const GlyphIndex index) const
 {
     const auto existing = m_glyphs.find(index);
-    if (existing != m_glyphs.cend())
+    if (existing != m_glyphs.cend()) {
         return existing->second;
+    }
 
     static const auto empty = Glyph();
     return empty;
@@ -157,8 +161,9 @@ void FontFace::addGlyph(const Glyph & glyph)
 std::vector<GlyphIndex> FontFace::glyphs() const
 {
     auto glyphs = std::vector<GlyphIndex>();
-    for (const auto & i : m_glyphs)
+    for (const auto & i : m_glyphs) {
         glyphs.push_back(i.first);
+    }
 
     return glyphs;
 }
@@ -171,8 +176,9 @@ bool FontFace::depictable(const GlyphIndex index) const
 float FontFace::kerning(const GlyphIndex index, const GlyphIndex subsequentIndex) const
 {
     const auto it = m_glyphs.find(index);
-    if (it == m_glyphs.cend())
-        return 0.f;
+    if (it == m_glyphs.cend()) {
+        return 0.0f;
+    }
 
     return it->second.kerning(subsequentIndex);
 }

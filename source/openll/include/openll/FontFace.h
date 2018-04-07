@@ -19,29 +19,29 @@ namespace openll
 
 /**
 *  @brief
-*    Font related data for glyph based text rendering.
+*    Description of a font for glyph based text rendering
 *
 *    The glyph-based font face is described by, e.g., font-size,
 *    line spacing, a glyph catalogue, as well as kerning information.
 *    The glyph catalogue is based on a set of glyphs referring to a
-*    texture atlas (see Glyph). All measures are provided in float
-*    eventhough most glyph-textures and associated font data is
+*    texture atlas (see Glyph). All measures are provided in float,
+*    even though most glyph textures and associated font data is
 *    encoded via integer values. FontFace explicitly relies on floating
-*    values to reduce the need of casting as well as to simplify the
-*    use for dpi aware text rendering. Most measures can be interpreted
+*    point values to reduce the need of casting as well as to simplify
+*    the use for dpi aware text rendering. Most measures can be interpreted
 *    as points (by means of the unit pt), again, easing the use for
 *    arbitrary dpi.
 *
-*    The font face interface is designed to access most basic font
+*    The font face interface is designed to access the most basic font
 *    settings ascent, descent, and linegap (leading). Additional
-*    font settings are provided via interface but are derived from
+*    font settings are provided via the interface, but are derived from
 *    or mapped to the above mentioned three settings, e.g., font size
 *    is the sum of descent and ascent. This is to provide as much
 *    convenience measures for type setting/font rendering as possible.
 *
 *  @remarks
-*    This class does not provide dpi awareness. This has to be
-*    handled outside of this class, e.g., during layouting and rendering.
+*    This class does not provide dpi awareness. This has to be handled
+*    outside of this class, e.g., during layouting and rendering.
 */
 class OPENLL_API FontFace
 {
@@ -50,9 +50,9 @@ public:
     *  @brief
     *    Constructor
     *
-    *    Constructs an unconfigured, empty font face specification. The
-    *    appropriate setters should be used for configuring the font
-    *    face. Alternatively, the FontImporter provides the import of a
+    *    Constructs an unconfigured, empty font face. The appropriate
+    *    setters should be used for configuring the font face.
+    *    Alternatively, the FontLoader provides the import of a
     *    font from a font configuration file (e.g., provided by
     *    http://kvazars.com/littera/).
     */
@@ -62,56 +62,56 @@ public:
     *  @brief
     *    Destructor
     *
-    *    Releases all glyphs. The glyph texture remains if it is shared.
+    *    Releases all glyphs and the associated glyph texture.
     */
     virtual ~FontFace();
 
     /**
     *  @brief
-    *    Get the size of the font in pt.
+    *    Get the size of the font (in pt)
     *
-    *    The font size is the measure from the tops of the tallest
-    *    glyphs (ascenders) to the bottom of the lowest descenders in
-    *    pt. It is derived via the sum of ascent and descent.
+    *    The font size is the measure from the top of the tallest
+    *    glyphs (ascenders) to the bottom of the lowest descenders.
+    *    It is derived via the sum of ascent and descent.
     *
     *  @return
-    *    The font size in pt (ascent + descent).
+    *    Font size in pt (ascent + descent)
     */
     float size() const;
 
     /**
     *  @brief
-    *    Get the font's ascent in pt.
+    *    Get the font's ascent (in pt)
     *
-    *    The ascent is the distance from the baseline to the tops of
-    *    the tallest glyphs (ascenders) in pt.
+    *    The ascent is the distance from the baseline to the top
+    *    of the tallest glyphs (ascenders).
     *
     *  @return
-    *    The distance from the baseline to the topmost ascenders in pt.
+    *    Distance from the baseline to the topmost ascenders (in pt)
     */
     float ascent() const;
 
     /**
     *  @brief
-    *    Set the font's ascent in pt.
+    *    Set the font's ascent (in pt)
     *
-    *    The ascent is the distance from the baseline to the tops of
-    *    the tallest glyphs (ascenders) in pt.
+    *    The ascent is the distance from the baseline to the
+    *    top of the tallest glyphs (ascenders).
     *
     *  @param[in] ascent
-    *    The distance from the baseline to the topmost ascenders in pt.
+    *    The distance from the baseline to the topmost ascenders (in pt)
     */
     void setAscent(float ascent);
 
     /**
     *  @brief
-    *    Get the font's descent in pt.
+    *    Get the font's descent (in pt)
     *
-    *    The descent is the distance from the baseline to the lowest
-    *    descenders in pt.
+    *    The descent is the distance from the baseline to the
+    *    lowest descenders.
     *
     *  @return
-    *    The distance from the baseline to the lowest descenders in pt.
+    *    Distance from the baseline to the lowest descenders (in pt)
     *
     *  @remarks
     *    This value is usually negative (if the fonts lowest
@@ -121,13 +121,13 @@ public:
 
     /**
     *  @brief
-    *    Set the font's descent in pt.
+    *    Set the font's descent (in pt)
     *
-    *    The descent is the distance from the baseline to the lowest
-    *    descenders in pt.
+    *    The descent is the distance from the baseline to the
+    *    lowest descenders in pt.
     *
     *  @param[in] descent
-    *    The distance from the baseline to the lowest descenders in pt.
+    *    Distance from the baseline to the lowest descenders (in pt)
     *
     *  @remarks
     *    This value is usually negative (if the fonts lowest
@@ -137,59 +137,58 @@ public:
 
     /**
     *  @brief
-    *    Get the font's leading/linegap in pt.
+    *    Get the font's leading/linegap (in pt)
     *
     *    The leading is the distance from the lowest descenders to the
-    *    topmost ascenders of a subsequent text line in pt.
+    *    topmost ascenders of a subsequent text line.
     *
     *  @return
-    *    The gap between two subsequent lines of text in pt.
+    *    Gap between two subsequent lines of text (in pt)
     */
     float linegap() const;
 
     /**
     *  @brief
-    *    Set the font's leading/linegap in pt.
+    *    Set the font's leading/linegap (in pt)
     *
     *    The leading is the distance from the lowest descenders to the
-    *    topmost ascenders of a subsequent text line in pt.
+    *    topmost ascenders of a subsequent text line.
     *
     *  @param[in] linegap
-    *    The gap between two subsequent lines of text in pt.
+    *    Gap between two subsequent lines of text (in pt)
     */
     void setLinegap(float linegap);
 
     /**
     *  @brief
-    *    Get the relative baseline-to-basline distance w.r.t. the font's size.
+    *    Get the relative baseline-to-basline distance w.r.t. the font's size
     *
-    *    The linespace relative linespace is derived as follows:
+    *    The relative linespace is derived as follows:
     *        linespace = size / lineHeight;
-    *    Note that descent is usually a negative value.
     *
     *  @return
-    *    The relative baseline-to-basline distance w.r.t. the font's size.
+    *    Relative baseline-to-basline distance w.r.t. the font's size
     */
     float linespace() const;
 
     /**
     *  @brief
-    *    Set the relative baseline-to-basline distance w.r.t. the font's size.
+    *    Set the relative baseline-to-basline distance w.r.t. the font's size
     *
     *    The linespace is mapped to linegap as follows:
     *        linegap = size * (linespace - 1)
     *
     *  @param[in] linespace
-    *    The relative baseline-to-basline distance w.r.t. the font's size.
+    *    Relative baseline-to-basline distance w.r.t. the font's size
     *
     *  @remarks
-    *    Values < 1.0 will result in a negative linegap.
+    *    Values < 1.0 will result in a negative linegap
     */
     void setLinespace(float linespace);
 
     /**
     *  @brief
-    *    Get the baseline-to-basline distance in pt.
+    *    Get the baseline-to-basline distance (in pt)
     *
     *    The lineheight is derived as follows:
     *        lineheight = size + linegap
@@ -197,143 +196,146 @@ public:
     *        lineheight = size * linespace
     *
     *  @return
-    *    The line height (baseline-to-basline distance) in pt.
+    *    Line height (baseline-to-basline distance) in pt
     */
     float lineHeight() const;
 
     /**
     *  @brief
-    *    Set the baseline-to-basline distance in pt.
+    *    Set the baseline-to-basline distance (in pt)
     *
     *  @param[in] lineHeight
-    *    The line height (baseline-to-basline distance) in pt.
+    *    The line height (baseline-to-basline distance) in pt
     *
     *  @remarks
-    *    Negative values will result in negative linegap.
+    *    Negative values will result in negative linegap
     */
     void setLineHeight(float lineHeight);
 
     /**
     *  @brief
-    *    Get the size/extent of the glyph texture in px.
-    *
-    *    This can only be set via setGlyphTexture.
+    *    Get the size/extent of the glyph texture (in px)
     *
     *  @return
-    *    The size/extent of the glyph texture in px.
+    *    Extent of the glyph texture (in px)
     */
     const glm::uvec2 & glyphTextureExtent() const;
 
     /**
     *  @brief
-    *    Sets the glyph texture atlas extent.
+    *    Set the size/extent of the glyph texture (in px)
     *
     *  @param[in] extent
-    *    The texture extent in px
+    *    Extent of the glyph texture (in px)
     */
     void setGlyphTextureExtent(const glm::uvec2 & extent);
 
     /**
     *  @brief
-    *    Get the padding applied to every glyph in px.
-    *
-    *    This can only be set via setGlyphTexture.
+    *    Get the padding applied to every glyph (in px)
     *
     *  @return
-    *    The CSS style (top, right, bottom, and left) padding applied
-    *    to every glyph within the texture in px.
+    *    Padding applied to every glyph within the texture (in px)
+    *
+    *  @remarks
+    *    The padding is defined in CSS style (top, right, bottom, left)
     */
     const glm::vec4 & glyphTexturePadding() const;
 
     /**
     *  @brief
-    *    Sets/updates the padding used for the glyph texture atlas.
+    *    Set the padding applied to every glyph (in px)
     *
     *  @param[in] padding
-    *    The CSS style (top, right, bottom, and left) padding applied
-    *    to every glyph within the texture in px.
+    *    Padding applied to every glyph within the texture (in px)
+    *
+    *  @remarks
+    *    The padding is defined in CSS style (top, right, bottom, left)
     */
     void setGlyphTexturePadding(const glm::vec4 & padding);
 
     /**
     *  @brief
-    *    Get the font face's associated glyph atlas.
+    *    Get the font face's associated glyph texture
     *
     *    All glyph data is associated to this texture atlas.
     *
     *  @return
-    *    The texture object containing the texture atlas.
+    *    Texture containing the glyph texture atlas
     */
     globjects::Texture * glyphTexture() const;
 
     /**
     *  @brief
-    *    Sets/updates the glyph texture atlas used for all comprised glyphs.
+    *    Set the font face's associated glyph texture
     *
     *  @param[in] texture
-    *    The new texture atlas for all glyphs
+    *    Texture containing the glyph texture atlas
     */
     void setGlyphTexture(std::unique_ptr<globjects::Texture> && texture);
 
     /**
     *  @brief
-    *    Check if a glyph of a specific index is available.
+    *    Check if a glyph of a specific index is available
     *
     *  @param[in] index
-    *    Index of the glyph to access.
+    *    Index of the glyph to access
     *
     *  @return
-    *    'true' if a glyph for the provided index was added, else 'false'.
+    *    'true' if a glyph for the provided index was added, else 'false'
     */
     bool hasGlyph(GlyphIndex index) const;
 
     /**
     *  @brief
-    *    Get a glyph by index.
+    *    Get/create glyph by index
     *
     *    If the glyph does not exists, a glyph with the given index
     *    will be added to the font face's glyphs.
     *
     *  @param[in] index
-    *    Index of the glyph to access.
+    *    Index of the glyph to access
     *
     *  @return
-    *    Reference to the glyph with the matching index.
+    *    Reference to the glyph with the matching index
     */
     Glyph & glyph(GlyphIndex index);
 
     /**
     *  @brief
-    *    Get a glyph by index.
+    *    Get glyph by index
     *
     *    If the glyph does not exists, a reference to an empty glyph
-    *    is returned (and an assertion is thrown).
+    *    is returned and an assertion is thrown.
     *
     *  @param[in] index
-    *    Index of the glyph to access.
+    *    Index of the glyph to access
     *
     *  @return
-    *    Reference to the glyph with the matching index. Blank glyph if not found.
+    *    Reference to the glyph with the matching index, or a blank glyph if not found
     */
     const Glyph & glyph(GlyphIndex index) const;
 
     /**
     *  @brief
-    *    Add a glyph to the font face's set of glyphs.
+    *    Add a glyph to the font face
     *
-    *    If the glyph already exists (assertion), the existing glyph remains.
+    *    If the glyph already exists, the existing glyph remains
+    *    and an assertion is thrown.
     *
     *  @param[in] glyph
-    *    The glyph to add to the set of glyphs.
+    *    Glyph to add
     */
     void addGlyph(const Glyph & glyph);
 
     /**
     *  @brief
-    *    Generates a vector of all comprised glyph indices.
+    *    Get available glyph indices
+    *
+    *    Generates a vector of all glyph indices available in this font face.
     *
     *  @return
-    *    A vector of all glyph indices available to this font face.
+    *    Vector of all glyph indices available in this font face
     */
     std::vector<GlyphIndex> glyphs() const;
 
@@ -342,66 +344,65 @@ public:
     *    Check if a glyph is depictable/renderable
     *
     *    If the glyph's subtexture vertical or horizontal extent is
-    *    zero the glyph does not need to be depicted/rendered. E.g.,
-    *    spaces, line feeds, other control sequences as well as
-    *    unknown glyphs do not need to be processed for rendering.
+    *    zero, the glyph does not need to be depicted/rendered.
+    *    For example, spaces, line feeds, other control sequences as well
+    *    as unknown glyphs do not need to be processed for rendering.
     *
     *  @param[in] index
-    *    Index of the glyph to access.
+    *    Index of the glyph
     *
     *  @return
-    *    'true' if the glyph needs to be depicted/rendered, else 'false'.
+    *    'true' if the glyph needs to be depicted/rendered, else 'false'
     */
     bool depictable(GlyphIndex index) const;
 
     /**
     *  @brief
-    *    Kerning for a glyph and a subsequent glyph in pt.
+    *    Get kerning for a glyph and a subsequent glyph (in pt)
     *
-    *    If the glyph or the subsequent glyph are unknown to this font
-    *    face (assertion), 0.f will be returned. For more detais on
+    *    If the glyph or the subsequent glyph are unknown to this font face,
+    *    0.0f will be returned and an assertion is thrown. For more detais on
     *    kerning, refer to the Glyph class.
     *
     *  @param[in] index
-    *    The current glyph index (e.g., of the curren pen-position).
+    *    The current glyph index (e.g., of the curren pen-position)
     *  @param[in] subsequentIndex
-    *    The glyph index of the subsequent/next glyph.
+    *    The glyph index of the subsequent/next glyph
     *
     *  @return
     *    The kerning (usually negative) between the two glyphs in pt.
     *    If either one of the glyphs is unknown to this font face or
-    *    no specific kerning for the glyph pair is available a zero
+    *    no specific kerning for the glyph pair is available, a zero
     *    kerning is returned.
     */
     float kerning(GlyphIndex index, GlyphIndex subsequentIndex) const;
 
     /**
     *  @brief
-    *    Set the kerning for a glyph w.r.t. to a subsequent glyph in pt.
+    *    Set the kerning for a glyph and a subsequent glyph (in pt)
     *
     *    If the glyph is known to this font face, the values are
-    *    forwared to the glyphs kerning setter (see Glyph for more information).
+    *    forwarded to the glyphs kerning setter (see Glyph for more information).
     *
     *  @param[in] index
-    *    The target glyph index.
+    *    The target glyph index
     *  @param[in] subsequentIndex
-    *    The glyph index of the respective subsequent/next glyph.
+    *    The glyph index of the respective subsequent/next glyph
     *  @param[in] kerning
-    *    Kerning of the two glyphs in pt.
+    *    Kerning of the two glyphs (in pt)
     */
     void setKerning(GlyphIndex index, GlyphIndex subsequentIndex, float kerning);
 
 
 protected:
-    float m_ascent;  ///< The distance from the baseline to the tops of the tallest glyphs (ascenders) in pt.
-    float m_descent; ///< The distance from the baseline to the lowest descenders in pt.
-    float m_linegap; ///< The distance from the lowest descenders to the topmost ascenders of a subsequent text line in pt.
+    float      m_ascent;              ///< Distance from the baseline to the tops of the tallest glyphs (ascenders) in pt
+    float      m_descent;             ///< Distance from the baseline to the lowest descenders in pt
+    float      m_linegap;             ///< Distance from the lowest descenders to the topmost ascenders of a subsequent text line in pt
+    glm::uvec2 m_glyphTextureExtent;  ///< The size of the glyph texture in px
+    glm::vec4  m_glyphTexturePadding; ///< The padding applied to every glyph in px
 
-    glm::uvec2 m_glyphTextureExtent;  ///< The size/extent of the glyph texture in px.
-    glm::vec4  m_glyphTexturePadding; ///< The padding applied to every glyph in px.
-
-    std::unique_ptr<globjects::Texture>   m_glyphTexture; ///< The font face's associated glyph atlas.
-    std::unordered_map<GlyphIndex, Glyph> m_glyphs;       ///< Quick-access container for all added glyphs.
+    std::unique_ptr<globjects::Texture>   m_glyphTexture; ///< The font face's associated glyph texture
+    std::unordered_map<GlyphIndex, Glyph> m_glyphs;       ///< Quick-access container for all added glyphs
 };
 
 
