@@ -64,7 +64,7 @@ public:
     *
     *    Releases all glyphs and the associated glyph texture.
     */
-    virtual ~FontFace();
+    ~FontFace();
 
     /**
     *  @brief

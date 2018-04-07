@@ -8,7 +8,7 @@ namespace openll
 
 Glyph::Glyph()
 : m_index(0u)
-, m_advance(0)
+, m_advance(0.0f)
 {
 }
 
@@ -33,10 +33,10 @@ const glm::vec2 & Glyph::subTextureOrigin() const
 
 void Glyph::setSubTextureOrigin(const glm::vec2 & origin)
 {
-    //assert(origin.x >= 0.f);
-    //assert(origin.x <= 1.f);
-    //assert(origin.y >= 0.f);
-    //assert(origin.y <= 1.f);
+    //assert(origin.x >= 0.0f);
+    //assert(origin.x <= 1.0f);
+    //assert(origin.y >= 0.0f);
+    //assert(origin.y <= 1.0f);
 
     m_subtextureOrigin = origin;
 }
@@ -48,15 +48,15 @@ const glm::vec2 & Glyph::subTextureExtent() const
 
 void Glyph::setSubTextureExtent(const glm::vec2 & extent)
 {
-    assert(extent.x <= 1.f);
-    assert(extent.y <= 1.f);
+    assert(extent.x <= 1.0f);
+    assert(extent.y <= 1.0f);
 
     m_subtextureExtent = extent;
 }
 
 bool Glyph::depictable() const
 {
-    return m_subtextureExtent.x > 0.f && m_subtextureExtent.y > 0.f;
+    return m_subtextureExtent.x > 0.0f && m_subtextureExtent.y > 0.0f;
 }
 
 const glm::vec2 & Glyph::bearing() const
@@ -97,15 +97,18 @@ void Glyph::setAdvance(const float advance)
 
 float Glyph::kerning(size_t subsequentIndex) const
 {
+    // Get kerning between this glyph and the subsequent glyph
     auto it = m_kernings.find(subsequentIndex);
-    if (it == m_kernings.cend())
-        return 0.f;
-
-    return it->second;
+    if (it != m_kernings.cend()) {
+        return it->second;
+    } else {
+        return 0.0f;
+    }
 }
 
 void Glyph::setKerning(size_t subsequentIndex, const float kerning)
 {
+    // Set kerning between this glyph and the subsequent glyph
     m_kernings[subsequentIndex] = kerning;
 }
 
