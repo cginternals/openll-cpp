@@ -48,11 +48,11 @@ namespace
     glm::vec2   g_origin(-1.0f, 1.0f);               ///< Origin position ( (-1, -1)..(1, 1), relative to the defined viewport )
     glm::vec4   g_margins(0.0f, 0.0f, 0.0f, 0.0f);   ///< Margins (top/right/bottom/left, in pt)
     float       g_pixelPerInch(96.0f);               ///< Number of pixels per inch
-    bool        g_wordWrap(true);                    ///< Wrap words at the line ending?
+    bool        g_wordWrap(true);                    ///< Wrap words at the end of a line?
     float       g_lineWidth(0.0f);                   ///< Width of a line (in pt)
     Alignment   g_alignment(Alignment::LeftAligned); ///< Horizontal text alignment
     LineAnchor  g_lineAnchor(LineAnchor::Ascent);    ///< Vertical line anchor
-    bool        g_optimized(true);                   ///< ???
+    bool        g_optimized(true);                   ///< Optimize rendering performance?
     glm::uvec2  g_size;                              ///< Viewport size (in pixels)
     glm::vec4   g_fontColor(0.0f, 0.0f, 0.0f, 1.0f); ///< Text color
 
