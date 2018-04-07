@@ -121,12 +121,12 @@ void FontFace::setGlyphTexture(std::unique_ptr<globjects::Texture> && texture)
     m_glyphTexture = std::move(texture);
 }
 
-bool FontFace::hasGlyph(const GlyphIndex index) const
+bool FontFace::hasGlyph(const size_t index) const
 {
     return m_glyphs.find(index) != m_glyphs.cend();
 }
 
-Glyph & FontFace::glyph(const GlyphIndex index)
+Glyph & FontFace::glyph(const size_t index)
 {
     const auto existing = m_glyphs.find(index);
     if (existing != m_glyphs.cend()) {
@@ -140,7 +140,7 @@ Glyph & FontFace::glyph(const GlyphIndex index)
     return inserted.first->second;
 }
 
-const Glyph & FontFace::glyph(const GlyphIndex index) const
+const Glyph & FontFace::glyph(const size_t index) const
 {
     const auto existing = m_glyphs.find(index);
     if (existing != m_glyphs.cend()) {
@@ -158,9 +158,9 @@ void FontFace::addGlyph(const Glyph & glyph)
     m_glyphs.emplace(glyph.index(), glyph);
 }
 
-std::vector<GlyphIndex> FontFace::glyphs() const
+std::vector<size_t> FontFace::glyphs() const
 {
-    auto glyphs = std::vector<GlyphIndex>();
+    auto glyphs = std::vector<size_t>();
     for (const auto & i : m_glyphs) {
         glyphs.push_back(i.first);
     }
@@ -168,12 +168,12 @@ std::vector<GlyphIndex> FontFace::glyphs() const
     return glyphs;
 }
 
-bool FontFace::depictable(const GlyphIndex index) const
+bool FontFace::depictable(const size_t index) const
 {
     return glyph(index).depictable();
 }
 
-float FontFace::kerning(const GlyphIndex index, const GlyphIndex subsequentIndex) const
+float FontFace::kerning(const size_t index, const size_t subsequentIndex) const
 {
     const auto it = m_glyphs.find(index);
     if (it == m_glyphs.cend()) {
@@ -183,7 +183,7 @@ float FontFace::kerning(const GlyphIndex index, const GlyphIndex subsequentIndex
     return it->second.kerning(subsequentIndex);
 }
 
-void FontFace::setKerning(const GlyphIndex index, const GlyphIndex subsequentIndex, const float kerning)
+void FontFace::setKerning(const size_t index, const size_t subsequentIndex, const float kerning)
 {
     const auto it = m_glyphs.find(index);
     if (it == m_glyphs.cend() || !hasGlyph(subsequentIndex))

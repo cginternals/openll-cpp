@@ -284,7 +284,7 @@ public:
     *  @return
     *    'true' if a glyph for the provided index was added, else 'false'
     */
-    bool hasGlyph(GlyphIndex index) const;
+    bool hasGlyph(size_t index) const;
 
     /**
     *  @brief
@@ -299,7 +299,7 @@ public:
     *  @return
     *    Reference to the glyph with the matching index
     */
-    Glyph & glyph(GlyphIndex index);
+    Glyph & glyph(size_t index);
 
     /**
     *  @brief
@@ -314,7 +314,7 @@ public:
     *  @return
     *    Reference to the glyph with the matching index, or a blank glyph if not found
     */
-    const Glyph & glyph(GlyphIndex index) const;
+    const Glyph & glyph(size_t index) const;
 
     /**
     *  @brief
@@ -337,7 +337,7 @@ public:
     *  @return
     *    Vector of all glyph indices available in this font face
     */
-    std::vector<GlyphIndex> glyphs() const;
+    std::vector<size_t> glyphs() const;
 
     /**
     *  @brief
@@ -354,7 +354,7 @@ public:
     *  @return
     *    'true' if the glyph needs to be depicted/rendered, else 'false'
     */
-    bool depictable(GlyphIndex index) const;
+    bool depictable(size_t index) const;
 
     /**
     *  @brief
@@ -375,7 +375,7 @@ public:
     *    no specific kerning for the glyph pair is available, a zero
     *    kerning is returned.
     */
-    float kerning(GlyphIndex index, GlyphIndex subsequentIndex) const;
+    float kerning(size_t index, size_t subsequentIndex) const;
 
     /**
     *  @brief
@@ -391,7 +391,7 @@ public:
     *  @param[in] kerning
     *    Kerning of the two glyphs (in pt)
     */
-    void setKerning(GlyphIndex index, GlyphIndex subsequentIndex, float kerning);
+    void setKerning(size_t index, size_t subsequentIndex, float kerning);
 
 
 protected:
@@ -401,8 +401,8 @@ protected:
     glm::uvec2 m_glyphTextureExtent;  ///< The size of the glyph texture in px
     glm::vec4  m_glyphTexturePadding; ///< The padding applied to every glyph in px
 
-    std::unique_ptr<globjects::Texture>   m_glyphTexture; ///< The font face's associated glyph texture
-    std::unordered_map<GlyphIndex, Glyph> m_glyphs;       ///< Quick-access container for all added glyphs
+    std::unique_ptr<globjects::Texture> m_glyphTexture; ///< The font face's associated glyph texture
+    std::unordered_map<size_t, Glyph>   m_glyphs;       ///< Quick-access container for all added glyphs
 };
 
 

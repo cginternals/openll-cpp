@@ -154,7 +154,7 @@ void FontLoader::parseChar(std::stringstream & stream, FontFace & fontFace) cons
 {
     auto pairs = readKeyValuePairs(stream, { "id", "x", "y", "width", "height", "xoffset", "yoffset", "xadvance" });
 
-    auto index = cppassist::string::fromString<GlyphIndex>(pairs.at("id"));
+    auto index = cppassist::string::fromString<size_t>(pairs.at("id"));
     assert(index > 0);
 
     auto glyph = Glyph();
@@ -189,10 +189,10 @@ void FontLoader::parseKerning(std::stringstream & stream, FontFace & fontFace) c
 {
     auto pairs = readKeyValuePairs(stream, { "first", "second", "amount" });
 
-    auto first = cppassist::string::fromString<GlyphIndex>(pairs.at("first"));
+    auto first = cppassist::string::fromString<size_t>(pairs.at("first"));
     assert(first > 0);
 
-    auto second = cppassist::string::fromString<GlyphIndex>(pairs.at("second"));
+    auto second = cppassist::string::fromString<size_t>(pairs.at("second"));
     assert(second > 0);
 
     auto kerning = cppassist::string::fromString<float>(pairs.at("amount"));

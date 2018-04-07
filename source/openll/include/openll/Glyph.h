@@ -13,10 +13,6 @@
 namespace openll
 {
 
-
-using GlyphIndex = std::uint32_t; ///< Index type of a glyph in a FontFace
-
-
 /**
 *  @brief
 *   Glyph related data for glyph based text rendering.
@@ -29,10 +25,6 @@ using GlyphIndex = std::uint32_t; ///< Index type of a glyph in a FontFace
 */
 class OPENLL_API Glyph
 {
-public:
-    using KerningBySubsequentGlyphIndex = std::unordered_map<GlyphIndex, float>; ///< Map type for kerning information lookup
-
-
 public:
     /**
     *  @brief
@@ -53,7 +45,7 @@ public:
     *  @return
     *    Index in FontFace
     */
-    GlyphIndex index() const;
+    size_t index() const;
 
     /**
     *  @brief
@@ -62,7 +54,7 @@ public:
     *  @param[in] index
     *    The index in the associated FontFace
     */
-    void setIndex(GlyphIndex index);
+    void setIndex(size_t index);
 
     /**
     *  @brief
@@ -257,7 +249,7 @@ public:
     *    kerning data is available for the subsequent glyph, the return
     *    value is zero/no kerning.
     */
-    float kerning(GlyphIndex subsequentIndex) const;
+    float kerning(size_t subsequentIndex) const;
 
     /**
     *  @brief
@@ -277,11 +269,11 @@ public:
     *    If kerning data for the subsequent glyph is already
     *    available it will be updated to the provided value.
     */
-    void setKerning(GlyphIndex subsequentIndex, float kerning);
+    void setKerning(size_t subsequentIndex, float kerning);
 
 
 protected:
-    GlyphIndex m_index; ///< Index in the associated FontFace
+    size_t m_index; ///< Index in the associated FontFace
 
     glm::vec2 m_subtextureOrigin; ///< Upper left position of the glyph's sub-texture
     glm::vec2 m_subtextureExtent; ///< Width and height of the glyph's sub-texture
@@ -290,7 +282,7 @@ protected:
     float     m_advance; ///< Glyph's horizontal overall advance in pt
     glm::vec2 m_extent;  ///< Width and height of the glyph in pt
 
-    KerningBySubsequentGlyphIndex m_kernings; ///< Kerning information map with upcoming glyph as key
+    std::unordered_map<size_t, float> m_kernings; ///< Kerning information map with upcoming glyph as key
 };
 
 

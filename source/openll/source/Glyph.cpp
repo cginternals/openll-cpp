@@ -16,12 +16,12 @@ Glyph::~Glyph()
 {
 }
 
-GlyphIndex Glyph::index() const
+size_t Glyph::index() const
 {
     return m_index;
 }
 
-void Glyph::setIndex(const GlyphIndex index)
+void Glyph::setIndex(const size_t index)
 {
     m_index = index;
 }
@@ -95,7 +95,7 @@ void Glyph::setAdvance(const float advance)
     m_advance = advance;
 }
 
-float Glyph::kerning(GlyphIndex subsequentIndex) const
+float Glyph::kerning(size_t subsequentIndex) const
 {
     auto it = m_kernings.find(subsequentIndex);
     if (it == m_kernings.cend())
@@ -104,7 +104,7 @@ float Glyph::kerning(GlyphIndex subsequentIndex) const
     return it->second;
 }
 
-void Glyph::setKerning(GlyphIndex subsequentIndex, const float kerning)
+void Glyph::setKerning(size_t subsequentIndex, const float kerning)
 {
     m_kernings[subsequentIndex] = kerning;
 }
