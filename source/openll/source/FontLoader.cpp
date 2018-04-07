@@ -8,6 +8,7 @@
 #include <set>
 #include <map>
 
+#include <cppassist/memory/make_unique.h>
 #include <cppassist/logging/logging.h>
 #include <cppassist/string/conversion.h>
 #include <cppassist/string/manipulation.h>
@@ -31,75 +32,60 @@ FontLoader::~FontLoader()
 {
 }
 
-bool FontLoader::canLoad(const std::string & ext) const
+std::unique_ptr<FontFace> FontLoader::load(const std::string & filename) const
 {
-    return ext == "fnt";
-}
-
-std::vector<std::string> FontLoader::loadingTypes() const
-{
-    return { "Bitmap Font (*.fnt)" };
-}
-
-std::string FontLoader::allLoadingTypes() const
-{
-    return "*.fnt";
-}
-
-FontFace * FontLoader::load(const std::string & filename, const std::function<void(int, int)>) const
-{
+    // Open file
     std::ifstream in(filename, std::ios::in | std::ios::binary);
-
-    if (!in)
+    if (!in) {
         return nullptr;
+    }
 
-    auto fontFace = new FontFace();
+    // Create font face
+    auto fontFace = cppassist::make_unique<FontFace>();
 
-    auto line = std::string();
+    // Initialize font info
     auto identifier = std::string();
-    auto fontSize = 0.f;
+    auto fontSize   = 0.0f;
 
+    // Read file line by line
+    auto line = std::string();
     while (std::getline(in, line))
     {
+        // Read next line
         std::stringstream ss;
         ss << line;
 
+        // Read line identifier
         if (!std::getline(ss, identifier, ' '))
         {
             assert(false);
             continue;
         }
 
-        if (identifier == "info")
-        {
-            handleInfo(ss, *fontFace, fontSize);
-        }
-        else if (identifier == "common")
-        {
-            handleCommon(ss, *fontFace, fontSize);
-        }
-        else if (identifier == "page")
-        {
-            handlePage(ss, *fontFace, filename);
-        }
-        else if (identifier == "char")
-        {
-            handleChar(ss, *fontFace);
-        }
-        else if (identifier == "kerning")
-        {
-            handleKerning(ss, *fontFace);
+        // Parse line
+        if (identifier == "info") {
+            parseInfo(ss, *fontFace, fontSize);
+        } else if (identifier == "common") {
+            parseCommon(ss, *fontFace, fontSize);
+        } else if (identifier == "page") {
+            parsePage(ss, *fontFace, filename);
+        } else if (identifier == "char") {
+            parseChar(ss, *fontFace);
+        } else if (identifier == "kerning") {
+            parseKerning(ss, *fontFace);
         }
     }
 
-    if (fontFace->glyphTexture())
-        return fontFace;
+    // Check if font has been loaded successfully
+    if (fontFace->glyphTexture()) {
+        return std::move(fontFace);
+    }
 
-    delete fontFace;
+    // Otherwise delete font face and return error
     return nullptr;
 }
 
-void FontLoader::handleInfo(std::stringstream & stream, FontFace & fontFace, float & fontSize) const
+void FontLoader::parseInfo(std::stringstream & stream, FontFace & fontFace, float & fontSize) const
 {
     auto pairs = readKeyValuePairs(stream, { "size", "padding" });
 
@@ -117,7 +103,7 @@ void FontLoader::handleInfo(std::stringstream & stream, FontFace & fontFace, flo
     fontFace.setGlyphTexturePadding(padding);
 }
 
-void FontLoader::handleCommon(std::stringstream & stream, FontFace & fontFace, const float fontSize) const
+void FontLoader::parseCommon(std::stringstream & stream, FontFace & fontFace, const float fontSize) const
 {
     auto pairs = readKeyValuePairs(stream, { "lineHeight", "base", "scaleW", "scaleH" });
 
@@ -129,10 +115,11 @@ void FontLoader::handleCommon(std::stringstream & stream, FontFace & fontFace, c
 
     fontFace.setGlyphTextureExtent({
         cppassist::string::fromString<float>(pairs.at("scaleW")),
-        cppassist::string::fromString<float>(pairs.at("scaleH")) });
+        cppassist::string::fromString<float>(pairs.at("scaleH"))
+    });
 }
 
-void FontLoader::handlePage(std::stringstream & stream, FontFace & fontFace, const std::string & filename) const
+void FontLoader::parsePage(std::stringstream & stream, FontFace & fontFace, const std::string & filename) const
 {
     auto pairs = readKeyValuePairs(stream, { "file" });
 
@@ -156,14 +143,6 @@ void FontLoader::handlePage(std::stringstream & stream, FontFace & fontFace, con
 
         fontFace.setGlyphTexture(std::unique_ptr<globjects::Texture>(texture));
     }
-    else {
-        // [TODO]
-        /*
-        fontFace.setGlyphTexture(
-            std::unique_ptr<globjects::Texture>(m_environment->resourceManager()->load<globjects::Texture>(path + "/" + file))
-        );
-        */
-    }
 
     fontFace.glyphTexture()->setParameter(gl::GL_TEXTURE_MIN_FILTER, gl::GL_LINEAR);
     fontFace.glyphTexture()->setParameter(gl::GL_TEXTURE_MAG_FILTER, gl::GL_LINEAR);
@@ -171,7 +150,7 @@ void FontLoader::handlePage(std::stringstream & stream, FontFace & fontFace, con
     fontFace.glyphTexture()->setParameter(gl::GL_TEXTURE_WRAP_T, gl::GL_CLAMP_TO_EDGE);
 }
 
-void FontLoader::handleChar(std::stringstream & stream, FontFace & fontFace) const
+void FontLoader::parseChar(std::stringstream & stream, FontFace & fontFace) const
 {
     auto pairs = readKeyValuePairs(stream, { "id", "x", "y", "width", "height", "xoffset", "yoffset", "xadvance" });
 
@@ -185,25 +164,28 @@ void FontLoader::handleChar(std::stringstream & stream, FontFace & fontFace) con
     const auto extentScale = 1.f / glm::vec2(fontFace.glyphTextureExtent());
     const auto extent = glm::vec2(
         cppassist::string::fromString<float>(pairs.at("width")),
-        cppassist::string::fromString<float>(pairs.at("height")));
+        cppassist::string::fromString<float>(pairs.at("height"))
+    );
 
     glyph.setSubTextureOrigin({
         cppassist::string::fromString<float>(pairs.at("x")) * extentScale.x,
-        1.f - (cppassist::string::fromString<float>(pairs.at("y")) + extent.y) * extentScale.y});
+        1.f - (cppassist::string::fromString<float>(pairs.at("y")) + extent.y) * extentScale.y
+    });
 
     glyph.setExtent(extent);
     glyph.setSubTextureExtent(extent * extentScale);
 
     glyph.setBearing(fontFace.ascent(),
         cppassist::string::fromString<float>(pairs.at("xoffset")),
-        cppassist::string::fromString<float>(pairs.at("yoffset")));
+        cppassist::string::fromString<float>(pairs.at("yoffset"))
+    );
 
     glyph.setAdvance(cppassist::string::fromString<float>(pairs.at("xadvance")));
 
     fontFace.addGlyph(glyph);
 }
 
-void FontLoader::handleKerning(std::stringstream & stream, FontFace & fontFace) const
+void FontLoader::parseKerning(std::stringstream & stream, FontFace & fontFace) const
 {
     auto pairs = readKeyValuePairs(stream, { "first", "second", "amount" });
 
@@ -218,20 +200,22 @@ void FontLoader::handleKerning(std::stringstream & stream, FontFace & fontFace) 
     fontFace.setKerning(first, second, kerning);
 }
 
-FontLoader::StringPairs FontLoader::readKeyValuePairs(std::stringstream & stream, const std::initializer_list<const char *> & mandatoryKeys)
+std::map<std::string, std::string> FontLoader::readKeyValuePairs(std::stringstream & stream, const std::initializer_list<const char *> & mandatoryKeys) const
 {
     auto key = std::string();
     auto value = std::string();
 
-    auto pairs = StringPairs();
+    auto pairs = std::map<std::string, std::string>();
 
     while (stream)
     {
-        if (!std::getline(stream, key, '='))
+        if (!std::getline(stream, key, '=')) {
             continue;
+        }
 
-        if (!std::getline(stream, value, ' '))
+        if (!std::getline(stream, value, ' ')) {
             continue;
+        }
 
         pairs.insert(std::pair<std::string, std::string>(key, value));
     }
@@ -240,11 +224,11 @@ FontLoader::StringPairs FontLoader::readKeyValuePairs(std::stringstream & stream
     auto valid = true;
     for (const auto mandatoryKey : mandatoryKeys)
     {
-        valid |= pairs.find(mandatoryKey) != pairs.cend();
+        valid |= (pairs.find(mandatoryKey) != pairs.cend());
     }
 
     if (!valid) {
-        return StringPairs();
+        return std::map<std::string, std::string>();
     }
 
     return pairs;

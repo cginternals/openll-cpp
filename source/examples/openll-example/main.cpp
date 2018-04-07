@@ -56,7 +56,7 @@ namespace
     glm::uvec2  g_size;                              ///< Viewport size (in pixels)
     glm::vec4   g_fontColor(0.0f, 0.0f, 0.0f, 1.0f); ///< Text color
 
-    FontFace  * g_fontFace;
+    std::unique_ptr<FontFace> g_fontFace;
     std::vector<GlyphSequence> g_sequences;
     GlyphVertexCloud * g_vertexCloud;
     std::unique_ptr<GlyphRenderer> g_renderer;
@@ -112,7 +112,7 @@ void prepare()
     g_vertexCloud->vertices().resize(numGlyphs);
 
     // Typeset and transform all sequences
-    assert(g_fontFace != nullptr);
+    assert(g_fontFace.get() != nullptr);
 
     auto vertexItr = g_vertexCloud->vertices().begin();
     for (const auto & sequence : g_sequences)
