@@ -6,18 +6,21 @@ uniform sampler2D glyphs;
 uniform vec4 color = vec4(1.0, 0.0, 0.0, 1.0);
 uniform vec2 offset = vec2(0.0, 0.0);
 
+
 in vec2 g_uv;
 in vec4 g_fontColor;
-//flat in vec3 g_normal;
+// flat in vec3 g_normal;
+
 
 layout (location = 0) out vec4 out_color;
+
 
 const int channel = 0;
 
 
 float aastep(float t, float value)
 {
-	//float afwidth = length(vec2(dFdx(value), dFdy(value))) * 1.0;
+//  float afwidth = length(vec2(dFdx(value), dFdy(value))) * 1.0;
 	float afwidth = fwidth(value) * 1.0;
 	return smoothstep(t - afwidth, t + afwidth, value);
 }
@@ -114,10 +117,10 @@ vec4 subpix(float r, float g, float b, vec4 fore, vec4 back)
 
 void main()
 {
-	// requires blend: glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	// Requires glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	float s = texture(glyphs, g_uv).r;
-	if(s < 0.4)
+	if (s < 0.4)
 		discard;
 
 	float f = dFdx(g_uv.x);
@@ -126,7 +129,7 @@ void main()
 	vec4 fc = g_fontColor;
 	vec4 bc = vec4(vec3(1.0), 0.0);
 
-	// subpixel variations
+	// Subpixel variations
 
 //	float r, g, b;
 
@@ -144,7 +147,7 @@ void main()
 //	}
 //	fragColor = subpix(r, g, b, fc, bc);
 
-	// non-subpixel variations
+	// Non-subpixel variations
 
 	float a;
 

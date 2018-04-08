@@ -29,7 +29,7 @@ glm::vec2 Typesetter::extent(
 , const float fontSize)
 {
     // Typeset text with default font size
-    auto defaultSize = typeset(sequence, fontFace, GlyphVertexCloud::Vertices::iterator(), true);
+    auto defaultSize = typeset(sequence, fontFace, std::vector<GlyphVertexCloud::Vertex>::iterator(), true);
 
     // Scale result with the given font size
     return defaultSize * fontSize / fontFace.size();
@@ -38,7 +38,7 @@ glm::vec2 Typesetter::extent(
 glm::vec2 Typesetter::typeset(
   const GlyphSequence & sequence
 , const FontFace & fontFace
-, const GlyphVertexCloud::Vertices::iterator & begin
+, const std::vector<GlyphVertexCloud::Vertex>::iterator & begin
 , bool dryrun)
 {
     auto pen = glm::vec2(0.f);
@@ -173,7 +173,7 @@ inline void Typesetter::typeset_glyph(
   const FontFace & fontFace
 , const glm::vec2 & pen
 , const Glyph & glyph
-, const GlyphVertexCloud::Vertices::iterator & vertex)
+, const std::vector<GlyphVertexCloud::Vertex>::iterator & vertex)
 {
     const auto & padding = fontFace.glyphTexturePadding();
     vertex->origin    = glm::vec3(pen, 0.f);
@@ -217,8 +217,8 @@ inline void Typesetter::typeset_extent(
 inline void Typesetter::typeset_align(
   const glm::vec2 & pen
 , const Alignment alignment
-, const GlyphVertexCloud::Vertices::iterator & begin
-, const GlyphVertexCloud::Vertices::iterator & end)
+, const std::vector<GlyphVertexCloud::Vertex>::iterator & begin
+, const std::vector<GlyphVertexCloud::Vertex>::iterator & end)
 {
     if (alignment == Alignment::LeftAligned) {
         return;
@@ -239,8 +239,8 @@ inline void Typesetter::typeset_align(
 inline void Typesetter::anchor_transform(
   const GlyphSequence & sequence
 , const FontFace & fontFace
-, const GlyphVertexCloud::Vertices::iterator & begin
-, const GlyphVertexCloud::Vertices::iterator & end)
+, const std::vector<GlyphVertexCloud::Vertex>::iterator & begin
+, const std::vector<GlyphVertexCloud::Vertex>::iterator & end)
 {
     auto offset = 0.f;
 
@@ -271,8 +271,8 @@ inline void Typesetter::anchor_transform(
 inline void Typesetter::vertex_transform(
   const glm::mat4 & transform
 , const glm::vec4 & fontColor
-, const GlyphVertexCloud::Vertices::iterator & begin
-, const GlyphVertexCloud::Vertices::iterator & end)
+, const std::vector<GlyphVertexCloud::Vertex>::iterator & begin
+, const std::vector<GlyphVertexCloud::Vertex>::iterator & end)
 {
     for (auto v = begin; v != end; ++v)
     {

@@ -85,7 +85,7 @@ public:
     *  @return
     *    Extent (width, height) of the text
     */
-    static glm::vec2 typeset(const GlyphSequence & sequence, const FontFace & fontFace, const GlyphVertexCloud::Vertices::iterator & begin, bool dryrun = false);
+    static glm::vec2 typeset(const GlyphSequence & sequence, const FontFace & fontFace, const std::vector<GlyphVertexCloud::Vertex>::iterator & begin, bool dryrun = false);
 
 
 private:
@@ -107,7 +107,7 @@ private:
         const FontFace & fontFace
     ,   const glm::vec2 & pen
     ,   const Glyph & glyph
-    ,   const GlyphVertexCloud::Vertices::iterator & vertex);
+    ,   const std::vector<GlyphVertexCloud::Vertex>::iterator & vertex);
 
     static void typeset_extent(
         const FontFace & fontFace
@@ -119,20 +119,20 @@ private:
     static void typeset_align(
         const glm::vec2 & pen
     ,   const Alignment alignment
-    ,   const GlyphVertexCloud::Vertices::iterator & begin
-    ,   const GlyphVertexCloud::Vertices::iterator & end);
+    ,   const std::vector<GlyphVertexCloud::Vertex>::iterator & begin
+    ,   const std::vector<GlyphVertexCloud::Vertex>::iterator & end);
 
     static void anchor_transform(
         const GlyphSequence & sequence
     ,   const FontFace & fontFace
-    ,   const GlyphVertexCloud::Vertices::iterator & begin
-    ,   const GlyphVertexCloud::Vertices::iterator & end);
+    ,   const std::vector<GlyphVertexCloud::Vertex>::iterator & begin
+    ,   const std::vector<GlyphVertexCloud::Vertex>::iterator & end);
 
     static void vertex_transform(
         const glm::mat4 & sequence
     ,   const glm::vec4 & fontColor
-    ,   const GlyphVertexCloud::Vertices::iterator & begin
-    ,   const GlyphVertexCloud::Vertices::iterator & end);
+    ,   const std::vector<GlyphVertexCloud::Vertex>::iterator & begin
+    ,   const std::vector<GlyphVertexCloud::Vertex>::iterator & end);
 
     static glm::vec2 extent_transform(
         const GlyphSequence & sequence
