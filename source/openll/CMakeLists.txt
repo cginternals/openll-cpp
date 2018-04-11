@@ -47,6 +47,7 @@ set(headers
     ${include_path}/GlyphVertexCloud.h
     ${include_path}/LineAnchor.h
     ${include_path}/Typesetter.h
+    ${include_path}/Text.h
 )
 
 set(sources
@@ -58,6 +59,7 @@ set(sources
     ${source_path}/GlyphSequence.cpp
     ${source_path}/GlyphVertexCloud.cpp
     ${source_path}/Typesetter.cpp
+    ${source_path}/Text.cpp
 )
 
 # Group source files

@@ -2,6 +2,7 @@
 #pragma once
 
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -18,6 +19,7 @@ namespace openll
 {
 
 
+class Text;
 class FontFace;
 
 
@@ -53,16 +55,25 @@ public:
 
     /**
     *  @brief
-    *    Get text that is rendered (32 bit unicode string)
+    *    Get text
     *
     *  @return
-    *    Text (32 bit unicode string)
+    *    Shared pointer to Text
     */
-    const std::u32string & text() const;
+    const std::shared_ptr<Text> & text() const;
 
     /**
     *  @brief
-    *    Set text that is rendered (32 bit unicode string)
+    *    Set text
+    *
+    *  @param[in] text
+    *    Shared pointer to Text
+    */
+    void setText(const std::shared_ptr<Text> & text);
+
+    /**
+    *  @brief
+    *    Set text directly from string (32 bit unicode string)
     *
     *  @param[in] text
     *    Text (32 bit unicode string)
@@ -296,13 +307,13 @@ public:
 
 
 protected:
-    std::u32string m_text;      ///< Text that is rendered
-    bool           m_wordWrap;  ///< Wrap words at the end of a line?
-    float          m_lineWidth; ///< Width of a line (in pt)
-    Alignment      m_alignment; ///< Horizontal text alignment
-    LineAnchor     m_anchor;    ///< Vertical line anchor
-    glm::mat4      m_transform; ///< Transformation for the glyph sequence
-    glm::vec4      m_textColor; ///< Text color (rgba)
+    std::shared_ptr<Text> m_text;      ///< Text that is rendered
+    bool                  m_wordWrap;  ///< Wrap words at the end of a line?
+    float                 m_lineWidth; ///< Width of a line (in pt)
+    Alignment             m_alignment; ///< Horizontal text alignment
+    LineAnchor            m_anchor;    ///< Vertical line anchor
+    glm::mat4             m_transform; ///< Transformation for the glyph sequence
+    glm::vec4             m_textColor; ///< Text color (rgba)
 };
 
 

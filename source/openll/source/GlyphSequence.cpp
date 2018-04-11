@@ -7,6 +7,7 @@
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <openll/Text.h>
 #include <openll/FontFace.h>
 
 
@@ -33,21 +34,29 @@ GlyphSequence::~GlyphSequence()
 {
 }
 
-const std::u32string & GlyphSequence::text() const
+const std::shared_ptr<Text> & GlyphSequence::text() const
 {
     return m_text;
 }
 
-void GlyphSequence::setText(const std::u32string & text)
+void GlyphSequence::setText(const std::shared_ptr<Text> & text)
 {
     m_text = text;
 
     // [TODO] Convert to std::vector<> ...
 }
 
+void GlyphSequence::setText(const std::u32string & text)
+{
+    m_text = std::shared_ptr<Text>(new Text);
+    m_text->setText(text);
+
+    // [TODO] Convert to std::vector<> ...
+}
+
 size_t GlyphSequence::size() const
 {
-    return m_text.size();
+    return m_text->text().size();
 }
 
 size_t GlyphSequence::size(const FontFace & fontFace) const
@@ -55,7 +64,7 @@ size_t GlyphSequence::size(const FontFace & fontFace) const
     auto count = size_t(0);
 
     // Count visible characters in string
-    for (const auto & c : m_text)
+    for (const auto & c : m_text->text())
     {
         if (fontFace.depictable(c)) {
             ++count;
@@ -69,7 +78,7 @@ const std::vector<char32_t> & GlyphSequence::chars(std::vector<char32_t> & allCh
 {
     allChars.reserve(allChars.size() + size());
 
-    for (const auto & c : m_text) {
+    for (const auto & c : m_text->text()) {
         allChars.push_back(c);
     }
 
@@ -81,7 +90,7 @@ const std::vector<char32_t> & GlyphSequence::chars(std::vector<char32_t> & depic
     // [TODO] Text may be large, so first counting and then iterating again should be avoided ...
     depictableChars.reserve(depictableChars.size() + size(fontFace));
 
-    for (const auto & c : m_text) {
+    for (const auto & c : m_text->text()) {
         if (fontFace.depictable(c)) {
             depictableChars.push_back(c);
         }
