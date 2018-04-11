@@ -93,7 +93,7 @@ void createSequence()
     g_sequences.front().setLineAnchor(g_lineAnchor);
     g_sequences.front().setFontColor(g_fontColor);
 
-    g_sequences.front().setTransform(g_origin, scaledFontSize, *g_fontFace, g_size, g_pixelPerInch, g_margins);
+    g_sequences.front().setTransform2D(g_origin, scaledFontSize, *g_fontFace, g_size, g_pixelPerInch, g_margins);
 }
 
 void prepare()
@@ -183,7 +183,7 @@ void resize()
     const auto scaledFontSize = g_fontSize;
     const auto scaledLineWidth = g_lineWidth;
 
-    g_sequences.front().setTransform(g_origin, scaledFontSize, *g_fontFace, g_size, g_pixelPerInch, g_margins);
+    g_sequences.front().setTransform2D(g_origin, scaledFontSize, *g_fontFace, g_size, g_pixelPerInch, g_margins);
     g_sequences.front().setLineWidth(scaledLineWidth, scaledFontSize, *g_fontFace);
 
     auto vertexItr = g_vertexCloud->vertices().begin();

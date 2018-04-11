@@ -83,7 +83,7 @@ public:
     *    ???
     *
     *  @return
-    *    Extent (width, height) of the text
+    *    Extent (width, height) of the text ... in scaled space [TODO]
     */
     static glm::vec2 typeset(const GlyphSequence & sequence, const FontFace & fontFace, const std::vector<GlyphVertexCloud::Vertex>::iterator & begin, bool dryrun = false);
 

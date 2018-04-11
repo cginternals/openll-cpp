@@ -252,23 +252,12 @@ public:
     *    The used font face
     *  @param[in] viewportExtent
     *    Extend of the viewport (width, height) in px
-    */
-    void setTransform(const glm::vec2 & origin, float fontSize, const FontFace & fontFace, const glm::uvec2 & viewportExtent);
-
-    /**
-    *  @brief
-    *    Set transformation matrix for rendering text in 3D world space
     *
-    *  @param[in] origin
-    *    Point of origin (in world coordinates)
-    *  @param[in] fontSize
-    *    Font size (in pt)
-    *  @param[in] fontFace
-    *    The used font face
-    *  @param[in] rotation
-    *    Rotation matrix for the text
+    *  @remarks
+    *    [TODO] Uses default values: 72ppi, and no margins (results in a point == pixel mapping)
     */
-    void setTransform(const glm::vec3 & origin, float fontSize, const FontFace & fontFace, const glm::mat4 & rotation);
+    // [TODO] remove ?
+    void setTransform2D(const glm::vec2 & origin, float fontSize, const FontFace & fontFace, const glm::uvec2 & viewportExtent);
 
     /**
     *  @brief
@@ -276,8 +265,8 @@ public:
     *
     *  @param[in] origin
     *    Point of origin (normalized coordinates w.r.t. the given viewport)
-    *  @param[in] fontSizeInWorld
-    *    Font size in pt (???) [TODO]
+    *  @param[in] fontSize
+    *    Font size in pt
     *  @param[in] fontFace
     *    The used font face
     *  @param[in] viewportExtent
@@ -287,8 +276,23 @@ public:
     *  @param[in] margins
     *    Margins (top/right/bottom/left, in pt)
     */
-    void setTransform(const glm::vec2 & origin, float fontSizeInWorld, const FontFace & fontFace, const glm::uvec2 & viewportExtent,
-                      float pixelPerInch, const glm::vec4 & margins = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+    void setTransform2D(const glm::vec2 & origin, float fontSize, const FontFace & fontFace, const glm::uvec2 & viewportExtent,
+                        float pixelPerInch, const glm::vec4 & margins = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+
+    /**
+    *  @brief
+    *    Set transformation matrix for rendering text in 3D world space
+    *
+    *  @param[in] origin
+    *    Point of origin (in world coordinates)
+    *  @param[in] fontSizeInWorld
+    *    Font size in world coordinates
+    *  @param[in] fontFace
+    *    The used font face
+    *  @param[in] transform
+    *    Local coordinate system on which the transformation is applied
+    */
+    void setTransform3D(const glm::vec3 & origin, float fontSizeInWorld, const FontFace & fontFace, const glm::mat4 & transform);
 
 
 protected:

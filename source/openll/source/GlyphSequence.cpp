@@ -40,12 +40,9 @@ const std::u32string & GlyphSequence::string() const
 
 void GlyphSequence::setString(const std::u32string & string)
 {
-    // [TODO] Text may be large and comparison is slow ...
-    if (m_string.compare(string) == 0) {
-        return;
-    }
-
     m_string = string;
+
+    // [TODO] Convert to std::vector<> ...
 }
 
 size_t GlyphSequence::size() const
@@ -153,7 +150,7 @@ void GlyphSequence::setTransform(const glm::mat4 & transform)
     m_transform = transform;
 }
 
-void GlyphSequence::setTransform(const glm::vec2 & origin, float fontSize, const FontFace & fontFace, const glm::uvec2 & viewportExtent)
+void GlyphSequence::setTransform2D(const glm::vec2 & origin, float fontSize, const FontFace & fontFace, const glm::uvec2 & viewportExtent)
 {
     // Start with identity matrix
     m_transform = glm::mat4();
@@ -171,22 +168,7 @@ void GlyphSequence::setTransform(const glm::vec2 & origin, float fontSize, const
     m_transform = glm::scale(m_transform, 2.0f / glm::vec3(viewportExtent.x, viewportExtent.y, 1.0f));
 }
 
-void GlyphSequence::setTransform(const glm::vec3 & origin, float fontSizeInWorld, const FontFace & fontFace, const glm::mat4 & rotation)
-{
-    // Start with identity matrix
-    m_transform = glm::mat4();
-
-    // Translate to origin position
-    m_transform = glm::translate(m_transform, origin);
-
-    // Scale by font size
-    m_transform = glm::scale(m_transform, glm::vec3(fontSizeInWorld / fontFace.size()));
-
-    // Apply rotation
-    m_transform = m_transform * rotation;
-}
-
-void GlyphSequence::setTransform(const glm::vec2 & origin, float fontSize, const FontFace & fontFace, const glm::uvec2 & viewportExtent, float pixelPerInch, const glm::vec4 & margins)
+void GlyphSequence::setTransform2D(const glm::vec2 & origin, float fontSize, const FontFace & fontFace, const glm::uvec2 & viewportExtent, float pixelPerInch, const glm::vec4 & margins)
 {
     // Calculate scale factor
     const auto pointsPerInch = 72.0f;
@@ -213,6 +195,21 @@ void GlyphSequence::setTransform(const glm::vec2 & origin, float fontSize, const
 
     // Scale glyphs of font face to target font size
     m_transform = glm::scale(m_transform, glm::vec3(fontSize / fontFace.size()));
+}
+
+void GlyphSequence::setTransform3D(const glm::vec3 & origin, float fontSizeInWorld, const FontFace & fontFace, const glm::mat4 & transform)
+{
+    // Start with identity matrix
+    m_transform = glm::mat4();
+
+    // Translate to origin position
+    m_transform = glm::translate(m_transform, origin);
+
+    // Scale by font size
+    m_transform = glm::scale(m_transform, glm::vec3(fontSizeInWorld));
+
+    // Apply transform
+    m_transform = m_transform * transform;
 }
 
 

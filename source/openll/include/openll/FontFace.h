@@ -403,6 +403,7 @@ protected:
 
     std::unique_ptr<globjects::Texture> m_glyphTexture; ///< The font face's associated glyph texture
     std::unordered_map<size_t, Glyph>   m_glyphs;       ///< Quick-access container for all added glyphs
+    // [TODO] evtl. unordered_map -> map
 };
 
 
