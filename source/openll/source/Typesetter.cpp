@@ -45,8 +45,8 @@ glm::vec2 Typesetter::typeset(
     auto vertex = begin;
     auto extent = glm::vec2(0.f);
 
-    const auto iBegin = sequence.string().cbegin();
-    const auto iEnd = sequence.string().cend();
+    const auto iBegin = sequence.text().cbegin();
+    const auto iEnd = sequence.text().cend();
 
     // Iterator used to reduce the number of wordwrap forward passes
     auto safe_forward = iBegin;
@@ -104,7 +104,7 @@ glm::vec2 Typesetter::typeset(
 
     if (!dryrun) {
         anchor_transform(sequence, fontFace, begin, vertex);
-        vertex_transform(sequence.transform(), sequence.fontColor(), begin, vertex);
+        vertex_transform(sequence.transform(), sequence.textColor(), begin, vertex);
     }
 
     return extent_transform(sequence, extent);
@@ -124,7 +124,7 @@ inline bool Typesetter::typeset_wordwrap(
     auto width_forward = 0.f;
 
     const auto pen_glyph = pen.x + glyph.advance()
-        + (index != sequence.string().cbegin() ? fontFace.kerning(*(index - 1), *index) : 0.f);
+        + (index != sequence.text().cbegin() ? fontFace.kerning(*(index - 1), *index) : 0.f);
 
     const auto wrap_glyph = glyph.depictable() && pen_glyph > lineWidth
         && (glyph.advance() <= lineWidth || pen.x > 0.f);
@@ -149,8 +149,8 @@ inline std::u32string::const_iterator Typesetter::typeset_forward(
     // Note: u32string::find outperforms set::count here (tested)
     static const auto delimiters = std::u32string({ '\x0A', ' ', ',', '.', '-', '/', '(', ')', '[', ']', '<', '>' });
 
-    const auto iBegin = sequence.string().cbegin();
-    const auto iEnd = sequence.string().cend();
+    const auto iBegin = sequence.text().cbegin();
+    const auto iEnd = sequence.text().cend();
 
     width = 0.f; // reset the width
 
@@ -270,7 +270,7 @@ inline void Typesetter::anchor_transform(
 
 inline void Typesetter::vertex_transform(
   const glm::mat4 & transform
-, const glm::vec4 & fontColor
+, const glm::vec4 & textColor
 , const std::vector<GlyphVertexCloud::Vertex>::iterator & begin
 , const std::vector<GlyphVertexCloud::Vertex>::iterator & end)
 {
@@ -283,7 +283,7 @@ inline void Typesetter::vertex_transform(
         v->origin = glm::vec3(ll);
         v->vtan   = glm::vec3(lr - ll);
         v->vbitan = glm::vec3(ul - ll);
-        v->fontColor = fontColor;
+        v->textColor = textColor;
     }
 }
 

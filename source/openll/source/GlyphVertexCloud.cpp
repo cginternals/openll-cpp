@@ -88,7 +88,7 @@ GlyphVertexCloud::GlyphVertexCloud()
 
     m_vao->binding(4)->setAttribute(4);
     m_vao->binding(4)->setBuffer(m_buffer.get(), 0, sizeof(Vertex));
-    m_vao->binding(4)->setFormat(4, gl::GL_FLOAT, gl::GL_FALSE, cppassist::offset(&Vertex::fontColor));
+    m_vao->binding(4)->setFormat(4, gl::GL_FLOAT, gl::GL_FALSE, cppassist::offset(&Vertex::textColor));
     m_vao->enable(4);
 }
 

@@ -58,16 +58,16 @@ public:
     *  @return
     *    Text (32 bit unicode string)
     */
-    const std::u32string & string() const;
+    const std::u32string & text() const;
 
     /**
     *  @brief
     *    Set text that is rendered (32 bit unicode string)
     *
-    *  @param[in] string
+    *  @param[in] text
     *    Text (32 bit unicode string)
     */
-    void setString(const std::u32string & string);
+    void setText(const std::u32string & text);
 
     /**
     *  @brief
@@ -201,21 +201,21 @@ public:
 
     /**
     *  @brief
-    *    Get font color (rgba)
+    *    Get text color (rgba)
     *
     *  @return
-    *    Font color (rgba)
+    *    Text color (rgba)
     */
-    const glm::vec4 & fontColor() const;
+    const glm::vec4 & textColor() const;
 
     /**
     *  @brief
-    *    Set font color (rgba)
+    *    Set text color (rgba)
     *
     *  @param[in] color
-    *    Font color (rgba)
+    *    Text color (rgba)
     */
-    void setFontColor(const glm::vec4 & color);
+    void setTextColor(const glm::vec4 & color);
 
     /**
     *  @brief
@@ -296,13 +296,13 @@ public:
 
 
 protected:
-    std::u32string m_string;    ///< Text that is rendered
+    std::u32string m_text;      ///< Text that is rendered
     bool           m_wordWrap;  ///< Wrap words at the end of a line?
     float          m_lineWidth; ///< Width of a line (in pt)
     Alignment      m_alignment; ///< Horizontal text alignment
     LineAnchor     m_anchor;    ///< Vertical line anchor
     glm::mat4      m_transform; ///< Transformation for the glyph sequence
-    glm::vec4      m_fontColor; ///< Font color (rgba)
+    glm::vec4      m_textColor; ///< Text color (rgba)
 };
 
 

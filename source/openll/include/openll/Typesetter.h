@@ -130,7 +130,7 @@ private:
 
     static void vertex_transform(
         const glm::mat4 & sequence
-    ,   const glm::vec4 & fontColor
+    ,   const glm::vec4 & textColor
     ,   const std::vector<GlyphVertexCloud::Vertex>::iterator & begin
     ,   const std::vector<GlyphVertexCloud::Vertex>::iterator & end);
 

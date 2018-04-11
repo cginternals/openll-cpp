@@ -44,7 +44,7 @@ public:
         glm::vec3 vtan;      ///< Tangent vector
         glm::vec3 vbitan;    ///< Bitangent vector
         glm::vec4 uvRect;    ///< Source image rect of the glyph in the glyph texter (uv-coordinates)
-        glm::vec4 fontColor; ///< Color of the glyph
+        glm::vec4 textColor; ///< Text of the glyph
     };
 
 

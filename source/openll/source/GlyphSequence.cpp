@@ -25,7 +25,7 @@ GlyphSequence::GlyphSequence()
 , m_lineWidth(0.0f)
 , m_alignment(Alignment::LeftAligned)
 , m_anchor(LineAnchor::Baseline)
-, m_fontColor(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f))
+, m_textColor(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f))
 {
 }
 
@@ -33,21 +33,21 @@ GlyphSequence::~GlyphSequence()
 {
 }
 
-const std::u32string & GlyphSequence::string() const
+const std::u32string & GlyphSequence::text() const
 {
-    return m_string;
+    return m_text;
 }
 
-void GlyphSequence::setString(const std::u32string & string)
+void GlyphSequence::setText(const std::u32string & text)
 {
-    m_string = string;
+    m_text = text;
 
     // [TODO] Convert to std::vector<> ...
 }
 
 size_t GlyphSequence::size() const
 {
-    return m_string.size();
+    return m_text.size();
 }
 
 size_t GlyphSequence::size(const FontFace & fontFace) const
@@ -55,7 +55,7 @@ size_t GlyphSequence::size(const FontFace & fontFace) const
     auto count = size_t(0);
 
     // Count visible characters in string
-    for (const auto & c : m_string)
+    for (const auto & c : m_text)
     {
         if (fontFace.depictable(c)) {
             ++count;
@@ -69,7 +69,7 @@ const std::vector<char32_t> & GlyphSequence::chars(std::vector<char32_t> & allCh
 {
     allChars.reserve(allChars.size() + size());
 
-    for (const auto & c : m_string) {
+    for (const auto & c : m_text) {
         allChars.push_back(c);
     }
 
@@ -81,7 +81,7 @@ const std::vector<char32_t> & GlyphSequence::chars(std::vector<char32_t> & depic
     // [TODO] Text may be large, so first counting and then iterating again should be avoided ...
     depictableChars.reserve(depictableChars.size() + size(fontFace));
 
-    for (const auto & c : m_string) {
+    for (const auto & c : m_text) {
         if (fontFace.depictable(c)) {
             depictableChars.push_back(c);
         }
@@ -130,14 +130,14 @@ void GlyphSequence::setLineAnchor(LineAnchor anchor)
     m_anchor = anchor;
 }
 
-const glm::vec4 & GlyphSequence::fontColor() const
+const glm::vec4 & GlyphSequence::textColor() const
 {
-    return m_fontColor;
+    return m_textColor;
 }
 
-void GlyphSequence::setFontColor(const glm::vec4 & color)
+void GlyphSequence::setTextColor(const glm::vec4 & color)
 {
-    m_fontColor = color;
+    m_textColor = color;
 }
 
 const glm::mat4 & GlyphSequence::transform() const

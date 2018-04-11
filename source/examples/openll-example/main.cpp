@@ -54,7 +54,7 @@ namespace
     LineAnchor  g_lineAnchor(LineAnchor::Ascent);    ///< Vertical line anchor
     bool        g_optimized(true);                   ///< Optimize rendering performance?
     glm::uvec2  g_size;                              ///< Viewport size (in pixels)
-    glm::vec4   g_fontColor(0.0f, 0.0f, 0.0f, 1.0f); ///< Text color
+    glm::vec4   g_textColor(0.0f, 0.0f, 0.0f, 1.0f); ///< Text color
 
     std::unique_ptr<FontFace> g_fontFace;
     std::vector<GlyphSequence> g_sequences;
@@ -86,12 +86,12 @@ void createSequence()
 
     g_sequences.resize(1);
 
-    g_sequences.front().setString(cppassist::string::encode(g_string, cppassist::Encoding::UTF8));
+    g_sequences.front().setText(cppassist::string::encode(g_string, cppassist::Encoding::UTF8));
     g_sequences.front().setWordWrap(g_wordWrap);
     g_sequences.front().setLineWidth(scaledLineWidth, scaledFontSize, *g_fontFace);
     g_sequences.front().setAlignment(g_alignment);
     g_sequences.front().setLineAnchor(g_lineAnchor);
-    g_sequences.front().setFontColor(g_fontColor);
+    g_sequences.front().setTextColor(g_textColor);
 
     g_sequences.front().setTransform2D(g_origin, scaledFontSize, *g_fontFace, g_size, g_pixelPerInch, g_margins);
 }
