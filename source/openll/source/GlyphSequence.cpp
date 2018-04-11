@@ -44,16 +44,16 @@ void GlyphSequence::setText(const std::u32string & text)
     m_text->setText(text);
 }
 
-size_t GlyphSequence::size() const
+size_t GlyphSequence::numChars() const
 {
     return m_text->text().size();
 }
 
-size_t GlyphSequence::size(const FontFace & fontFace) const
+size_t GlyphSequence::numDepictableChars(const FontFace & fontFace) const
 {
     auto count = size_t(0);
 
-    // Count visible characters in string
+    // Count depictable characters in string
     for (const auto & c : m_text->text())
     {
         if (fontFace.depictable(c)) {
@@ -67,7 +67,7 @@ size_t GlyphSequence::size(const FontFace & fontFace) const
 const std::vector<char32_t> & GlyphSequence::appendDepictableChars(std::vector<char32_t> & depictableChars, const FontFace & fontFace) const
 {
     // [TODO] Text may be large, so first counting and then iterating again should be avoided ...
-    depictableChars.reserve(depictableChars.size() + size(fontFace));
+    depictableChars.reserve(depictableChars.size() + numDepictableChars(fontFace));
 
     for (const auto & c : m_text->text()) {
         if (fontFace.depictable(c)) {

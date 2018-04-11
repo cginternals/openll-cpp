@@ -101,7 +101,7 @@ void prepare()
     auto numGlyphs = std::size_t{0};
     for (const auto & sequence : g_sequences)
     {
-        numGlyphs += sequence.size(*g_fontFace);
+        numGlyphs += sequence.numDepictableChars(*g_fontFace);
     }
 
     g_vertexCloud = new GlyphVertexCloud;
@@ -117,7 +117,7 @@ void prepare()
     for (const auto & sequence : g_sequences)
     {
         auto extent = Typesetter::typeset(sequence, *g_fontFace, vertexItr);
-        vertexItr += sequence.size(*g_fontFace);
+        vertexItr += sequence.numDepictableChars(*g_fontFace);
     }
 
     if (g_optimized)
@@ -189,7 +189,7 @@ void resize()
     for (const auto & sequence : g_sequences)
     {
         auto extent = Typesetter::typeset(sequence, *g_fontFace, vertexItr);
-        vertexItr += sequence.size(*g_fontFace);
+        vertexItr += sequence.numDepictableChars(*g_fontFace);
     }
 
     g_vertexCloud->update();

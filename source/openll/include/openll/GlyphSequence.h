@@ -74,9 +74,9 @@ public:
     *    Get number of characters
     *
     *  @return
-    *    Number of characters in the glyph sequence
+    *    Number of characters in the glyph sequence (length of string)
     */
-    size_t size() const;
+    size_t numChars() const;
 
     /**
     *  @brief
@@ -92,7 +92,7 @@ public:
     *  @return
     *    Number of visible characters in the glyph sequence
     */
-    size_t size(const FontFace & fontFace) const;
+    size_t numDepictableChars(const FontFace & fontFace) const;
 
     /**
     *  @brief
