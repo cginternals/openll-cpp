@@ -69,9 +69,9 @@ public:
     *  @param[in] fontFace
     *    Font face to use
     *  @param[in] begin
-    *    ???
+    *    ??? [TODO]
     *  @param[in] dryrun
-    *    ???
+    *    ??? [TODO]
     *
     *  @return
     *    Extent (width, height) of the text ... in scaled space [TODO]

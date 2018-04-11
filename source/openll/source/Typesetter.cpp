@@ -79,7 +79,7 @@ glm::vec2 Typesetter::typeset(
             pen.x += fontFace.kerning(*(i - 1), *i);
         }
 
-        // typeset glyphs in vertex cloud (only if renderable)
+        // Typeset glyphs in vertex cloud (only if renderable)
         if (!dryrun && glyph.depictable()) {
             typeset_glyph(fontFace, pen, glyph, vertex++);
         }
@@ -225,7 +225,7 @@ inline void Typesetter::typeset_align(
         penOffset *= 0.5f;
     }
 
-    // origin is expected to be in 'font face space' (not transformed)
+    // Origin is expected to be in 'font face space' (not transformed)
     for (auto v = begin; v != end; ++v) {
         v->origin.x += penOffset;
     }

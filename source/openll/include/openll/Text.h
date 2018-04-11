@@ -82,8 +82,8 @@ public:
 
 
 protected:
-    std::u32string m_text;      ///< Text that is rendered
-    char32_t       m_linefeed;  ///< Character that marks the end of a line
+    std::u32string m_text;     ///< Text that is rendered
+    char32_t       m_linefeed; ///< Character that marks the end of a line
 };
 
 
