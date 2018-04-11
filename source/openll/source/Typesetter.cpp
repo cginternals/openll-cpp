@@ -55,7 +55,7 @@ glm::vec2 Typesetter::typeset(
 
         // Handle line feeds as well as word wrap for next word
         // (or next glyph if word width exceeds the max line width)
-        feedLine = *i == GlyphSequence::lineFeed() || (sequence.wordWrap() &&
+        feedLine = *i == sequence.text()->lineFeed() || (sequence.wordWrap() &&
             typeset_wordwrap(sequence, fontFace, pen, glyph, i, safe_forward));
 
         if (feedLine)

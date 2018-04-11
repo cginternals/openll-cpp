@@ -32,17 +32,6 @@ class OPENLL_API GlyphSequence
 public:
     /**
     *  @brief
-    *    Get line feed character
-    *
-    *  @return
-    *    Character that marks the end of a line
-    */
-    static char32_t lineFeed();
-
-
-public:
-    /**
-    *  @brief
     *    Constructor
     */
     GlyphSequence();

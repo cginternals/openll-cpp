@@ -15,12 +15,6 @@ namespace openll
 {
 
 
-char32_t GlyphSequence::lineFeed()
-{
-    static const auto LF = static_cast<char32_t>('\x0A');
-    return LF;
-}
-
 GlyphSequence::GlyphSequence()
 : m_wordWrap(false)
 , m_lineWidth(0.0f)
