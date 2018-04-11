@@ -96,24 +96,20 @@ public:
 
     /**
     *  @brief
-    *    Get all characters of the glyph sequence
-    *
-    *  @return
-    *    List of characters in the glyph sequence (32 bit unicode)
-    */
-    const std::vector<char32_t> & chars(std::vector<char32_t> & allChars) const;
-
-    /**
-    *  @brief
-    *    Get all visible characters of the glyph sequence using a given font face
+    *    Get all visible characters of the glyph sequence
     *
     *    This function returns the characters that will actually be rendered
     *    using the given font face, ignoring all glyphs that are not visible/renderable.
     *
+    *  @param[in,out] allChars
+    *    List to which the characters are appended (32 bit unicode)
+    *  @param[in] fontFace
+    *    Font face
+    *
     *  @return
-    *    List of visible characters in the glyph sequence (32 bit unicode)
+    *    Reference to the list of characters (32 bit unicode)
     */
-    const std::vector<char32_t> & chars(std::vector<char32_t> & allChars, const FontFace & fontFace) const;
+    const std::vector<char32_t> & appendDepictableChars(std::vector<char32_t> & allChars, const FontFace & fontFace) const;
 
     /**
     *  @brief

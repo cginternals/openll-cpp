@@ -36,16 +36,12 @@ const std::shared_ptr<Text> & GlyphSequence::text() const
 void GlyphSequence::setText(const std::shared_ptr<Text> & text)
 {
     m_text = text;
-
-    // [TODO] Convert to std::vector<> ...
 }
 
 void GlyphSequence::setText(const std::u32string & text)
 {
     m_text = std::shared_ptr<Text>(new Text);
     m_text->setText(text);
-
-    // [TODO] Convert to std::vector<> ...
 }
 
 size_t GlyphSequence::size() const
@@ -68,18 +64,7 @@ size_t GlyphSequence::size(const FontFace & fontFace) const
     return count;
 }
 
-const std::vector<char32_t> & GlyphSequence::chars(std::vector<char32_t> & allChars) const
-{
-    allChars.reserve(allChars.size() + size());
-
-    for (const auto & c : m_text->text()) {
-        allChars.push_back(c);
-    }
-
-    return allChars;
-}
-
-const std::vector<char32_t> & GlyphSequence::chars(std::vector<char32_t> & depictableChars, const FontFace & fontFace) const
+const std::vector<char32_t> & GlyphSequence::appendDepictableChars(std::vector<char32_t> & depictableChars, const FontFace & fontFace) const
 {
     // [TODO] Text may be large, so first counting and then iterating again should be avoided ...
     depictableChars.reserve(depictableChars.size() + size(fontFace));

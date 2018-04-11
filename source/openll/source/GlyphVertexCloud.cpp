@@ -143,7 +143,7 @@ void GlyphVertexCloud::optimize(const std::vector<GlyphSequence> & sequences, co
     // Create string associated with all depictable glyphs
     auto depictableChars = std::vector<char32_t>();
     for (const auto & sequence : sequences) {
-        sequence.chars(depictableChars, fontFace);
+        sequence.appendDepictableChars(depictableChars, fontFace);
     }
 
     // Get vertices
