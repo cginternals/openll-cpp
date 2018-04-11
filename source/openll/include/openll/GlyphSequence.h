@@ -35,7 +35,7 @@ public:
     *  @return
     *    Character that marks the end of a line
     */
-    char32_t lineFeed();
+    static char32_t lineFeed();
 
 
 public:

@@ -17,12 +17,6 @@ namespace openll
 {
 
 
-const char32_t & Typesetter::lineFeed()
-{
-    static const auto LF = static_cast<char32_t>('\x0A');
-    return LF;
-}
-
 glm::vec2 Typesetter::extent(
   const GlyphSequence & sequence
 , const FontFace & fontFace
@@ -60,7 +54,7 @@ glm::vec2 Typesetter::typeset(
 
         // Handle line feeds as well as word wrap for next word
         // (or next glyph if word width exceeds the max line width)
-        feedLine = *i == lineFeed() || (sequence.wordWrap() &&
+        feedLine = *i == GlyphSequence::lineFeed() || (sequence.wordWrap() &&
             typeset_wordwrap(sequence, fontFace, pen, glyph, i, safe_forward));
 
         if (feedLine)

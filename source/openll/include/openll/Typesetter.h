@@ -39,15 +39,6 @@ public:
 
     /**
     *  @brief
-    *    Get line feed character
-    *
-    *  @return
-    *    Character that marks the end of a line
-    */
-    static const char32_t & lineFeed();
-
-    /**
-    *  @brief
     *    Get the extent of the text when layouted with a given font size
     *
     *  @param[in] sequence
