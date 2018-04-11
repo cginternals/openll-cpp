@@ -3,7 +3,7 @@
 
 
 #include <vector>
-#include <unordered_map>
+#include <map>
 
 #include <glm/vec2.hpp>
 #include <glm/vec4.hpp>
@@ -402,8 +402,7 @@ protected:
     glm::vec4  m_glyphTexturePadding; ///< The padding applied to every glyph in px
 
     std::unique_ptr<globjects::Texture> m_glyphTexture; ///< The font face's associated glyph texture
-    std::unordered_map<size_t, Glyph>   m_glyphs;       ///< Quick-access container for all added glyphs
-    // [TODO] evtl. unordered_map -> map
+    std::map<size_t, Glyph>             m_glyphs;       ///< Quick-access container for all added glyphs
 };
 
 
