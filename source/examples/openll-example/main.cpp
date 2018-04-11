@@ -73,8 +73,7 @@ namespace
 
 void loadFont(const std::string & filename)
 {
-    FontLoader fontLoader;
-    g_fontFace = fontLoader.load(filename);
+    g_fontFace = FontLoader::load(filename);
 }
 
 void createSequence()

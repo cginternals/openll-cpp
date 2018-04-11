@@ -24,17 +24,8 @@ class FontFace;
 class OPENLL_API FontLoader
 {
 public:
-    /**
-    *  @brief
-    *    Constructor
-    */
-    FontLoader();
-
-    /**
-    *  @brief
-    *    Destructor
-    */
-    ~FontLoader();
+    FontLoader() = delete;
+    ~FontLoader() = delete;
 
     /**
     *  @brief
@@ -46,7 +37,7 @@ public:
     *  @return
     *    A configured and initialized FontFace on success, else 'nullptr'
     */
-    std::unique_ptr<FontFace> load(const std::string & filename) const;
+    static std::unique_ptr<FontFace> load(const std::string & filename);
 
 
 protected:
@@ -61,7 +52,7 @@ protected:
     *  @param[out] fontSize
     *    The retrieved font size of the font face
     */
-    void parseInfo(std::stringstream & stream, FontFace & fontFace, float & fontSize) const;
+    static void parseInfo(std::stringstream & stream, FontFace & fontFace, float & fontSize);
 
     /**
     *  @brief
@@ -74,7 +65,7 @@ protected:
     *  @param[in] fontSize
     *    The font size to correctly determine other metrics
     */
-    void parseCommon(std::stringstream & stream, FontFace & fontFace, float fontSize) const;
+    static void parseCommon(std::stringstream & stream, FontFace & fontFace, float fontSize);
 
     /**
     *  @brief
@@ -87,7 +78,7 @@ protected:
     *  @param[out] filename
     *    The file name of the description file to derivate glyph texture atlas file paths
     */
-    void parsePage(std::stringstream & stream, FontFace & fontFace, const std::string & filename) const;
+    static void parsePage(std::stringstream & stream, FontFace & fontFace, const std::string & filename);
 
     /**
     *  @brief
@@ -98,7 +89,7 @@ protected:
     *  @param[in,out] fontFace
     *    The font face to construct
     */
-    void parseChar(std::stringstream & stream, FontFace & fontFace) const;
+    static void parseChar(std::stringstream & stream, FontFace & fontFace);
 
     /**
     *  @brief
@@ -109,7 +100,7 @@ protected:
     *  @param[in,out] fontFace
     *    The font face to construct
     */
-    void parseKerning(std::stringstream & stream, FontFace & fontFace) const;
+    static void parseKerning(std::stringstream & stream, FontFace & fontFace);
 
     /**
     *  @brief
@@ -123,7 +114,7 @@ protected:
     *  @return
     *    The list of all extracted key-value pairs, empty if not all mandatory keys exist
     */
-    std::map<std::string, std::string> readKeyValuePairs(std::stringstream & stream, const std::initializer_list<const char *> & mandatoryKeys) const;
+    static std::map<std::string, std::string> readKeyValuePairs(std::stringstream & stream, const std::initializer_list<const char *> & mandatoryKeys);
 };
 
 

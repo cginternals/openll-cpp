@@ -24,15 +24,7 @@ namespace openll
 {
 
 
-FontLoader::FontLoader()
-{
-}
-
-FontLoader::~FontLoader()
-{
-}
-
-std::unique_ptr<FontFace> FontLoader::load(const std::string & filename) const
+std::unique_ptr<FontFace> FontLoader::load(const std::string & filename)
 {
     // Open file
     std::ifstream in(filename, std::ios::in | std::ios::binary);
@@ -85,7 +77,7 @@ std::unique_ptr<FontFace> FontLoader::load(const std::string & filename) const
     return nullptr;
 }
 
-void FontLoader::parseInfo(std::stringstream & stream, FontFace & fontFace, float & fontSize) const
+void FontLoader::parseInfo(std::stringstream & stream, FontFace & fontFace, float & fontSize)
 {
     auto pairs = readKeyValuePairs(stream, { "size", "padding" });
 
@@ -103,7 +95,7 @@ void FontLoader::parseInfo(std::stringstream & stream, FontFace & fontFace, floa
     fontFace.setGlyphTexturePadding(padding);
 }
 
-void FontLoader::parseCommon(std::stringstream & stream, FontFace & fontFace, const float fontSize) const
+void FontLoader::parseCommon(std::stringstream & stream, FontFace & fontFace, const float fontSize)
 {
     auto pairs = readKeyValuePairs(stream, { "lineHeight", "base", "scaleW", "scaleH" });
 
@@ -119,7 +111,7 @@ void FontLoader::parseCommon(std::stringstream & stream, FontFace & fontFace, co
     });
 }
 
-void FontLoader::parsePage(std::stringstream & stream, FontFace & fontFace, const std::string & filename) const
+void FontLoader::parsePage(std::stringstream & stream, FontFace & fontFace, const std::string & filename)
 {
     auto pairs = readKeyValuePairs(stream, { "file" });
 
@@ -150,7 +142,7 @@ void FontLoader::parsePage(std::stringstream & stream, FontFace & fontFace, cons
     fontFace.glyphTexture()->setParameter(gl::GL_TEXTURE_WRAP_T, gl::GL_CLAMP_TO_EDGE);
 }
 
-void FontLoader::parseChar(std::stringstream & stream, FontFace & fontFace) const
+void FontLoader::parseChar(std::stringstream & stream, FontFace & fontFace)
 {
     auto pairs = readKeyValuePairs(stream, { "id", "x", "y", "width", "height", "xoffset", "yoffset", "xadvance" });
 
@@ -185,7 +177,7 @@ void FontLoader::parseChar(std::stringstream & stream, FontFace & fontFace) cons
     fontFace.addGlyph(glyph);
 }
 
-void FontLoader::parseKerning(std::stringstream & stream, FontFace & fontFace) const
+void FontLoader::parseKerning(std::stringstream & stream, FontFace & fontFace)
 {
     auto pairs = readKeyValuePairs(stream, { "first", "second", "amount" });
 
@@ -200,7 +192,7 @@ void FontLoader::parseKerning(std::stringstream & stream, FontFace & fontFace) c
     fontFace.setKerning(first, second, kerning);
 }
 
-std::map<std::string, std::string> FontLoader::readKeyValuePairs(std::stringstream & stream, const std::initializer_list<const char *> & mandatoryKeys) const
+std::map<std::string, std::string> FontLoader::readKeyValuePairs(std::stringstream & stream, const std::initializer_list<const char *> & mandatoryKeys)
 {
     auto key = std::string();
     auto value = std::string();
