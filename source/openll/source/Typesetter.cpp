@@ -170,7 +170,7 @@ glm::vec2 Typesetter::typeset_label(std::vector<GlyphVertexCloud::Vertex> & vert
         // Typeset glyphs in vertex cloud (only if renderable)
         if (!dryrun && glyph.depictable()) {
             vertices.push_back(GlyphVertexCloud::Vertex());
-            typeset_glyph(fontFace, pen, glyph, vertices, buckets, vertex++);
+            typeset_glyph(fontFace, pen, glyph, vertices, buckets, vertex++, optimize && !dryrun);
         }
 
         pen.x += glyph.advance();
@@ -260,7 +260,8 @@ inline void Typesetter::typeset_glyph(
 , const Glyph & glyph
 , std::vector<GlyphVertexCloud::Vertex> & vertices
 , std::map<size_t, std::vector<size_t>> & buckets
-, size_t index)
+, size_t index
+, bool optimize)
 {
     auto & vertex = vertices[index];
 
@@ -279,8 +280,10 @@ inline void Typesetter::typeset_glyph(
         + glm::vec2(padding[1], padding[0]) * extentScale;
     vertex.uvRect = glm::vec4(ll, ur);
 
-    auto glyphIndex = glyph.index();
-    buckets[glyphIndex].push_back(index);
+    if (optimize) {
+        auto glyphIndex = glyph.index();
+        buckets[glyphIndex].push_back(index);
+    }
 }
 
 inline void Typesetter::typeset_extent(

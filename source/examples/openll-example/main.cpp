@@ -116,6 +116,9 @@ void prepare()
     // Prepare vertex cloud
     g_vertexCloud = new GlyphVertexCloud;
 
+    // [DEBUG]
+//  auto extent = Typesetter::extent(g_labels.front(), *g_fontFace, g_fontSize);
+
     // Typeset and transform all labels
     Typesetter::typeset(*g_vertexCloud, g_labels, *g_fontFace, g_optimized);
 

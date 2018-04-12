@@ -191,7 +191,8 @@ private:
     ,   const Glyph & glyph
     ,   std::vector<GlyphVertexCloud::Vertex> & vertices
     ,   std::map<size_t, std::vector<size_t>> & buckets
-    ,   size_t index);
+    ,   size_t index
+    ,   bool optimize);
 
     static void typeset_extent(
         const FontFace & fontFace
