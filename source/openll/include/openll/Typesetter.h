@@ -16,7 +16,7 @@ namespace openll
 
 
 enum class Alignment : unsigned char;
-class GlyphSequence;
+class Label;
 class FontFace;
 class Glyph;
 
@@ -26,9 +26,9 @@ class Glyph;
 *    Typesetter that layouts text
 *
 *    The typesetter is responsible for layouting text on the screen or
-*    in a virtual space. It takes a glyph sequence, which defines where
-*    it wants to appear (see GlyphSequence), and a font face that is used
-*    to display the text, and computes the actual position for each glyph.
+*    in a virtual space. It takes a label, which defines where it wants
+*    to appear (see Label), and a font face that is used to display the
+*    text and computes the actual position for each glyph.
 *    Its output is a vertex array, which describes the glyphs position and
 *    appearance on the screen/in the scene and which can be rendered
 *    using a GlyphRenderer.
@@ -43,8 +43,8 @@ public:
     *  @brief
     *    Get the extent of the text when layouted with a given font size
     *
-    *  @param[in] sequence
-    *    Text to display
+    *  @param[in] label
+    *    Label to display
     *  @param[in] fontFace
     *    Font face to use
     *  @param[in] fontSize
@@ -60,7 +60,7 @@ public:
     *    instead of first calling extent and then typeset, to avoid
     *    layouting the text more than once.
     */
-    static glm::vec2 extent(const GlyphSequence & sequence, const FontFace & fontFace, float fontSize);
+    static glm::vec2 extent(const Label & label, const FontFace & fontFace, float fontSize);
 
     /**
     *  @brief
@@ -68,8 +68,8 @@ public:
     *
     *  @param[in,out] vertexCloud
     *    Vertex cloud that is constructed
-    *  @param[in] sequence
-    *    Text to display
+    *  @param[in] label
+    *    Label to display
     *  @param[in] fontFace
     *    Font face to use
     *  @param[in] optimize
@@ -90,7 +90,7 @@ public:
     */
     static glm::vec2 typeset(
         GlyphVertexCloud & vertexCloud
-    ,   const GlyphSequence & sequence
+    ,   const Label & label
     ,   const FontFace & fontFace
     ,   bool optimize = false
     ,   bool dryrun = false);
@@ -101,7 +101,7 @@ public:
     *
     *  @param[in,out] vertexCloud
     *    Vertex cloud that is constructed
-    *  @param[in] sequences
+    *  @param[in] labels
     *    List of labels to display
     *  @param[in] fontFace
     *    Font face to use
@@ -123,7 +123,7 @@ public:
     */
     static glm::vec2 typeset(
         GlyphVertexCloud & vertexCloud
-    ,   const std::vector<GlyphSequence> & sequences
+    ,   const std::vector<Label> & labels
     ,   const FontFace & fontFace
     ,   bool optimize = false
     ,   bool dryrun = false);
@@ -134,7 +134,7 @@ public:
     *
     *  @param[in,out] vertexCloud
     *    Vertex cloud that is constructed
-    *  @param[in] sequences
+    *  @param[in] labels
     *    List of labels to display
     *  @param[in] fontFace
     *    Font face to use
@@ -156,7 +156,7 @@ public:
     */
     static glm::vec2 typeset(
         GlyphVertexCloud & vertexCloud
-    ,   const std::vector<const GlyphSequence *> & sequences
+    ,   const std::vector<const Label *> & labels
     ,   const FontFace & fontFace
     ,   bool optimize = false
     ,   bool dryrun = false);
@@ -166,13 +166,13 @@ private:
     static glm::vec2 typeset_label(
         std::vector<GlyphVertexCloud::Vertex> & vertices
     ,   std::map<size_t, std::vector<size_t>> & buckets
-    ,   const GlyphSequence & sequence
+    ,   const Label & label
     ,   const FontFace & fontFace
     ,   bool optimize = false
     ,   bool dryrun = false);
 
     static bool typeset_wordwrap(
-        const GlyphSequence & sequence
+        const Label & label
     ,   const FontFace & fontFace
     ,   const glm::vec2 & pen
     ,   const Glyph & glyph
@@ -180,7 +180,7 @@ private:
     ,   std::u32string::const_iterator & safe_forward);
 
     static std::u32string::const_iterator typeset_forward(
-        const GlyphSequence & sequence
+        const Label & label
     ,   const FontFace & fontFace
     ,   const std::u32string::const_iterator & begin
     ,   float & width);
@@ -208,21 +208,21 @@ private:
     ,   size_t end);
 
     static void anchor_transform(
-        const GlyphSequence & sequence
+        const Label & label
     ,   const FontFace & fontFace
     ,   std::vector<GlyphVertexCloud::Vertex> & vertices
     ,   size_t begin
     ,   size_t end);
 
     static void vertex_transform(
-        const glm::mat4 & sequence
+        const glm::mat4 & label
     ,   const glm::vec4 & textColor
     ,   std::vector<GlyphVertexCloud::Vertex> & vertices
     ,   size_t begin
     ,   size_t end);
 
     static glm::vec2 extent_transform(
-        const GlyphSequence & sequence
+        const Label & label
     ,   const glm::vec2 & extent);
 
     static void optimize_vertices(

@@ -25,22 +25,22 @@ class FontFace;
 
 /**
 *  @brief
-*    A sequence of text that is to be rendered with a given font face
+*    Text label that is to be rendered with a given font face
 */
-class OPENLL_API GlyphSequence
+class OPENLL_API Label
 {
 public:
     /**
     *  @brief
     *    Constructor
     */
-    GlyphSequence();
+    Label();
 
     /**
     *  @brief
     *    Destructor
     */
-    ~GlyphSequence();
+    ~Label();
 
     /**
     *  @brief
@@ -74,7 +74,7 @@ public:
     *    Get number of characters
     *
     *  @return
-    *    Number of characters in the glyph sequence (length of string)
+    *    Number of characters in the label (length of string)
     */
     size_t numChars() const;
 
@@ -182,19 +182,19 @@ public:
 
     /**
     *  @brief
-    *    Get transformation matrix for rendering the glyph sequence
+    *    Get transformation matrix for rendering the label
     *
     *  @return
-    *    Transformation for the glyph sequence
+    *    Transformation for the label
     */
     const glm::mat4 & transform() const;
 
     /**
     *  @brief
-    *    Set transformation matrix for rendering the glyph sequence
+    *    Set transformation matrix for rendering the label
     *
     *  @param[in] transform
-    *    Transformation for the glyph sequence
+    *    Transformation for the label
     *
     *  @remarks
     *    Instead of setting the transformation matrix directly,
@@ -264,7 +264,7 @@ protected:
     float                 m_lineWidth; ///< Width of a line (in pt)
     Alignment             m_alignment; ///< Horizontal text alignment
     LineAnchor            m_anchor;    ///< Vertical line anchor
-    glm::mat4             m_transform; ///< Transformation for the glyph sequence
+    glm::mat4             m_transform; ///< Transformation for the label
     glm::vec4             m_textColor; ///< Text color (rgba)
 };
 

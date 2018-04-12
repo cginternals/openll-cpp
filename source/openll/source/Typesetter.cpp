@@ -11,7 +11,7 @@
 #include <openll/Text.h>
 #include <openll/Alignment.h>
 #include <openll/FontFace.h>
-#include <openll/GlyphSequence.h>
+#include <openll/Label.h>
 
 
 namespace openll
@@ -19,7 +19,7 @@ namespace openll
 
 
 glm::vec2 Typesetter::extent(
-  const GlyphSequence & sequence
+  const Label & label
 , const FontFace & fontFace
 , const float fontSize)
 {
@@ -28,13 +28,13 @@ glm::vec2 Typesetter::extent(
     std::map<size_t, std::vector<size_t>> buckets;
 
     // Typeset text with default font size
-    auto extent = typeset_label(vertices, buckets, sequence, fontFace, false, true);
+    auto extent = typeset_label(vertices, buckets, label, fontFace, false, true);
 
     // Scale result with the given font size
     return extent * fontSize / fontFace.size();
 }
 
-glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const GlyphSequence & sequence, const FontFace & fontFace, bool optimize, bool dryrun)
+glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const Label & label, const FontFace & fontFace, bool optimize, bool dryrun)
 {
     // Clear vertex cloud
     vertexCloud.vertices().clear();
@@ -43,7 +43,7 @@ glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const GlyphSequenc
     std::map<size_t, std::vector<size_t>> buckets;
 
     // Typeset single label
-    auto extent = typeset_label(vertexCloud.vertices(), buckets, sequence, fontFace, optimize, dryrun);
+    auto extent = typeset_label(vertexCloud.vertices(), buckets, label, fontFace, optimize, dryrun);
 
     // Optimize vertex cloud
     if (optimize) {
@@ -57,7 +57,7 @@ glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const GlyphSequenc
     return extent;
 }
 
-glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<GlyphSequence> & sequences, const FontFace & fontFace, bool optimize, bool dryrun)
+glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<Label> & labels, const FontFace & fontFace, bool optimize, bool dryrun)
 {
     // Clear vertex cloud
     vertexCloud.vertices().clear();
@@ -67,8 +67,8 @@ glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<
 
     // Typeset labels
     glm::vec2 extent(0.0f, 0.0f);
-    for (const auto & sequence : sequences) {
-        auto currenExtent = typeset_label(vertexCloud.vertices(), buckets, sequence, fontFace, optimize, dryrun);
+    for (const auto & label : labels) {
+        auto currenExtent = typeset_label(vertexCloud.vertices(), buckets, label, fontFace, optimize, dryrun);
         extent = glm::vec2(glm::max(extent.x, currenExtent.x), glm::max(extent.y, currenExtent.y));
     }
 
@@ -84,7 +84,7 @@ glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<
     return extent;
 }
 
-glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<const GlyphSequence *> & sequences, const FontFace & fontFace, bool optimize, bool dryrun)
+glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<const Label *> & labels, const FontFace & fontFace, bool optimize, bool dryrun)
 {
     // Clear vertex cloud
     vertexCloud.vertices().clear();
@@ -94,10 +94,10 @@ glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<
 
     // Typeset labels
     glm::vec2 extent(0.0f, 0.0f);
-    for (const auto * sequence : sequences) {
-        if (!sequence) continue;
+    for (const auto * label : labels) {
+        if (!label) continue;
 
-        auto currenExtent = typeset_label(vertexCloud.vertices(), buckets, *sequence, fontFace, optimize, dryrun);
+        auto currenExtent = typeset_label(vertexCloud.vertices(), buckets, *label, fontFace, optimize, dryrun);
         extent = glm::vec2(glm::max(extent.x, currenExtent.x), glm::max(extent.y, currenExtent.y));
     }
 
@@ -113,10 +113,10 @@ glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<
     return extent;
 }
 
-glm::vec2 Typesetter::typeset_label(std::vector<GlyphVertexCloud::Vertex> & vertices, std::map<size_t, std::vector<size_t>> & buckets, const GlyphSequence & sequence, const FontFace & fontFace, bool optimize, bool dryrun)
+glm::vec2 Typesetter::typeset_label(std::vector<GlyphVertexCloud::Vertex> & vertices, std::map<size_t, std::vector<size_t>> & buckets, const Label & label, const FontFace & fontFace, bool optimize, bool dryrun)
 {
     // Append vertex cloud: the maximum number of visible glyphs is the size of the string
-    vertices.reserve(vertices.size() + sequence.text()->text().size());
+    vertices.reserve(vertices.size() + label.text()->text().size());
 
     // Create first vertex
     if (!dryrun) {
@@ -128,8 +128,8 @@ glm::vec2 Typesetter::typeset_label(std::vector<GlyphVertexCloud::Vertex> & vert
     auto vertex = begin;
     auto extent = glm::vec2(0.f);
 
-    const auto iBegin = sequence.text()->text().cbegin();
-    const auto iEnd = sequence.text()->text().cend();
+    const auto iBegin = label.text()->text().cbegin();
+    const auto iEnd = label.text()->text().cend();
 
     // Iterator used to reduce the number of wordwrap forward passes
     auto safe_forward = iBegin;
@@ -143,8 +143,8 @@ glm::vec2 Typesetter::typeset_label(std::vector<GlyphVertexCloud::Vertex> & vert
 
         // Handle line feeds as well as word wrap for next word
         // (or next glyph if word width exceeds the max line width)
-        feedLine = *i == sequence.text()->lineFeed() || (sequence.wordWrap() &&
-            typeset_wordwrap(sequence, fontFace, pen, glyph, i, safe_forward));
+        feedLine = *i == label.text()->lineFeed() || (label.wordWrap() &&
+            typeset_wordwrap(label, fontFace, pen, glyph, i, safe_forward));
 
         if (feedLine)
         {
@@ -153,7 +153,7 @@ glm::vec2 Typesetter::typeset_label(std::vector<GlyphVertexCloud::Vertex> & vert
 
             // Handle alignment (when line feed occurs)
             if (!dryrun) {
-                typeset_align(pen, sequence.alignment(), vertices, feedVertex, vertex);
+                typeset_align(pen, label.alignment(), vertices, feedVertex, vertex);
             }
 
             pen.x = 0.f;
@@ -177,39 +177,39 @@ glm::vec2 Typesetter::typeset_label(std::vector<GlyphVertexCloud::Vertex> & vert
 
         if (i + 1 == iEnd)
         {
-            // Handle alignment (when last line of sequence is processed)
+            // Handle alignment (when last line of the label is processed)
             typeset_extent(fontFace, i, iBegin, pen, extent);
 
             if (!dryrun) {
-                typeset_align(pen, sequence.alignment(), vertices, feedVertex, vertex);
+                typeset_align(pen, label.alignment(), vertices, feedVertex, vertex);
             }
         }
     }
 
     if (!dryrun) {
-        anchor_transform(sequence, fontFace, vertices, begin, vertex);
-        vertex_transform(sequence.transform(), sequence.textColor(), vertices, begin, vertex);
+        anchor_transform(label, fontFace, vertices, begin, vertex);
+        vertex_transform(label.transform(), label.textColor(), vertices, begin, vertex);
     }
 
-    return extent_transform(sequence, extent);
+    return extent_transform(label, extent);
 }
 
 inline bool Typesetter::typeset_wordwrap(
-  const GlyphSequence & sequence
+  const Label & label
 , const FontFace & fontFace
 , const glm::vec2 & pen
 , const Glyph & glyph
 , const std::u32string::const_iterator & index
 , std::u32string::const_iterator & safe_forward)
 {
-    assert(sequence.wordWrap());
+    assert(label.wordWrap());
 
-    const auto lineWidth = sequence.lineWidth();
+    const auto lineWidth = label.lineWidth();
     auto width_forward = 0.f;
 
     const auto pen_glyph =
         pen.x + glyph.advance() +
-            (index != sequence.text()->text().cbegin() ? fontFace.kerning(*(index - 1), *index) : 0.f);
+            (index != label.text()->text().cbegin() ? fontFace.kerning(*(index - 1), *index) : 0.f);
 
     const auto wrap_glyph = glyph.depictable() && pen_glyph > lineWidth
         && (glyph.advance() <= lineWidth || pen.x > 0.f);
@@ -217,7 +217,7 @@ inline bool Typesetter::typeset_wordwrap(
     auto wrap_forward = false;
     if (!wrap_glyph && index >= safe_forward)
     {
-        safe_forward = typeset_forward(sequence, fontFace, index, width_forward);
+        safe_forward = typeset_forward(label, fontFace, index, width_forward);
         wrap_forward = width_forward <= lineWidth && (pen.x + width_forward) > lineWidth;
     }
 
@@ -225,7 +225,7 @@ inline bool Typesetter::typeset_wordwrap(
 }
 
 inline std::u32string::const_iterator Typesetter::typeset_forward(
-  const GlyphSequence & sequence
+  const Label & label
 , const FontFace & fontFace
 , const std::u32string::const_iterator & begin
 , float & width)
@@ -234,8 +234,8 @@ inline std::u32string::const_iterator Typesetter::typeset_forward(
     // Note: u32string::find outperforms set::count here (tested)
     static const auto delimiters = std::u32string({ '\x0A', ' ', ',', '.', '-', '/', '(', ')', '[', ']', '<', '>' });
 
-    const auto iBegin = sequence.text()->text().cbegin();
-    const auto iEnd = sequence.text()->text().cend();
+    const auto iBegin = label.text()->text().cbegin();
+    const auto iEnd = label.text()->text().cend();
 
     width = 0.f; // reset the width
 
@@ -331,7 +331,7 @@ inline void Typesetter::typeset_align(
 }
 
 inline void Typesetter::anchor_transform(
-  const GlyphSequence & sequence
+  const Label & label
 , const FontFace & fontFace
 , std::vector<GlyphVertexCloud::Vertex> & vertices
 , size_t begin
@@ -339,7 +339,7 @@ inline void Typesetter::anchor_transform(
 {
     auto offset = 0.f;
 
-    switch (sequence.lineAnchor())
+    switch (label.lineAnchor())
     {
     case LineAnchor::Ascent:
         offset = fontFace.ascent();
@@ -387,12 +387,12 @@ inline void Typesetter::vertex_transform(
 }
 
 inline glm::vec2 Typesetter::extent_transform(
-  const GlyphSequence & sequence
+  const Label & label
 , const glm::vec2 & extent)
 {
-    auto ll = sequence.transform() * glm::vec4(     0.f,      0.f, 0.f, 1.f);
-    auto lr = sequence.transform() * glm::vec4(extent.x,      0.f, 0.f, 1.f);
-    auto ul = sequence.transform() * glm::vec4(     0.f, extent.y, 0.f, 1.f);
+    auto ll = label.transform() * glm::vec4(     0.f,      0.f, 0.f, 1.f);
+    auto lr = label.transform() * glm::vec4(extent.x,      0.f, 0.f, 1.f);
+    auto ul = label.transform() * glm::vec4(     0.f, extent.y, 0.f, 1.f);
 
     return glm::vec2(glm::distance(lr, ll), glm::distance(ul, ll));
 }

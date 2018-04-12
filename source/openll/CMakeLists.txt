@@ -43,11 +43,11 @@ set(headers
     ${include_path}/FontLoader.h
     ${include_path}/Glyph.h
     ${include_path}/GlyphRenderer.h
-    ${include_path}/GlyphSequence.h
     ${include_path}/GlyphVertexCloud.h
+    ${include_path}/Label.h
     ${include_path}/LineAnchor.h
-    ${include_path}/Typesetter.h
     ${include_path}/Text.h
+    ${include_path}/Typesetter.h
 )
 
 set(sources
@@ -56,10 +56,10 @@ set(sources
     ${source_path}/FontLoader.cpp
     ${source_path}/Glyph.cpp
     ${source_path}/GlyphRenderer.cpp
-    ${source_path}/GlyphSequence.cpp
     ${source_path}/GlyphVertexCloud.cpp
-    ${source_path}/Typesetter.cpp
+    ${source_path}/Label.cpp
     ${source_path}/Text.cpp
+    ${source_path}/Typesetter.cpp
 )
 
 # Group source files

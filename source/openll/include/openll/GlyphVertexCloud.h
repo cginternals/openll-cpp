@@ -23,10 +23,6 @@ namespace openll
 {
 
 
-class FontFace;
-class GlyphSequence;
-
-
 /**
 *  @brief
 *    Vertex array that describes each glyph to be rendered on the screen

@@ -15,9 +15,6 @@
 #include <globjects/VertexArray.h>
 #include <globjects/VertexAttributeBinding.h>
 
-#include <openll/GlyphSequence.h>
-#include <openll/FontFace.h>
-
 
 namespace openll
 {

@@ -1,5 +1,5 @@
 
-#include <openll/GlyphSequence.h>
+#include <openll/Label.h>
 
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
@@ -15,7 +15,7 @@ namespace openll
 {
 
 
-GlyphSequence::GlyphSequence()
+Label::Label()
 : m_wordWrap(false)
 , m_lineWidth(0.0f)
 , m_alignment(Alignment::LeftAligned)
@@ -24,92 +24,92 @@ GlyphSequence::GlyphSequence()
 {
 }
 
-GlyphSequence::~GlyphSequence()
+Label::~Label()
 {
 }
 
-const std::shared_ptr<Text> & GlyphSequence::text() const
+const std::shared_ptr<Text> & Label::text() const
 {
     return m_text;
 }
 
-void GlyphSequence::setText(const std::shared_ptr<Text> & text)
+void Label::setText(const std::shared_ptr<Text> & text)
 {
     m_text = text;
 }
 
-void GlyphSequence::setText(const std::u32string & text)
+void Label::setText(const std::u32string & text)
 {
     m_text = std::shared_ptr<Text>(new Text);
     m_text->setText(text);
 }
 
-size_t GlyphSequence::numChars() const
+size_t Label::numChars() const
 {
     return m_text->text().size();
 }
 
-bool GlyphSequence::wordWrap() const
+bool Label::wordWrap() const
 {
     return m_wordWrap;
 }
 
-void GlyphSequence::setWordWrap(bool wrap)
+void Label::setWordWrap(bool wrap)
 {
     m_wordWrap = wrap;
 }
 
-float GlyphSequence::lineWidth() const
+float Label::lineWidth() const
 {
     return m_lineWidth;
 }
 
-void GlyphSequence::setLineWidth(float lineWidth, float fontSize, const FontFace & fontFace)
+void Label::setLineWidth(float lineWidth, float fontSize, const FontFace & fontFace)
 {
     m_lineWidth = glm::max(lineWidth * fontFace.size() / fontSize, 0.0f);
 }
 
-Alignment GlyphSequence::alignment() const
+Alignment Label::alignment() const
 {
     return m_alignment;
 }
 
-void GlyphSequence::setAlignment(Alignment alignment)
+void Label::setAlignment(Alignment alignment)
 {
     m_alignment = alignment;
 }
 
-LineAnchor GlyphSequence::lineAnchor() const
+LineAnchor Label::lineAnchor() const
 {
     return m_anchor;
 }
 
-void GlyphSequence::setLineAnchor(LineAnchor anchor)
+void Label::setLineAnchor(LineAnchor anchor)
 {
     m_anchor = anchor;
 }
 
-const glm::vec4 & GlyphSequence::textColor() const
+const glm::vec4 & Label::textColor() const
 {
     return m_textColor;
 }
 
-void GlyphSequence::setTextColor(const glm::vec4 & color)
+void Label::setTextColor(const glm::vec4 & color)
 {
     m_textColor = color;
 }
 
-const glm::mat4 & GlyphSequence::transform() const
+const glm::mat4 & Label::transform() const
 {
     return m_transform;
 }
 
-void GlyphSequence::setTransform(const glm::mat4 & transform)
+void Label::setTransform(const glm::mat4 & transform)
 {
     m_transform = transform;
 }
 
-void GlyphSequence::setTransform2D(const glm::vec2 & origin, float fontSize, const FontFace & fontFace, const glm::uvec2 & viewportExtent)
+void Label::setTransform2D(const glm::vec2 & origin, float fontSize, const FontFace & fontFace, const glm::uvec2 & viewportExtent)
 {
     // Start with identity matrix
     m_transform = glm::mat4();
@@ -127,7 +127,7 @@ void GlyphSequence::setTransform2D(const glm::vec2 & origin, float fontSize, con
     m_transform = glm::scale(m_transform, 2.0f / glm::vec3(viewportExtent.x, viewportExtent.y, 1.0f));
 }
 
-void GlyphSequence::setTransform2D(const glm::vec2 & origin, float fontSize, const FontFace & fontFace, const glm::uvec2 & viewportExtent, float pixelPerInch, const glm::vec4 & margins)
+void Label::setTransform2D(const glm::vec2 & origin, float fontSize, const FontFace & fontFace, const glm::uvec2 & viewportExtent, float pixelPerInch, const glm::vec4 & margins)
 {
     // Calculate scale factor
     const auto pointsPerInch = 72.0f;
@@ -156,7 +156,7 @@ void GlyphSequence::setTransform2D(const glm::vec2 & origin, float fontSize, con
     m_transform = glm::scale(m_transform, glm::vec3(fontSize / fontFace.size()));
 }
 
-void GlyphSequence::setTransform3D(const glm::vec3 & origin, float fontSizeInWorld, const FontFace & fontFace, const glm::mat4 & transform)
+void Label::setTransform3D(const glm::vec3 & origin, float fontSizeInWorld, const FontFace & fontFace, const glm::mat4 & transform)
 {
     // Start with identity matrix
     m_transform = glm::mat4();

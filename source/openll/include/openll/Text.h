@@ -15,8 +15,8 @@ namespace openll
 *  @brief
 *    Text buffer
 *
-*    Represents a text buffer which can be shared between glyph sequences
-*    to display the same text at different locations or with different styles
+*    Represents a text buffer which can be shared between label to display
+*    the same text at different locations or with different styles.
 */
 class OPENLL_API Text
 {

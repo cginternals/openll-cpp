@@ -26,7 +26,7 @@
 #include <openll/LineAnchor.h>
 #include <openll/FontFace.h>
 #include <openll/FontLoader.h>
-#include <openll/GlyphSequence.h>
+#include <openll/Label.h>
 #include <openll/GlyphVertexCloud.h>
 #include <openll/GlyphRenderer.h>
 #include <openll/Typesetter.h>
@@ -59,7 +59,7 @@ namespace
     glm::vec4      g_textColor(0.0f, 0.0f, 0.0f, 1.0f); ///< Text color
 
     std::unique_ptr<FontFace> g_fontFace;
-    std::vector<GlyphSequence> g_sequences;
+    std::vector<Label> g_labels;
     GlyphVertexCloud * g_vertexCloud;
     std::unique_ptr<GlyphRenderer> g_renderer;
 
@@ -90,23 +90,23 @@ void loadFont(const std::string & filename)
     g_fontFace = FontLoader::load(filename);
 }
 
-void createSequence()
+void createLabel()
 {
     g_lineWidth = g_size.x / g_pixelPerInch * 72.0f;
 
     const auto scaledFontSize = g_fontSize; // * 16.0f;
     const auto scaledLineWidth = g_lineWidth; // * 160.0f;
 
-    g_sequences.resize(1);
+    g_labels.resize(1);
 
-    g_sequences.front().setText(g_largeText);
-    g_sequences.front().setWordWrap(g_wordWrap);
-    g_sequences.front().setLineWidth(scaledLineWidth, scaledFontSize, *g_fontFace);
-    g_sequences.front().setAlignment(g_alignment);
-    g_sequences.front().setLineAnchor(g_lineAnchor);
-    g_sequences.front().setTextColor(g_textColor);
+    g_labels.front().setText(g_largeText);
+    g_labels.front().setWordWrap(g_wordWrap);
+    g_labels.front().setLineWidth(scaledLineWidth, scaledFontSize, *g_fontFace);
+    g_labels.front().setAlignment(g_alignment);
+    g_labels.front().setLineAnchor(g_lineAnchor);
+    g_labels.front().setTextColor(g_textColor);
 
-    g_sequences.front().setTransform2D(g_origin, scaledFontSize, *g_fontFace, g_size, g_pixelPerInch, g_margins);
+    g_labels.front().setTransform2D(g_origin, scaledFontSize, *g_fontFace, g_size, g_pixelPerInch, g_margins);
 }
 
 void prepare()
@@ -116,8 +116,8 @@ void prepare()
     // Prepare vertex cloud
     g_vertexCloud = new GlyphVertexCloud;
 
-    // Typeset and transform all sequences
-    auto extent = Typesetter::typeset(*g_vertexCloud, g_sequences, *g_fontFace, g_optimized);
+    // Typeset and transform all labels
+    Typesetter::typeset(*g_vertexCloud, g_labels, *g_fontFace, g_optimized);
 
     // [TODO] Problem: multiple labels, multiple font faces
     g_vertexCloud->setTexture(g_fontFace->glyphTexture());
@@ -147,7 +147,7 @@ void initialize()
     // Load font
     loadFont(openll::dataPath() + "/openll/fonts/" + g_fontFilename);
 
-    createSequence();
+    createLabel();
 
     auto start = std::chrono::high_resolution_clock::now();
 
@@ -180,11 +180,11 @@ void resize()
     const auto scaledFontSize = g_fontSize;
     const auto scaledLineWidth = g_lineWidth;
 
-    g_sequences.front().setTransform2D(g_origin, scaledFontSize, *g_fontFace, g_size, g_pixelPerInch, g_margins);
-    g_sequences.front().setLineWidth(scaledLineWidth, scaledFontSize, *g_fontFace);
+    g_labels.front().setTransform2D(g_origin, scaledFontSize, *g_fontFace, g_size, g_pixelPerInch, g_margins);
+    g_labels.front().setLineWidth(scaledLineWidth, scaledFontSize, *g_fontFace);
 
-    // Typeset and transform all sequences
-    auto extent = Typesetter::typeset(*g_vertexCloud, g_sequences, *g_fontFace, g_optimized);
+    // Typeset and transform all labels
+    Typesetter::typeset(*g_vertexCloud, g_labels, *g_fontFace, g_optimized);
 }
 
 void draw()
