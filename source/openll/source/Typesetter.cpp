@@ -23,16 +23,15 @@ glm::vec2 Typesetter::extent(
 , const FontFace & fontFace
 , const float fontSize)
 {
-    // [TODO]
+    // Prepare empty vertex list for dry run
+    std::vector<GlyphVertexCloud::Vertex> vertices;
+    std::map<size_t, std::vector<size_t>> buckets;
 
-    /*
     // Typeset text with default font size
-    auto defaultSize = typeset(sequence, fontFace, std::vector<GlyphVertexCloud::Vertex>::iterator(), true);
+    auto extent = typeset_label(vertices, buckets, sequence, fontFace, false, true);
 
     // Scale result with the given font size
-    return defaultSize * fontSize / fontFace.size();
-    */
-   return glm::vec2();
+    return extent * fontSize / fontFace.size();
 }
 
 glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const GlyphSequence & sequence, const FontFace & fontFace, bool optimize, bool dryrun)
