@@ -58,10 +58,11 @@ namespace
     glm::uvec2     g_size;                              ///< Viewport size (in pixels)
     glm::vec4      g_textColor(0.0f, 0.0f, 0.0f, 1.0f); ///< Text color
 
-    std::unique_ptr<FontFace> g_fontFace;
-    std::vector<Label> g_labels;
-    GlyphVertexCloud * g_vertexCloud;
-    std::unique_ptr<GlyphRenderer> g_renderer;
+    // Text rendering objects
+    Label                             g_label;       ///< Label that is displayed
+    std::unique_ptr<FontFace>         g_fontFace;    ///< Used font
+    std::unique_ptr<GlyphVertexCloud> g_vertexCloud; ///< GPU geometry of the label
+    std::unique_ptr<GlyphRenderer>    g_renderer;    ///< Label renderer
 
     // OpenGL objects
     std::unique_ptr<globjects::AbstractStringSource> g_vertexShaderSource;   ///< Shader source for the vertex shader
@@ -97,16 +98,14 @@ void createLabel()
     const auto scaledFontSize = g_fontSize; // * 16.0f;
     const auto scaledLineWidth = g_lineWidth; // * 160.0f;
 
-    g_labels.resize(1);
+    g_label.setText(g_largeText);
+    g_label.setWordWrap(g_wordWrap);
+    g_label.setLineWidth(scaledLineWidth, scaledFontSize, *g_fontFace);
+    g_label.setAlignment(g_alignment);
+    g_label.setLineAnchor(g_lineAnchor);
+    g_label.setTextColor(g_textColor);
 
-    g_labels.front().setText(g_largeText);
-    g_labels.front().setWordWrap(g_wordWrap);
-    g_labels.front().setLineWidth(scaledLineWidth, scaledFontSize, *g_fontFace);
-    g_labels.front().setAlignment(g_alignment);
-    g_labels.front().setLineAnchor(g_lineAnchor);
-    g_labels.front().setTextColor(g_textColor);
-
-    g_labels.front().setTransform2D(g_origin, scaledFontSize, *g_fontFace, g_size, g_pixelPerInch, g_margins);
+    g_label.setTransform2D(g_origin, scaledFontSize, *g_fontFace, g_size, g_pixelPerInch, g_margins);
 }
 
 void prepare()
@@ -114,13 +113,13 @@ void prepare()
     assert(g_fontFace.get() != nullptr);
 
     // Prepare vertex cloud
-    g_vertexCloud = new GlyphVertexCloud;
+    g_vertexCloud = std::unique_ptr<GlyphVertexCloud>(new GlyphVertexCloud);
 
     // [DEBUG]
-//  auto extent = Typesetter::extent(g_labels.front(), *g_fontFace, g_fontSize);
+//  auto extent = Typesetter::extent(g_label, *g_fontFace, g_fontSize);
 
     // Typeset and transform all labels
-    Typesetter::typeset(*g_vertexCloud, g_labels, *g_fontFace, g_optimized);
+    Typesetter::typeset(*g_vertexCloud, g_label, *g_fontFace, g_optimized);
 
     // [TODO] Problem: multiple labels, multiple font faces
     g_vertexCloud->setTexture(g_fontFace->glyphTexture());
@@ -183,11 +182,11 @@ void resize()
     const auto scaledFontSize = g_fontSize;
     const auto scaledLineWidth = g_lineWidth;
 
-    g_labels.front().setTransform2D(g_origin, scaledFontSize, *g_fontFace, g_size, g_pixelPerInch, g_margins);
-    g_labels.front().setLineWidth(scaledLineWidth, scaledFontSize, *g_fontFace);
+    g_label.setTransform2D(g_origin, scaledFontSize, *g_fontFace, g_size, g_pixelPerInch, g_margins);
+    g_label.setLineWidth(scaledLineWidth, scaledFontSize, *g_fontFace);
 
     // Typeset and transform all labels
-    Typesetter::typeset(*g_vertexCloud, g_labels, *g_fontFace, g_optimized);
+    Typesetter::typeset(*g_vertexCloud, g_label, *g_fontFace, g_optimized);
 }
 
 void draw()
