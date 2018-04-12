@@ -45,10 +45,6 @@ public:
     *
     *  @param[in] label
     *    Label to display
-    *  @param[in] fontFace
-    *    Font face to use
-    *  @param[in] fontSize
-    *    Font size (in pt)
     *
     *  @return
     *    Extent (width, height) of the text
@@ -60,7 +56,7 @@ public:
     *    instead of first calling extent and then typeset, to avoid
     *    layouting the text more than once.
     */
-    static glm::vec2 extent(const Label & label, const FontFace & fontFace, float fontSize);
+    static glm::vec2 extent(const Label & label);
 
     /**
     *  @brief
@@ -70,8 +66,6 @@ public:
     *    Vertex cloud that is constructed
     *  @param[in] label
     *    Label to display
-    *  @param[in] fontFace
-    *    Font face to use
     *  @param[in] optimize
     *    Optimize vertex cloud for rendering performance? (slow for large texts!)
     *  @param[in] dryrun
@@ -88,12 +82,7 @@ public:
     *    least once. Therefore, optimization might not be advisable for
     *    large texts.
     */
-    static glm::vec2 typeset(
-        GlyphVertexCloud & vertexCloud
-    ,   const Label & label
-    ,   const FontFace & fontFace
-    ,   bool optimize = false
-    ,   bool dryrun = false);
+    static glm::vec2 typeset(GlyphVertexCloud & vertexCloud, const Label & label, bool optimize = false, bool dryrun = false);
 
     /**
     *  @brief
@@ -103,8 +92,6 @@ public:
     *    Vertex cloud that is constructed
     *  @param[in] labels
     *    List of labels to display
-    *  @param[in] fontFace
-    *    Font face to use
     *  @param[in] optimize
     *    Optimize vertex cloud for rendering performance? (slow for large texts!)
     *  @param[in] dryrun
@@ -121,12 +108,7 @@ public:
     *    least once. Therefore, optimization might not be advisable for
     *    large texts.
     */
-    static glm::vec2 typeset(
-        GlyphVertexCloud & vertexCloud
-    ,   const std::vector<Label> & labels
-    ,   const FontFace & fontFace
-    ,   bool optimize = false
-    ,   bool dryrun = false);
+    static glm::vec2 typeset(GlyphVertexCloud & vertexCloud, const std::vector<Label> & labels, bool optimize = false, bool dryrun = false);
 
     /**
     *  @brief
@@ -136,8 +118,6 @@ public:
     *    Vertex cloud that is constructed
     *  @param[in] labels
     *    List of labels to display
-    *  @param[in] fontFace
-    *    Font face to use
     *  @param[in] optimize
     *    Optimize vertex cloud for rendering performance? (slow for large texts!)
     *  @param[in] dryrun
@@ -154,12 +134,7 @@ public:
     *    least once. Therefore, optimization might not be advisable for
     *    large texts.
     */
-    static glm::vec2 typeset(
-        GlyphVertexCloud & vertexCloud
-    ,   const std::vector<const Label *> & labels
-    ,   const FontFace & fontFace
-    ,   bool optimize = false
-    ,   bool dryrun = false);
+    static glm::vec2 typeset(GlyphVertexCloud & vertexCloud, const std::vector<const Label *> & labels, bool optimize = false, bool dryrun = false);
 
 
 private:
@@ -167,7 +142,6 @@ private:
         std::vector<GlyphVertexCloud::Vertex> & vertices
     ,   std::map<size_t, std::vector<size_t>> & buckets
     ,   const Label & label
-    ,   const FontFace & fontFace
     ,   bool optimize = false
     ,   bool dryrun = false);
 

@@ -18,24 +18,35 @@ namespace openll
 {
 
 
-glm::vec2 Typesetter::extent(
-  const Label & label
-, const FontFace & fontFace
-, const float fontSize)
+glm::vec2 Typesetter::extent(const Label & label)
 {
+    assert(label.fontFace() != nullptr);
+
+    // Abort operation if no font face is set
+    if (!label.fontFace()) {
+        return glm::vec2();
+    }
+
     // Prepare empty vertex list for dry run
     std::vector<GlyphVertexCloud::Vertex> vertices;
     std::map<size_t, std::vector<size_t>> buckets;
 
     // Typeset text with default font size
-    auto extent = typeset_label(vertices, buckets, label, fontFace, false, true);
+    auto extent = typeset_label(vertices, buckets, label, false, true);
 
     // Scale result with the given font size
-    return extent * fontSize / fontFace.size();
+    return extent * label.fontSize() / label.fontFace()->size();
 }
 
-glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const Label & label, const FontFace & fontFace, bool optimize, bool dryrun)
+glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const Label & label, bool optimize, bool dryrun)
 {
+    assert(label.fontFace() != nullptr);
+
+    // Abort operation if no font face is set
+    if (!label.fontFace()) {
+        return glm::vec2();
+    }
+
     // Clear vertex cloud
     vertexCloud.vertices().clear();
 
@@ -43,7 +54,7 @@ glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const Label & labe
     std::map<size_t, std::vector<size_t>> buckets;
 
     // Typeset single label
-    auto extent = typeset_label(vertexCloud.vertices(), buckets, label, fontFace, optimize, dryrun);
+    auto extent = typeset_label(vertexCloud.vertices(), buckets, label, optimize, dryrun);
 
     // Optimize vertex cloud
     if (optimize) {
@@ -57,7 +68,7 @@ glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const Label & labe
     return extent;
 }
 
-glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<Label> & labels, const FontFace & fontFace, bool optimize, bool dryrun)
+glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<Label> & labels, bool optimize, bool dryrun)
 {
     // Clear vertex cloud
     vertexCloud.vertices().clear();
@@ -68,8 +79,13 @@ glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<
     // Typeset labels
     glm::vec2 extent(0.0f, 0.0f);
     for (const auto & label : labels) {
-        auto currenExtent = typeset_label(vertexCloud.vertices(), buckets, label, fontFace, optimize, dryrun);
-        extent = glm::vec2(glm::max(extent.x, currenExtent.x), glm::max(extent.y, currenExtent.y));
+        assert(label.fontFace() != nullptr);
+
+        // Abort operation if no font face is set
+        if (label.fontFace()) {
+            auto currenExtent = typeset_label(vertexCloud.vertices(), buckets, label, optimize, dryrun);
+            extent = glm::vec2(glm::max(extent.x, currenExtent.x), glm::max(extent.y, currenExtent.y));
+        }
     }
 
     // Optimize vertex cloud
@@ -84,7 +100,7 @@ glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<
     return extent;
 }
 
-glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<const Label *> & labels, const FontFace & fontFace, bool optimize, bool dryrun)
+glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<const Label *> & labels, bool optimize, bool dryrun)
 {
     // Clear vertex cloud
     vertexCloud.vertices().clear();
@@ -95,10 +111,16 @@ glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<
     // Typeset labels
     glm::vec2 extent(0.0f, 0.0f);
     for (const auto * label : labels) {
+        // Abort if label is not valid
+        assert(label);
         if (!label) continue;
 
-        auto currenExtent = typeset_label(vertexCloud.vertices(), buckets, *label, fontFace, optimize, dryrun);
-        extent = glm::vec2(glm::max(extent.x, currenExtent.x), glm::max(extent.y, currenExtent.y));
+        // Abort operation if no font face is set
+        assert(label->fontFace() != nullptr);
+        if (label->fontFace()) {
+            auto currenExtent = typeset_label(vertexCloud.vertices(), buckets, *label, optimize, dryrun);
+            extent = glm::vec2(glm::max(extent.x, currenExtent.x), glm::max(extent.y, currenExtent.y));
+        }
     }
 
     // Optimize vertex cloud
@@ -113,8 +135,11 @@ glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<
     return extent;
 }
 
-glm::vec2 Typesetter::typeset_label(std::vector<GlyphVertexCloud::Vertex> & vertices, std::map<size_t, std::vector<size_t>> & buckets, const Label & label, const FontFace & fontFace, bool optimize, bool dryrun)
+glm::vec2 Typesetter::typeset_label(std::vector<GlyphVertexCloud::Vertex> & vertices, std::map<size_t, std::vector<size_t>> & buckets, const Label & label, bool optimize, bool dryrun)
 {
+    // Get font face
+    auto & fontFace = *label.fontFace();
+
     // Append vertex cloud: the maximum number of visible glyphs is the size of the string
     vertices.reserve(vertices.size() + label.text()->text().size());
 
@@ -204,7 +229,7 @@ inline bool Typesetter::typeset_wordwrap(
 {
     assert(label.wordWrap());
 
-    const auto lineWidth = label.lineWidth();
+    const auto lineWidth = glm::max(label.lineWidth() * label.fontFace()->size() / label.fontSize(), 0.0f);
     auto width_forward = 0.f;
 
     const auto pen_glyph =

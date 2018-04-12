@@ -16,7 +16,9 @@ namespace openll
 
 
 Label::Label()
-: m_wordWrap(false)
+: m_fontFace(nullptr)
+, m_fontSize(16)
+, m_wordWrap(false)
 , m_lineWidth(0.0f)
 , m_alignment(Alignment::LeftAligned)
 , m_anchor(LineAnchor::Baseline)
@@ -44,9 +46,24 @@ void Label::setText(const std::u32string & text)
     m_text->setText(text);
 }
 
-size_t Label::numChars() const
+const FontFace * Label::fontFace() const
 {
-    return m_text->text().size();
+    return m_fontFace;
+}
+
+void Label::setFontFace(FontFace & fontFace)
+{
+    m_fontFace = &fontFace;
+}
+
+float Label::fontSize() const
+{
+    return m_fontSize;
+}
+
+void Label::setFontSize(float fontSize)
+{
+    m_fontSize = fontSize;
 }
 
 bool Label::wordWrap() const
@@ -64,9 +81,9 @@ float Label::lineWidth() const
     return m_lineWidth;
 }
 
-void Label::setLineWidth(float lineWidth, float fontSize, const FontFace & fontFace)
+void Label::setLineWidth(float lineWidth)
 {
-    m_lineWidth = glm::max(lineWidth * fontFace.size() / fontSize, 0.0f);
+    m_lineWidth = lineWidth;
 }
 
 Alignment Label::alignment() const
@@ -109,8 +126,13 @@ void Label::setTransform(const glm::mat4 & transform)
     m_transform = transform;
 }
 
-void Label::setTransform2D(const glm::vec2 & origin, float fontSize, const FontFace & fontFace, const glm::uvec2 & viewportExtent)
+void Label::setTransform2D(const glm::vec2 & origin, const glm::uvec2 & viewportExtent)
 {
+    assert(m_fontFace != nullptr);
+
+    // Abort operation if no font face is set
+    if (!m_fontFace) return;
+
     // Start with identity matrix
     m_transform = glm::mat4();
 
@@ -121,14 +143,19 @@ void Label::setTransform2D(const glm::vec2 & origin, float fontSize, const FontF
     m_transform = glm::translate(m_transform, glm::vec3(origin, 0.0f));
 
     // Scale glyphs of font face to target normalized size
-    m_transform = glm::scale(m_transform, glm::vec3(viewportExtent.y * fontSize / fontFace.size()));
+    m_transform = glm::scale(m_transform, glm::vec3(viewportExtent.y * m_fontSize / m_fontFace->size()));
 
     // Scale glyphs to NDC size
     m_transform = glm::scale(m_transform, 2.0f / glm::vec3(viewportExtent.x, viewportExtent.y, 1.0f));
 }
 
-void Label::setTransform2D(const glm::vec2 & origin, float fontSize, const FontFace & fontFace, const glm::uvec2 & viewportExtent, float pixelPerInch, const glm::vec4 & margins)
+void Label::setTransform2D(const glm::vec2 & origin, const glm::uvec2 & viewportExtent, float pixelPerInch, const glm::vec4 & margins)
 {
+    assert(m_fontFace != nullptr);
+
+    // Abort operation if no font face is set
+    if (!m_fontFace) return;
+
     // Calculate scale factor
     const auto pointsPerInch = 72.0f;
     const auto ppiScale = pixelPerInch / pointsPerInch;
@@ -153,10 +180,10 @@ void Label::setTransform2D(const glm::vec2 & origin, float fontSize, const FontF
         , glm::vec3((0.5f * origin + 0.5f) * marginedExtent, 0.0f) + glm::vec3(margins[3], margins[2], 0.0f));
 
     // Scale glyphs of font face to target font size
-    m_transform = glm::scale(m_transform, glm::vec3(fontSize / fontFace.size()));
+    m_transform = glm::scale(m_transform, glm::vec3(m_fontSize / m_fontFace->size()));
 }
 
-void Label::setTransform3D(const glm::vec3 & origin, float fontSizeInWorld, const FontFace & fontFace, const glm::mat4 & transform)
+void Label::setTransform3D(const glm::vec3 & origin, const glm::mat4 & transform)
 {
     // Start with identity matrix
     m_transform = glm::mat4();
@@ -165,7 +192,7 @@ void Label::setTransform3D(const glm::vec3 & origin, float fontSizeInWorld, cons
     m_transform = glm::translate(m_transform, origin);
 
     // Scale by font size
-    m_transform = glm::scale(m_transform, glm::vec3(fontSizeInWorld));
+    m_transform = glm::scale(m_transform, glm::vec3(m_fontSize));
 
     // Apply transform
     m_transform = m_transform * transform;
