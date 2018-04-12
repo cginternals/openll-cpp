@@ -150,29 +150,6 @@ public:
 
     /**
     *  @brief
-    *    Optimize vertex array for rendering
-    *
-    *    This optimizes the vertex array for rendering performance
-    *    by sorting the glyphs in a way that all instances of a single
-    *    glyph are rendered subsequently (texture cache optimization).
-    *
-    *  @param[in] sequences
-    *    List of texts which are to be rendered
-    *  @param[in] fontFace
-    *    Font face to use
-    *
-    *  @remarks
-    *    Keep in mind that optimizing the vertex array is a slow process
-    *    itself, as each character of the text has to be processed and
-    *    for each character it has to be determined, whether the glyph
-    *    is visible or not. So the entire text has to be processed at
-    *    least once. Therefore, optimization might not be advisable for
-    *    large texts.
-    */
-    void optimize(const std::vector<GlyphSequence> & sequences, const FontFace & fontFace);
-
-    /**
-    *  @brief
     *    Draw glyph vertex array
     *
     *    This function draws the vertex array by means of OpenGL geometry.

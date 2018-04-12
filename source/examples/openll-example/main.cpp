@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <random>
 #include <vector>
+#include <chrono>
 
 #include <glm/glm.hpp>
 
@@ -39,22 +40,23 @@ namespace
 {
     // Text that is displayed
     const auto s_text =
-    R"(Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.)";
+    R"(Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Ste)";
 
     // Configuration of text rendering
-    std::string g_fontFilename("opensansr36.fnt");   ///< Font file
-    std::string g_string(s_text);                    ///< Text to display
-    float       g_fontSize(16.0f);                   ///< Font size (in pt)
-    glm::vec2   g_origin(-1.0f, 1.0f);               ///< Origin position ( (-1, -1)..(1, 1), relative to the defined viewport )
-    glm::vec4   g_margins(0.0f, 0.0f, 0.0f, 0.0f);   ///< Margins (top/right/bottom/left, in pt)
-    float       g_pixelPerInch(96.0f);               ///< Number of pixels per inch
-    bool        g_wordWrap(true);                    ///< Wrap words at the end of a line?
-    float       g_lineWidth(0.0f);                   ///< Width of a line (in pt)
-    Alignment   g_alignment(Alignment::LeftAligned); ///< Horizontal text alignment
-    LineAnchor  g_lineAnchor(LineAnchor::Ascent);    ///< Vertical line anchor
-    bool        g_optimized(true);                   ///< Optimize rendering performance?
-    glm::uvec2  g_size;                              ///< Viewport size (in pixels)
-    glm::vec4   g_textColor(0.0f, 0.0f, 0.0f, 1.0f); ///< Text color
+    std::string    g_fontFilename("opensansr36.fnt");   ///< Font file
+    std::u32string g_smallText;                         ///< Text to display (small)
+    std::u32string g_largeText;                         ///< Text to display (large)
+    float          g_fontSize(16.0f);                   ///< Font size (in pt)
+    glm::vec2      g_origin(-1.0f, 1.0f);               ///< Origin position ( (-1, -1)..(1, 1), relative to the defined viewport )
+    glm::vec4      g_margins(0.0f, 0.0f, 0.0f, 0.0f);   ///< Margins (top/right/bottom/left, in pt)
+    float          g_pixelPerInch(96.0f);               ///< Number of pixels per inch
+    bool           g_wordWrap(true);                    ///< Wrap words at the end of a line?
+    float          g_lineWidth(0.0f);                   ///< Width of a line (in pt)
+    Alignment      g_alignment(Alignment::LeftAligned); ///< Horizontal text alignment
+    LineAnchor     g_lineAnchor(LineAnchor::Ascent);    ///< Vertical line anchor
+    bool           g_optimized(true);                   ///< Optimize rendering performance?
+    glm::uvec2     g_size;                              ///< Viewport size (in pixels)
+    glm::vec4      g_textColor(0.0f, 0.0f, 0.0f, 1.0f); ///< Text color
 
     std::unique_ptr<FontFace> g_fontFace;
     std::vector<GlyphSequence> g_sequences;
@@ -71,6 +73,18 @@ namespace
     std::unique_ptr<globjects::Program>              g_program;              ///< Shader program
 }
 
+void prepareText(size_t size)
+{
+    // Prepare small text
+    g_smallText = cppassist::string::encode(std::string(s_text), cppassist::Encoding::UTF8);
+
+    // Prepare large text
+    for (unsigned int i=0; i<size; i++) {
+        g_largeText += g_smallText;
+        g_largeText += g_smallText;
+    }
+}
+
 void loadFont(const std::string & filename)
 {
     g_fontFace = FontLoader::load(filename);
@@ -85,7 +99,7 @@ void createSequence()
 
     g_sequences.resize(1);
 
-    g_sequences.front().setText(cppassist::string::encode(g_string, cppassist::Encoding::UTF8));
+    g_sequences.front().setText(g_largeText);
     g_sequences.front().setWordWrap(g_wordWrap);
     g_sequences.front().setLineWidth(scaledLineWidth, scaledFontSize, *g_fontFace);
     g_sequences.front().setAlignment(g_alignment);
@@ -97,47 +111,22 @@ void createSequence()
 
 void prepare()
 {
-    // Get total number of glyphs
-    auto numGlyphs = std::size_t{0};
-    for (const auto & sequence : g_sequences)
-    {
-        numGlyphs += sequence.numDepictableChars(*g_fontFace);
-    }
-
-    g_vertexCloud = new GlyphVertexCloud;
-
-    // Prepare vertex cloud storage
-    g_vertexCloud->vertices().clear();
-    g_vertexCloud->vertices().resize(numGlyphs);
-
-    // Typeset and transform all sequences
     assert(g_fontFace.get() != nullptr);
 
-    auto vertexItr = g_vertexCloud->vertices().begin();
-    for (const auto & sequence : g_sequences)
-    {
-        auto extent = Typesetter::typeset(sequence, *g_fontFace, vertexItr);
-        vertexItr += sequence.numDepictableChars(*g_fontFace);
-    }
+    // Prepare vertex cloud
+    g_vertexCloud = new GlyphVertexCloud;
 
-    if (g_optimized)
-    {
-        // Optimize and update drawable
-        g_vertexCloud->optimize(g_sequences, *g_fontFace);
-    }
-    else
-    {
-        // Update vertex array
-        g_vertexCloud->update();
-    }
+    // Typeset and transform all sequences
+    auto extent = Typesetter::typeset(*g_vertexCloud, g_sequences, *g_fontFace, g_optimized);
 
+    // [TODO] Problem: multiple labels, multiple font faces
     g_vertexCloud->setTexture(g_fontFace->glyphTexture());
 }
 
 void prepareRendering()
 {
     g_vertexShaderSource = GlyphRenderer::vertexShaderSource();
-    g_vertexShader = cppassist::make_unique<globjects::Shader>(gl::GL_VERTEX_SHADER,   g_vertexShaderSource.get());
+    g_vertexShader = cppassist::make_unique<globjects::Shader>(gl::GL_VERTEX_SHADER, g_vertexShaderSource.get());
 
     g_geometryShaderSource = GlyphRenderer::geometryShaderSource();
     g_geometryShader = cppassist::make_unique<globjects::Shader>(gl::GL_GEOMETRY_SHADER, g_geometryShaderSource.get());
@@ -159,7 +148,16 @@ void initialize()
     loadFont(openll::dataPath() + "/openll/fonts/" + g_fontFilename);
 
     createSequence();
+
+    auto start = std::chrono::high_resolution_clock::now();
+
     prepare();
+
+    auto end = std::chrono::high_resolution_clock::now();
+    auto diff = end - start;
+    auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count();
+    std::cout << "Preparation: " << ns << " ns." << std::endl;
+
     prepareRendering();
 }
 
@@ -185,14 +183,8 @@ void resize()
     g_sequences.front().setTransform2D(g_origin, scaledFontSize, *g_fontFace, g_size, g_pixelPerInch, g_margins);
     g_sequences.front().setLineWidth(scaledLineWidth, scaledFontSize, *g_fontFace);
 
-    auto vertexItr = g_vertexCloud->vertices().begin();
-    for (const auto & sequence : g_sequences)
-    {
-        auto extent = Typesetter::typeset(sequence, *g_fontFace, vertexItr);
-        vertexItr += sequence.numDepictableChars(*g_fontFace);
-    }
-
-    g_vertexCloud->update();
+    // Typeset and transform all sequences
+    auto extent = Typesetter::typeset(*g_vertexCloud, g_sequences, *g_fontFace, g_optimized);
 }
 
 void draw()
@@ -284,6 +276,12 @@ int main(int, char *[])
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
     g_size = glm::uvec2(width, height);
+
+    // Prepare text
+//  prepareText(1);    // 1 kB
+    prepareText(1024); // 1 MB
+    std::cout << "Small: " << g_smallText.size() << std::endl;
+    std::cout << "Large: " << g_largeText.size() << std::endl;
 
     // Initialize OpenGL objects in context
     initialize();

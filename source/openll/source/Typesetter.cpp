@@ -23,19 +23,108 @@ glm::vec2 Typesetter::extent(
 , const FontFace & fontFace
 , const float fontSize)
 {
+    // [TODO]
+
+    /*
     // Typeset text with default font size
     auto defaultSize = typeset(sequence, fontFace, std::vector<GlyphVertexCloud::Vertex>::iterator(), true);
 
     // Scale result with the given font size
     return defaultSize * fontSize / fontFace.size();
+    */
+   return glm::vec2();
 }
 
-glm::vec2 Typesetter::typeset(
-  const GlyphSequence & sequence
-, const FontFace & fontFace
-, const std::vector<GlyphVertexCloud::Vertex>::iterator & begin
-, bool dryrun)
+glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const GlyphSequence & sequence, const FontFace & fontFace, bool optimize, bool dryrun)
 {
+    // Clear vertex cloud
+    vertexCloud.vertices().clear();
+
+    // Setup map for optimizing vertex array
+    std::map<size_t, std::vector<size_t>> buckets;
+
+    // Typeset single label
+    auto extent = typeset_label(vertexCloud, buckets, sequence, fontFace, optimize, dryrun);
+
+    // Optimize vertex cloud
+    if (optimize) {
+        Typesetter::optimize(vertexCloud, buckets);
+    }
+
+    // Update vertex array
+    vertexCloud.update();
+
+    // Give back extent
+    return extent;
+}
+
+glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<GlyphSequence> & sequences, const FontFace & fontFace, bool optimize, bool dryrun)
+{
+    // Clear vertex cloud
+    vertexCloud.vertices().clear();
+
+    // Setup map for optimizing vertex array
+    std::map<size_t, std::vector<size_t>> buckets;
+
+    // Typeset labels
+    glm::vec2 extent(0.0f, 0.0f);
+    for (const auto & sequence : sequences) {
+        auto currenExtent = typeset_label(vertexCloud, buckets, sequence, fontFace, optimize, dryrun);
+        extent = glm::vec2(glm::max(extent.x, currenExtent.x), glm::max(extent.y, currenExtent.y));
+    }
+
+    // Optimize vertex cloud
+    if (optimize) {
+        Typesetter::optimize(vertexCloud, buckets);
+    }
+
+    // Update vertex array
+    vertexCloud.update();
+
+    // Give back extent
+    return extent;
+}
+
+glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<const GlyphSequence *> & sequences, const FontFace & fontFace, bool optimize, bool dryrun)
+{
+    // Clear vertex cloud
+    vertexCloud.vertices().clear();
+
+    // Setup map for optimizing vertex array
+    std::map<size_t, std::vector<size_t>> buckets;
+
+    // Typeset labels
+    glm::vec2 extent(0.0f, 0.0f);
+    for (const auto * sequence : sequences) {
+        if (!sequence) continue;
+
+        auto currenExtent = typeset_label(vertexCloud, buckets, *sequence, fontFace, optimize, dryrun);
+        extent = glm::vec2(glm::max(extent.x, currenExtent.x), glm::max(extent.y, currenExtent.y));
+    }
+
+    // Optimize vertex cloud
+    if (optimize) {
+        Typesetter::optimize(vertexCloud, buckets);
+    }
+
+    // Update vertex array
+    vertexCloud.update();
+
+    // Give back extent
+    return extent;
+}
+
+glm::vec2 Typesetter::typeset_label(GlyphVertexCloud & vertexCloud, std::map<size_t, std::vector<size_t>> & buckets, const GlyphSequence & sequence, const FontFace & fontFace, bool optimize, bool dryrun)
+{
+    // Append vertex cloud: the maximum number of visible glyphs is the size of the string
+    vertexCloud.vertices().reserve(vertexCloud.vertices().size() + sequence.text()->text().size());
+
+    // Create first vertex
+    if (!dryrun) {
+        vertexCloud.vertices().push_back(GlyphVertexCloud::Vertex());
+    }
+    size_t begin = vertexCloud.vertices().size() - 1;
+
     auto pen = glm::vec2(0.f);
     auto vertex = begin;
     auto extent = glm::vec2(0.f);
@@ -65,7 +154,7 @@ glm::vec2 Typesetter::typeset(
 
             // Handle alignment (when line feed occurs)
             if (!dryrun) {
-                typeset_align(pen, sequence.alignment(), feedVertex, vertex);
+                typeset_align(pen, sequence.alignment(), vertexCloud, feedVertex, vertex);
             }
 
             pen.x = 0.f;
@@ -81,7 +170,8 @@ glm::vec2 Typesetter::typeset(
 
         // Typeset glyphs in vertex cloud (only if renderable)
         if (!dryrun && glyph.depictable()) {
-            typeset_glyph(fontFace, pen, glyph, vertex++);
+            vertexCloud.vertices().push_back(GlyphVertexCloud::Vertex());
+            typeset_glyph(fontFace, pen, glyph, vertexCloud, buckets, vertex++);
         }
 
         pen.x += glyph.advance();
@@ -92,14 +182,14 @@ glm::vec2 Typesetter::typeset(
             typeset_extent(fontFace, i, iBegin, pen, extent);
 
             if (!dryrun) {
-                typeset_align(pen, sequence.alignment(), feedVertex, vertex);
+                typeset_align(pen, sequence.alignment(), vertexCloud, feedVertex, vertex);
             }
         }
     }
 
     if (!dryrun) {
-        anchor_transform(sequence, fontFace, begin, vertex);
-        vertex_transform(sequence.transform(), sequence.textColor(), begin, vertex);
+        anchor_transform(sequence, fontFace, vertexCloud, begin, vertex);
+        vertex_transform(sequence.transform(), sequence.textColor(), vertexCloud, begin, vertex);
     }
 
     return extent_transform(sequence, extent);
@@ -118,8 +208,9 @@ inline bool Typesetter::typeset_wordwrap(
     const auto lineWidth = sequence.lineWidth();
     auto width_forward = 0.f;
 
-    const auto pen_glyph = pen.x + glyph.advance()
-        + (index != sequence.text()->text().cbegin() ? fontFace.kerning(*(index - 1), *index) : 0.f);
+    const auto pen_glyph =
+        pen.x + glyph.advance() +
+            (index != sequence.text()->text().cbegin() ? fontFace.kerning(*(index - 1), *index) : 0.f);
 
     const auto wrap_glyph = glyph.depictable() && pen_glyph > lineWidth
         && (glyph.advance() <= lineWidth || pen.x > 0.f);
@@ -168,22 +259,29 @@ inline void Typesetter::typeset_glyph(
   const FontFace & fontFace
 , const glm::vec2 & pen
 , const Glyph & glyph
-, const std::vector<GlyphVertexCloud::Vertex>::iterator & vertex)
+, GlyphVertexCloud & vertexCloud
+, std::map<size_t, std::vector<size_t>> & buckets
+, size_t index)
 {
-    const auto & padding = fontFace.glyphTexturePadding();
-    vertex->origin    = glm::vec3(pen, 0.f);
-    vertex->origin.x += glyph.bearing().x - padding[3];
-    vertex->origin.y += glyph.bearing().y - glyph.extent().y - padding[2];
+    GlyphVertexCloud::Vertex & vertex = vertexCloud.vertices()[index];
 
-    vertex->vtan   = glm::vec3(glyph.extent().x + padding[1] + padding[3], 0.f, 0.f);
-    vertex->vbitan = glm::vec3(0.f, glyph.extent().y + padding[0] + padding[2], 0.f);
+    const auto & padding = fontFace.glyphTexturePadding();
+    vertex.origin    = glm::vec3(pen, 0.f);
+    vertex.origin.x += glyph.bearing().x - padding[3];
+    vertex.origin.y += glyph.bearing().y - glyph.extent().y - padding[2];
+
+    vertex.vtan   = glm::vec3(glyph.extent().x + padding[1] + padding[3], 0.f, 0.f);
+    vertex.vbitan = glm::vec3(0.f, glyph.extent().y + padding[0] + padding[2], 0.f);
 
     const auto extentScale = 1.f / glm::vec2(fontFace.glyphTextureExtent());
     const auto ll = glyph.subTextureOrigin()
         - glm::vec2(padding[3], padding[2]) * extentScale;
     const auto ur = glyph.subTextureOrigin() + glyph.subTextureExtent()
         + glm::vec2(padding[1], padding[0]) * extentScale;
-    vertex->uvRect = glm::vec4(ll, ur);
+    vertex.uvRect = glm::vec4(ll, ur);
+
+    auto glyphIndex = glyph.index();
+    buckets[glyphIndex].push_back(index);
 }
 
 inline void Typesetter::typeset_extent(
@@ -212,8 +310,9 @@ inline void Typesetter::typeset_extent(
 inline void Typesetter::typeset_align(
   const glm::vec2 & pen
 , const Alignment alignment
-, const std::vector<GlyphVertexCloud::Vertex>::iterator & begin
-, const std::vector<GlyphVertexCloud::Vertex>::iterator & end)
+, GlyphVertexCloud & vertexCloud
+, size_t begin
+, size_t end)
 {
     if (alignment == Alignment::LeftAligned) {
         return;
@@ -226,16 +325,18 @@ inline void Typesetter::typeset_align(
     }
 
     // Origin is expected to be in 'font face space' (not transformed)
-    for (auto v = begin; v != end; ++v) {
-        v->origin.x += penOffset;
+    for (auto i = begin; i != end; ++i) {
+        auto & v = vertexCloud.vertices()[i];
+        v.origin.x += penOffset;
     }
 }
 
 inline void Typesetter::anchor_transform(
   const GlyphSequence & sequence
 , const FontFace & fontFace
-, const std::vector<GlyphVertexCloud::Vertex>::iterator & begin
-, const std::vector<GlyphVertexCloud::Vertex>::iterator & end)
+, GlyphVertexCloud & vertexCloud
+, size_t begin
+, size_t end)
 {
     auto offset = 0.f;
 
@@ -258,27 +359,31 @@ inline void Typesetter::anchor_transform(
         return;
     }
 
-    for (auto v = begin; v != end; ++v) {
-        v->origin.y -= offset;
+    for (auto i = begin; i != end; ++i) {
+        auto & v = vertexCloud.vertices()[i];
+        v.origin.y -= offset;
     }
 }
 
 inline void Typesetter::vertex_transform(
   const glm::mat4 & transform
 , const glm::vec4 & textColor
-, const std::vector<GlyphVertexCloud::Vertex>::iterator & begin
-, const std::vector<GlyphVertexCloud::Vertex>::iterator & end)
+, GlyphVertexCloud & vertexCloud
+, size_t begin
+, size_t end)
 {
-    for (auto v = begin; v != end; ++v)
+    for (auto i = begin; i != end; ++i)
     {
-        auto ll = transform * glm::vec4(v->origin, 1.f);
-        auto lr = transform * glm::vec4(v->origin + v->vtan, 1.f);
-        auto ul = transform * glm::vec4(v->origin + v->vbitan, 1.f);
+        auto & v = vertexCloud.vertices()[i];
 
-        v->origin = glm::vec3(ll);
-        v->vtan   = glm::vec3(lr - ll);
-        v->vbitan = glm::vec3(ul - ll);
-        v->textColor = textColor;
+        auto ll = transform * glm::vec4(v.origin, 1.f);
+        auto lr = transform * glm::vec4(v.origin + v.vtan, 1.f);
+        auto ul = transform * glm::vec4(v.origin + v.vbitan, 1.f);
+
+        v.origin = glm::vec3(ll);
+        v.vtan   = glm::vec3(lr - ll);
+        v.vbitan = glm::vec3(ul - ll);
+        v.textColor = textColor;
     }
 }
 
@@ -291,6 +396,25 @@ inline glm::vec2 Typesetter::extent_transform(
     auto ul = sequence.transform() * glm::vec4(     0.f, extent.y, 0.f, 1.f);
 
     return glm::vec2(glm::distance(lr, ll), glm::distance(ul, ll));
+}
+
+inline void Typesetter::optimize(GlyphVertexCloud & vertexCloud, const std::map<size_t, std::vector<size_t>> & buckets)
+{
+    std::vector<GlyphVertexCloud::Vertex> vertices;
+
+    vertices.reserve(vertexCloud.vertices().size());
+
+    for (auto & it : buckets)
+    {
+        auto & bucket = it.second;
+
+        for (size_t i=0; i<bucket.size(); i++)
+        {
+            vertices.emplace_back( vertexCloud.vertices()[bucket[i]] );
+        }
+    }
+
+    std::swap(vertexCloud.vertices(), vertices);
 }
 
 

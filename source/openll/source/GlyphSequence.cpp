@@ -49,35 +49,6 @@ size_t GlyphSequence::numChars() const
     return m_text->text().size();
 }
 
-size_t GlyphSequence::numDepictableChars(const FontFace & fontFace) const
-{
-    auto count = size_t(0);
-
-    // Count depictable characters in string
-    for (const auto & c : m_text->text())
-    {
-        if (fontFace.depictable(c)) {
-            ++count;
-        }
-    }
-
-    return count;
-}
-
-const std::vector<char32_t> & GlyphSequence::appendDepictableChars(std::vector<char32_t> & depictableChars, const FontFace & fontFace) const
-{
-    // [TODO] Text may be large, so first counting and then iterating again should be avoided ...
-    depictableChars.reserve(depictableChars.size() + numDepictableChars(fontFace));
-
-    for (const auto & c : m_text->text()) {
-        if (fontFace.depictable(c)) {
-            depictableChars.push_back(c);
-        }
-    }
-
-    return depictableChars;
-}
-
 bool GlyphSequence::wordWrap() const
 {
     return m_wordWrap;

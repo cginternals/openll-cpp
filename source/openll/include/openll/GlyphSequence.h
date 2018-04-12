@@ -80,39 +80,6 @@ public:
 
     /**
     *  @brief
-    *    Get number of characters that will be rendered using a given font face
-    *
-    *    This function returns the number of glyphs that will actually be rendered
-    *    using the given font face, ignoring all glyphs that are not visible/renderable.
-    *    The runtime complexity is O(n) w.r.t the number of characters in the string.
-    *
-    *  @param[in] fontFace
-    *    Font face that used for rendering
-    *
-    *  @return
-    *    Number of visible characters in the glyph sequence
-    */
-    size_t numDepictableChars(const FontFace & fontFace) const;
-
-    /**
-    *  @brief
-    *    Get all visible characters of the glyph sequence
-    *
-    *    This function returns the characters that will actually be rendered
-    *    using the given font face, ignoring all glyphs that are not visible/renderable.
-    *
-    *  @param[in,out] allChars
-    *    List to which the characters are appended (32 bit unicode)
-    *  @param[in] fontFace
-    *    Font face
-    *
-    *  @return
-    *    Reference to the list of characters (32 bit unicode)
-    */
-    const std::vector<char32_t> & appendDepictableChars(std::vector<char32_t> & allChars, const FontFace & fontFace) const;
-
-    /**
-    *  @brief
     *    Get if words are wrapped at the end of a line
     *
     *  @return

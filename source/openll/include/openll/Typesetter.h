@@ -3,6 +3,8 @@
 
 
 #include <string>
+#include <vector>
+#include <map>
 
 #include <glm/fwd.hpp>
 
@@ -64,22 +66,111 @@ public:
     *  @brief
     *    Typeset (layout) the given text
     *
+    *  @param[in,out] vertexCloud
+    *    Vertex cloud that is constructed
     *  @param[in] sequence
     *    Text to display
     *  @param[in] fontFace
     *    Font face to use
-    *  @param[in] begin
-    *    ??? [TODO]
+    *  @param[in] optimize
+    *    Optimize vertex cloud for rendering performance? (slow for large texts!)
     *  @param[in] dryrun
-    *    ??? [TODO]
+    *    Do not create output, just compute the extent?
     *
     *  @return
     *    Extent (width, height) of the text ... in scaled space [TODO]
+    *
+    *  @remarks
+    *    Keep in mind that optimizing the vertex array is a slow process
+    *    itself, as each character of the text has to be processed and
+    *    for each character it has to be determined, whether the glyph
+    *    is visible or not. So the entire text has to be processed at
+    *    least once. Therefore, optimization might not be advisable for
+    *    large texts.
     */
-    static glm::vec2 typeset(const GlyphSequence & sequence, const FontFace & fontFace, const std::vector<GlyphVertexCloud::Vertex>::iterator & begin, bool dryrun = false);
+    static glm::vec2 typeset(
+        GlyphVertexCloud & vertexCloud
+    ,   const GlyphSequence & sequence
+    ,   const FontFace & fontFace
+    ,   bool optimize = false
+    ,   bool dryrun = false);
+
+    /**
+    *  @brief
+    *    Typeset (layout) the given text
+    *
+    *  @param[in,out] vertexCloud
+    *    Vertex cloud that is constructed
+    *  @param[in] sequences
+    *    List of labels to display
+    *  @param[in] fontFace
+    *    Font face to use
+    *  @param[in] optimize
+    *    Optimize vertex cloud for rendering performance? (slow for large texts!)
+    *  @param[in] dryrun
+    *    Do not create output, just compute the extent?
+    *
+    *  @return
+    *    Extent (width, height) of the text ... in scaled space [TODO]
+    *
+    *  @remarks
+    *    Keep in mind that optimizing the vertex array is a slow process
+    *    itself, as each character of the text has to be processed and
+    *    for each character it has to be determined, whether the glyph
+    *    is visible or not. So the entire text has to be processed at
+    *    least once. Therefore, optimization might not be advisable for
+    *    large texts.
+    */
+    static glm::vec2 typeset(
+        GlyphVertexCloud & vertexCloud
+    ,   const std::vector<GlyphSequence> & sequences
+    ,   const FontFace & fontFace
+    ,   bool optimize = false
+    ,   bool dryrun = false);
+
+    /**
+    *  @brief
+    *    Typeset (layout) the given text
+    *
+    *  @param[in,out] vertexCloud
+    *    Vertex cloud that is constructed
+    *  @param[in] sequences
+    *    List of labels to display
+    *  @param[in] fontFace
+    *    Font face to use
+    *  @param[in] optimize
+    *    Optimize vertex cloud for rendering performance? (slow for large texts!)
+    *  @param[in] dryrun
+    *    Do not create output, just compute the extent?
+    *
+    *  @return
+    *    Extent (width, height) of the text ... in scaled space [TODO]
+    *
+    *  @remarks
+    *    Keep in mind that optimizing the vertex array is a slow process
+    *    itself, as each character of the text has to be processed and
+    *    for each character it has to be determined, whether the glyph
+    *    is visible or not. So the entire text has to be processed at
+    *    least once. Therefore, optimization might not be advisable for
+    *    large texts.
+    */
+    static glm::vec2 typeset(
+        GlyphVertexCloud & vertexCloud
+    ,   const std::vector<const GlyphSequence *> & sequences
+    ,   const FontFace & fontFace
+    ,   bool optimize = false
+    ,   bool dryrun = false);
 
 
 private:
+    static glm::vec2 typeset_label(
+        GlyphVertexCloud & vertexCloud
+    ,   std::map<size_t, std::vector<size_t>> & buckets
+    ,   const GlyphSequence & sequence
+    ,   const FontFace & fontFace
+    ,   bool optimize = false
+    ,   bool dryrun = false);
+
     static bool typeset_wordwrap(
         const GlyphSequence & sequence
     ,   const FontFace & fontFace
@@ -98,7 +189,9 @@ private:
         const FontFace & fontFace
     ,   const glm::vec2 & pen
     ,   const Glyph & glyph
-    ,   const std::vector<GlyphVertexCloud::Vertex>::iterator & vertex);
+    ,   GlyphVertexCloud & vertexCloud
+    ,   std::map<size_t, std::vector<size_t>> & buckets
+    ,   size_t index);
 
     static void typeset_extent(
         const FontFace & fontFace
@@ -110,24 +203,31 @@ private:
     static void typeset_align(
         const glm::vec2 & pen
     ,   const Alignment alignment
-    ,   const std::vector<GlyphVertexCloud::Vertex>::iterator & begin
-    ,   const std::vector<GlyphVertexCloud::Vertex>::iterator & end);
+    ,   GlyphVertexCloud & vertexCloud
+    ,   size_t begin
+    ,   size_t end);
 
     static void anchor_transform(
         const GlyphSequence & sequence
     ,   const FontFace & fontFace
-    ,   const std::vector<GlyphVertexCloud::Vertex>::iterator & begin
-    ,   const std::vector<GlyphVertexCloud::Vertex>::iterator & end);
+    ,   GlyphVertexCloud & vertexCloud
+    ,   size_t begin
+    ,   size_t end);
 
     static void vertex_transform(
         const glm::mat4 & sequence
     ,   const glm::vec4 & textColor
-    ,   const std::vector<GlyphVertexCloud::Vertex>::iterator & begin
-    ,   const std::vector<GlyphVertexCloud::Vertex>::iterator & end);
+    ,   GlyphVertexCloud & vertexCloud
+    ,   size_t begin
+    ,   size_t end);
 
     static glm::vec2 extent_transform(
         const GlyphSequence & sequence
     ,   const glm::vec2 & extent);
+
+    static void optimize(
+        GlyphVertexCloud & vertexCloud
+    ,   const std::map<size_t, std::vector<size_t>> & buckets);
 };
 
 
