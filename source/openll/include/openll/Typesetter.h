@@ -164,7 +164,7 @@ public:
 
 private:
     static glm::vec2 typeset_label(
-        GlyphVertexCloud & vertexCloud
+        std::vector<GlyphVertexCloud::Vertex> & vertices
     ,   std::map<size_t, std::vector<size_t>> & buckets
     ,   const GlyphSequence & sequence
     ,   const FontFace & fontFace
@@ -189,7 +189,7 @@ private:
         const FontFace & fontFace
     ,   const glm::vec2 & pen
     ,   const Glyph & glyph
-    ,   GlyphVertexCloud & vertexCloud
+    ,   std::vector<GlyphVertexCloud::Vertex> & vertices
     ,   std::map<size_t, std::vector<size_t>> & buckets
     ,   size_t index);
 
@@ -203,21 +203,21 @@ private:
     static void typeset_align(
         const glm::vec2 & pen
     ,   const Alignment alignment
-    ,   GlyphVertexCloud & vertexCloud
+    ,   std::vector<GlyphVertexCloud::Vertex> & vertices
     ,   size_t begin
     ,   size_t end);
 
     static void anchor_transform(
         const GlyphSequence & sequence
     ,   const FontFace & fontFace
-    ,   GlyphVertexCloud & vertexCloud
+    ,   std::vector<GlyphVertexCloud::Vertex> & vertices
     ,   size_t begin
     ,   size_t end);
 
     static void vertex_transform(
         const glm::mat4 & sequence
     ,   const glm::vec4 & textColor
-    ,   GlyphVertexCloud & vertexCloud
+    ,   std::vector<GlyphVertexCloud::Vertex> & vertices
     ,   size_t begin
     ,   size_t end);
 
@@ -225,8 +225,8 @@ private:
         const GlyphSequence & sequence
     ,   const glm::vec2 & extent);
 
-    static void optimize(
-        GlyphVertexCloud & vertexCloud
+    static void optimize_vertices(
+        std::vector<GlyphVertexCloud::Vertex> & vertices
     ,   const std::map<size_t, std::vector<size_t>> & buckets);
 };
 

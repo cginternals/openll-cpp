@@ -44,11 +44,11 @@ glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const GlyphSequenc
     std::map<size_t, std::vector<size_t>> buckets;
 
     // Typeset single label
-    auto extent = typeset_label(vertexCloud, buckets, sequence, fontFace, optimize, dryrun);
+    auto extent = typeset_label(vertexCloud.vertices(), buckets, sequence, fontFace, optimize, dryrun);
 
     // Optimize vertex cloud
     if (optimize) {
-        Typesetter::optimize(vertexCloud, buckets);
+        optimize_vertices(vertexCloud.vertices(), buckets);
     }
 
     // Update vertex array
@@ -69,13 +69,13 @@ glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<
     // Typeset labels
     glm::vec2 extent(0.0f, 0.0f);
     for (const auto & sequence : sequences) {
-        auto currenExtent = typeset_label(vertexCloud, buckets, sequence, fontFace, optimize, dryrun);
+        auto currenExtent = typeset_label(vertexCloud.vertices(), buckets, sequence, fontFace, optimize, dryrun);
         extent = glm::vec2(glm::max(extent.x, currenExtent.x), glm::max(extent.y, currenExtent.y));
     }
 
     // Optimize vertex cloud
     if (optimize) {
-        Typesetter::optimize(vertexCloud, buckets);
+        optimize_vertices(vertexCloud.vertices(), buckets);
     }
 
     // Update vertex array
@@ -98,13 +98,13 @@ glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<
     for (const auto * sequence : sequences) {
         if (!sequence) continue;
 
-        auto currenExtent = typeset_label(vertexCloud, buckets, *sequence, fontFace, optimize, dryrun);
+        auto currenExtent = typeset_label(vertexCloud.vertices(), buckets, *sequence, fontFace, optimize, dryrun);
         extent = glm::vec2(glm::max(extent.x, currenExtent.x), glm::max(extent.y, currenExtent.y));
     }
 
     // Optimize vertex cloud
     if (optimize) {
-        Typesetter::optimize(vertexCloud, buckets);
+        optimize_vertices(vertexCloud.vertices(), buckets);
     }
 
     // Update vertex array
@@ -114,16 +114,16 @@ glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<
     return extent;
 }
 
-glm::vec2 Typesetter::typeset_label(GlyphVertexCloud & vertexCloud, std::map<size_t, std::vector<size_t>> & buckets, const GlyphSequence & sequence, const FontFace & fontFace, bool optimize, bool dryrun)
+glm::vec2 Typesetter::typeset_label(std::vector<GlyphVertexCloud::Vertex> & vertices, std::map<size_t, std::vector<size_t>> & buckets, const GlyphSequence & sequence, const FontFace & fontFace, bool optimize, bool dryrun)
 {
     // Append vertex cloud: the maximum number of visible glyphs is the size of the string
-    vertexCloud.vertices().reserve(vertexCloud.vertices().size() + sequence.text()->text().size());
+    vertices.reserve(vertices.size() + sequence.text()->text().size());
 
     // Create first vertex
     if (!dryrun) {
-        vertexCloud.vertices().push_back(GlyphVertexCloud::Vertex());
+        vertices.push_back(GlyphVertexCloud::Vertex());
     }
-    size_t begin = vertexCloud.vertices().size() - 1;
+    size_t begin = vertices.size() - 1;
 
     auto pen = glm::vec2(0.f);
     auto vertex = begin;
@@ -154,7 +154,7 @@ glm::vec2 Typesetter::typeset_label(GlyphVertexCloud & vertexCloud, std::map<siz
 
             // Handle alignment (when line feed occurs)
             if (!dryrun) {
-                typeset_align(pen, sequence.alignment(), vertexCloud, feedVertex, vertex);
+                typeset_align(pen, sequence.alignment(), vertices, feedVertex, vertex);
             }
 
             pen.x = 0.f;
@@ -170,8 +170,8 @@ glm::vec2 Typesetter::typeset_label(GlyphVertexCloud & vertexCloud, std::map<siz
 
         // Typeset glyphs in vertex cloud (only if renderable)
         if (!dryrun && glyph.depictable()) {
-            vertexCloud.vertices().push_back(GlyphVertexCloud::Vertex());
-            typeset_glyph(fontFace, pen, glyph, vertexCloud, buckets, vertex++);
+            vertices.push_back(GlyphVertexCloud::Vertex());
+            typeset_glyph(fontFace, pen, glyph, vertices, buckets, vertex++);
         }
 
         pen.x += glyph.advance();
@@ -182,14 +182,14 @@ glm::vec2 Typesetter::typeset_label(GlyphVertexCloud & vertexCloud, std::map<siz
             typeset_extent(fontFace, i, iBegin, pen, extent);
 
             if (!dryrun) {
-                typeset_align(pen, sequence.alignment(), vertexCloud, feedVertex, vertex);
+                typeset_align(pen, sequence.alignment(), vertices, feedVertex, vertex);
             }
         }
     }
 
     if (!dryrun) {
-        anchor_transform(sequence, fontFace, vertexCloud, begin, vertex);
-        vertex_transform(sequence.transform(), sequence.textColor(), vertexCloud, begin, vertex);
+        anchor_transform(sequence, fontFace, vertices, begin, vertex);
+        vertex_transform(sequence.transform(), sequence.textColor(), vertices, begin, vertex);
     }
 
     return extent_transform(sequence, extent);
@@ -259,11 +259,11 @@ inline void Typesetter::typeset_glyph(
   const FontFace & fontFace
 , const glm::vec2 & pen
 , const Glyph & glyph
-, GlyphVertexCloud & vertexCloud
+, std::vector<GlyphVertexCloud::Vertex> & vertices
 , std::map<size_t, std::vector<size_t>> & buckets
 , size_t index)
 {
-    GlyphVertexCloud::Vertex & vertex = vertexCloud.vertices()[index];
+    auto & vertex = vertices[index];
 
     const auto & padding = fontFace.glyphTexturePadding();
     vertex.origin    = glm::vec3(pen, 0.f);
@@ -310,7 +310,7 @@ inline void Typesetter::typeset_extent(
 inline void Typesetter::typeset_align(
   const glm::vec2 & pen
 , const Alignment alignment
-, GlyphVertexCloud & vertexCloud
+, std::vector<GlyphVertexCloud::Vertex> & vertices
 , size_t begin
 , size_t end)
 {
@@ -326,7 +326,7 @@ inline void Typesetter::typeset_align(
 
     // Origin is expected to be in 'font face space' (not transformed)
     for (auto i = begin; i != end; ++i) {
-        auto & v = vertexCloud.vertices()[i];
+        auto & v = vertices[i];
         v.origin.x += penOffset;
     }
 }
@@ -334,7 +334,7 @@ inline void Typesetter::typeset_align(
 inline void Typesetter::anchor_transform(
   const GlyphSequence & sequence
 , const FontFace & fontFace
-, GlyphVertexCloud & vertexCloud
+, std::vector<GlyphVertexCloud::Vertex> & vertices
 , size_t begin
 , size_t end)
 {
@@ -360,7 +360,7 @@ inline void Typesetter::anchor_transform(
     }
 
     for (auto i = begin; i != end; ++i) {
-        auto & v = vertexCloud.vertices()[i];
+        auto & v = vertices[i];
         v.origin.y -= offset;
     }
 }
@@ -368,13 +368,13 @@ inline void Typesetter::anchor_transform(
 inline void Typesetter::vertex_transform(
   const glm::mat4 & transform
 , const glm::vec4 & textColor
-, GlyphVertexCloud & vertexCloud
+, std::vector<GlyphVertexCloud::Vertex> & vertices
 , size_t begin
 , size_t end)
 {
     for (auto i = begin; i != end; ++i)
     {
-        auto & v = vertexCloud.vertices()[i];
+        auto & v = vertices[i];
 
         auto ll = transform * glm::vec4(v.origin, 1.f);
         auto lr = transform * glm::vec4(v.origin + v.vtan, 1.f);
@@ -398,11 +398,11 @@ inline glm::vec2 Typesetter::extent_transform(
     return glm::vec2(glm::distance(lr, ll), glm::distance(ul, ll));
 }
 
-inline void Typesetter::optimize(GlyphVertexCloud & vertexCloud, const std::map<size_t, std::vector<size_t>> & buckets)
+inline void Typesetter::optimize_vertices(std::vector<GlyphVertexCloud::Vertex> & vertices, const std::map<size_t, std::vector<size_t>> & buckets)
 {
-    std::vector<GlyphVertexCloud::Vertex> vertices;
+    std::vector<GlyphVertexCloud::Vertex> sorted;
 
-    vertices.reserve(vertexCloud.vertices().size());
+    sorted.reserve(vertices.size());
 
     for (auto & it : buckets)
     {
@@ -410,11 +410,11 @@ inline void Typesetter::optimize(GlyphVertexCloud & vertexCloud, const std::map<
 
         for (size_t i=0; i<bucket.size(); i++)
         {
-            vertices.emplace_back( vertexCloud.vertices()[bucket[i]] );
+            sorted.emplace_back(vertices[bucket[i]]);
         }
     }
 
-    std::swap(vertexCloud.vertices(), vertices);
+    std::swap(vertices, sorted);
 }
 
 
