@@ -12,6 +12,7 @@
 namespace globjects
 {
     class AbstractStringSource;
+    class Shader;
     class Program;
 }
 
@@ -63,13 +64,10 @@ public:
     *  @brief
     *    Constructor
     *
-    *  @param[in] program
-    *    Shader program used for rendering
-    *
     *  @remarks
     *    This initializes OpenGL objects, so an OpenGL context must be current when creating this object.
     */
-    explicit GlyphRenderer(globjects::Program * program);
+    GlyphRenderer();
 
     /**
     *  @brief
@@ -100,6 +98,15 @@ public:
 
     /**
     *  @brief
+    *    Set shader program
+    *
+    *  @param[in] program
+    *    Shader program used for rendering
+    */
+    void setProgram(std::unique_ptr<globjects::Program> && program);
+
+    /**
+    *  @brief
     *    Render text to screen in 2D space
     *
     *  @param[in] vertexCloud
@@ -120,7 +127,13 @@ public:
 
 
 protected:
-    globjects::Program * m_program; ///< Program used for rendering
+    std::unique_ptr<globjects::Program>              m_program;              ///< Program used for rendering
+    std::unique_ptr<globjects::Shader>               m_vertexShader;         ///< Vertex shader
+    std::unique_ptr<globjects::Shader>               m_geometryShader;       ///< Geometry shader
+    std::unique_ptr<globjects::Shader>               m_fragmentShader;       ///< Fragment shader
+    std::unique_ptr<globjects::AbstractStringSource> m_vertexShaderSource;   ///< Shader source for the vertex shader
+    std::unique_ptr<globjects::AbstractStringSource> m_geometryShaderSource; ///< Shader source for the geometry shader
+    std::unique_ptr<globjects::AbstractStringSource> m_fragmentShaderSource; ///< Shader source for the fragment shader
 };
 
 

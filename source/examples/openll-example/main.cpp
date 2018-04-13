@@ -1,15 +1,11 @@
 
 #include <iostream>
-#include <algorithm>
-#include <random>
-#include <vector>
 #include <chrono>
 
 #include <glm/glm.hpp>
 
 #include <GLFW/glfw3.h>
 
-#include <cppassist/memory/make_unique.h>
 #include <cppassist/string/conversion.h>
 
 #include <glbinding/gl/gl.h>
@@ -17,9 +13,6 @@
 #include <glbinding/Version.h>
 
 #include <globjects/globjects.h>
-#include <globjects/base/File.h>
-#include <globjects/logging.h>
-#include <globjects/Texture.h>
 
 #include <openll/openll.h>
 #include <openll/Alignment.h>
@@ -62,15 +55,6 @@ namespace
     std::unique_ptr<FontFace>         g_fontFace;    ///< Used font
     std::unique_ptr<GlyphVertexCloud> g_vertexCloud; ///< GPU geometry of the label
     std::unique_ptr<GlyphRenderer>    g_renderer;    ///< Label renderer
-
-    // OpenGL objects
-    std::unique_ptr<globjects::AbstractStringSource> g_vertexShaderSource;   ///< Shader source for the vertex shader
-    std::unique_ptr<globjects::Shader>               g_vertexShader;         ///< Vertex shader
-    std::unique_ptr<globjects::AbstractStringSource> g_geometryShaderSource; ///< Shader source for the geometry shader
-    std::unique_ptr<globjects::Shader>               g_geometryShader;       ///< Geometry shader
-    std::unique_ptr<globjects::AbstractStringSource> g_fragmentShaderSource; ///< Shader source for the fragment shader
-    std::unique_ptr<globjects::Shader>               g_fragmentShader;       ///< Fragment shader
-    std::unique_ptr<globjects::Program>              g_program;              ///< Shader program
 }
 
 void prepareText(size_t size)
@@ -124,21 +108,7 @@ void prepare()
 
 void prepareRendering()
 {
-    g_vertexShaderSource = GlyphRenderer::vertexShaderSource();
-    g_vertexShader = cppassist::make_unique<globjects::Shader>(gl::GL_VERTEX_SHADER, g_vertexShaderSource.get());
-
-    g_geometryShaderSource = GlyphRenderer::geometryShaderSource();
-    g_geometryShader = cppassist::make_unique<globjects::Shader>(gl::GL_GEOMETRY_SHADER, g_geometryShaderSource.get());
-
-    g_fragmentShaderSource = GlyphRenderer::fragmentShaderSource();
-    g_fragmentShader = cppassist::make_unique<globjects::Shader>(gl::GL_FRAGMENT_SHADER, g_fragmentShaderSource.get());
-
-    g_program = cppassist::make_unique<globjects::Program>();
-    g_program->attach(g_vertexShader.get());
-    g_program->attach(g_geometryShader.get());
-    g_program->attach(g_fragmentShader.get());
-
-    g_renderer = cppassist::make_unique<GlyphRenderer>(g_program.get());
+    g_renderer = std::unique_ptr<GlyphRenderer>(new GlyphRenderer);
 }
 
 void initialize()
@@ -163,13 +133,9 @@ void initialize()
 void deinitialize()
 {
     // Release OpenGL objects
-    g_vertexShaderSource.reset(nullptr);
-    g_vertexShader.reset(nullptr);
-    g_geometryShaderSource.reset(nullptr);
-    g_geometryShader.reset(nullptr);
-    g_fragmentShaderSource.reset(nullptr);
-    g_fragmentShader.reset(nullptr);
-    g_program.reset(nullptr);
+    g_renderer.reset(nullptr);
+    g_vertexCloud.reset(nullptr);
+    g_fontFace.reset(nullptr);
 }
 
 void resize()
@@ -278,7 +244,7 @@ int main(int, char *[])
 
     // Prepare text
     prepareText(1);    // 1 kB
-//    prepareText(1024); // 1 MB
+//  prepareText(1024); // 1 MB
     std::cout << "Text size: " << g_text.size() << std::endl;
 
     // Initialize OpenGL objects in context
