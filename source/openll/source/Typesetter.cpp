@@ -213,8 +213,7 @@ glm::vec2 Typesetter::typeset_label(std::vector<GlyphVertexCloud::Vertex> & vert
         vertex_transform(label.transform(), label.textColor(), vertices, begin, vertex);
     }
 
-    // Scale extent back to the label's font size (it has been computed with the font face's font size)
-    return extent_transform(label, extent) * label.fontSize() / label.fontFace()->size();
+    return extent_transform(label, extent);
 }
 
 inline bool Typesetter::typeset_wordwrap(

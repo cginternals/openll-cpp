@@ -42,12 +42,10 @@ namespace
     const auto s_text =
     R"(Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Ste)";
 
-    const auto s_text2 = R"(Lorem ipsum dolor sit amet)";
-
     // Configuration of text rendering
     std::string    g_fontFilename("opensansr36.fnt");   ///< Font file
     std::u32string g_text;                              ///< Text to display
-    float          g_fontSize(36.0f);                   ///< Font size (in pt)
+    float          g_fontSize(16.0f);                   ///< Font size (in pt)
     glm::vec2      g_origin(-1.0f, 1.0f);               ///< Origin position ( (-1, -1)..(1, 1), relative to the defined viewport )
     glm::vec4      g_margins(8.0f, 8.0f, 0.0f, 8.0f);   ///< Margins (top/right/bottom/left, in pt)
     float          g_pixelPerInch(72.0f);               ///< Number of pixels per inch
@@ -77,7 +75,6 @@ namespace
 
 void prepareText(size_t size)
 {
-    /*
     // Prepare text snippet
     auto snippet = cppassist::string::encode(std::string(s_text), cppassist::Encoding::UTF8);
 
@@ -86,9 +83,6 @@ void prepareText(size_t size)
         g_text += snippet;
         g_text += snippet;
     }
-    */
-
-    g_text = cppassist::string::encode(std::string(s_text2), cppassist::Encoding::UTF8);
 }
 
 void loadFont(const std::string & filename)
@@ -123,12 +117,8 @@ void prepare()
     // Prepare vertex cloud
     g_vertexCloud = std::unique_ptr<GlyphVertexCloud>(new GlyphVertexCloud);
 
-    // [DEBUG]
-    auto extent = Typesetter::extent(g_label);
-    std::cout << "extent: (" << extent.x << ", " << extent.y << ")" << std::endl;
-
     // Typeset and transform all labels
-    extent = Typesetter::typeset(*g_vertexCloud, g_label, g_optimized);
+    auto extent = Typesetter::typeset(*g_vertexCloud, g_label, g_optimized);
     std::cout << "extent: (" << extent.x << ", " << extent.y << ")" << std::endl;
 
     // [TODO] Problem: multiple labels, multiple font faces
@@ -195,7 +185,8 @@ void resize()
     g_label.setLineWidth(scaledLineWidth);
 
     // Typeset and transform all labels
-    Typesetter::typeset(*g_vertexCloud, g_label, g_optimized);
+    auto extent = Typesetter::typeset(*g_vertexCloud, g_label, g_optimized);
+    std::cout << "extent: (" << extent.x << ", " << extent.y << ")" << std::endl;
 }
 
 void draw()
@@ -289,8 +280,8 @@ int main(int, char *[])
     g_size = glm::uvec2(width, height);
 
     // Prepare text
-//  prepareText(1);    // 1 kB
-    prepareText(1024); // 1 MB
+    prepareText(1);    // 1 kB
+//    prepareText(1024); // 1 MB
     std::cout << "Text size: " << g_text.size() << std::endl;
 
     // Initialize OpenGL objects in context
