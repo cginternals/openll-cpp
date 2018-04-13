@@ -52,9 +52,7 @@ public:
     *  @remarks
     *    This function internally performs the typesetting of the
     *    text, but only returns its extent, disregarding the resulting
-    *    vertex array. Therefore, if possible, typeset should be called
-    *    instead of first calling extent and then typeset, to avoid
-    *    layouting the text more than once.
+    *    vertex array.
     */
     static glm::vec2 extent(const Label & label);
 
@@ -76,10 +74,8 @@ public:
     *
     *  @remarks
     *    Keep in mind that optimizing the vertex array is a slow process
-    *    itself, as each character of the text has to be processed and
-    *    for each character it has to be determined, whether the glyph
-    *    is visible or not. So the entire text has to be processed at
-    *    least once. Therefore, optimization might not be advisable for
+    *    itself and also needs a lot of memory, as the vertex array has
+    *    to be sorted. Therefore, optimization might not be advisable for
     *    large texts.
     */
     static glm::vec2 typeset(GlyphVertexCloud & vertexCloud, const Label & label, bool optimize = false, bool dryrun = false);
@@ -102,10 +98,8 @@ public:
     *
     *  @remarks
     *    Keep in mind that optimizing the vertex array is a slow process
-    *    itself, as each character of the text has to be processed and
-    *    for each character it has to be determined, whether the glyph
-    *    is visible or not. So the entire text has to be processed at
-    *    least once. Therefore, optimization might not be advisable for
+    *    itself and also needs a lot of memory, as the vertex array has
+    *    to be sorted. Therefore, optimization might not be advisable for
     *    large texts.
     */
     static glm::vec2 typeset(GlyphVertexCloud & vertexCloud, const std::vector<Label> & labels, bool optimize = false, bool dryrun = false);
@@ -128,16 +122,32 @@ public:
     *
     *  @remarks
     *    Keep in mind that optimizing the vertex array is a slow process
-    *    itself, as each character of the text has to be processed and
-    *    for each character it has to be determined, whether the glyph
-    *    is visible or not. So the entire text has to be processed at
-    *    least once. Therefore, optimization might not be advisable for
+    *    itself and also needs a lot of memory, as the vertex array has
+    *    to be sorted. Therefore, optimization might not be advisable for
     *    large texts.
     */
     static glm::vec2 typeset(GlyphVertexCloud & vertexCloud, const std::vector<const Label *> & labels, bool optimize = false, bool dryrun = false);
 
 
 private:
+    /**
+    *  @brief
+    *    Typeset label
+    *
+    *  @param[in,out] vertices
+    *    Vertex array
+    *  @param[in,out] buckets
+    *    Buckets for sorting the vertices (only used for optimize)
+    *  @param[in] label
+    *    Label to layout
+    *  @param[in] optimize
+    *    Optimize vertex cloud for rendering performance? (slow for large texts!)
+    *  @param[in] dryrun
+    *    Do not create output, just compute the extent?
+    *
+    *  @return
+    *    Extent of the label
+    */
     static glm::vec2 typeset_label(
         std::vector<GlyphVertexCloud::Vertex> & vertices
     ,   std::map<size_t, std::vector<size_t>> & buckets
@@ -145,6 +155,26 @@ private:
     ,   bool optimize = false
     ,   bool dryrun = false);
 
+    /**
+    *  @brief
+    *    Determine whether the next word needs to be wrapped
+    *
+    *  @param[in] label
+    *    Label to layout
+    *  @param[in] fontFace
+    *    The used font face
+    *  @param[in] pen
+    *    Current typesetting position
+    *  @param[in] glyph
+    *    Glyph that is rendered
+    *  @param[in] index
+    *    Current character
+    *  @param[in,out] safe_forward
+    *    The last character that was included in the forward accumulation
+    *
+    *  @return
+    *    'true' if word need to be wrapped, else 'false'
+    */
     static bool typeset_wordwrap(
         const Label & label
     ,   const FontFace & fontFace
@@ -153,21 +183,82 @@ private:
     ,   const std::u32string::const_iterator & index
     ,   std::u32string::const_iterator & safe_forward);
 
+    /**
+    *  @brief
+    *    Get width from the current location to the next delimiter or line feed
+    *
+    *    Accumulates glyph advances (including kerning) up to the next
+    *    delimiter or line feed occurrence starting at the given index
+    *    for the given label.
+    *
+    *  @param[in] label
+    *    Label to layout
+    *  @param[in] fontFace
+    *    The used font face
+    *  @param[in,out] index
+    *    Current character
+    *  @param[out] width
+    *    The accumulated width up to the next delimiter (reset to 0)
+    *
+    *  @return
+    *    The last character that was included in the forward accumulation
+    */
     static std::u32string::const_iterator typeset_forward(
         const Label & label
     ,   const FontFace & fontFace
-    ,   const std::u32string::const_iterator & begin
+    ,   const std::u32string::const_iterator & index
     ,   float & width);
 
+    /**
+    *  @brief
+    *    Configure the vertex for a given glyph to render
+    *
+    *    If no vertex is given or the glyph is not depictable,
+    *    this method immediately exits at the beginning.
+    *
+    *  @param[in,out] vertices
+    *    Vertex array
+    *  @param[in,out] buckets
+    *    Buckets for sorting the vertices (only used for optimize)
+    *  @param[in] index
+    *    Index of the current vertex
+    *  @param[in] fontFace
+    *    The used font face
+    *  @param[in] pen
+    *    Current typesetting position
+    *  @param[in] glyph
+    *    Glyph that is rendered
+    *  @param[in] optimize
+    *    Optimize vertex cloud for rendering performance? (slow for large texts!)
+    */
     static void typeset_glyph(
-        const FontFace & fontFace
-    ,   const glm::vec2 & pen
-    ,   const Glyph & glyph
-    ,   std::vector<GlyphVertexCloud::Vertex> & vertices
+        std::vector<GlyphVertexCloud::Vertex> & vertices
     ,   std::map<size_t, std::vector<size_t>> & buckets
     ,   size_t index
+    ,   const FontFace & fontFace
+    ,   const glm::vec2 & pen
+    ,   const Glyph & glyph
     ,   bool optimize);
 
+    /**
+    *  @brief
+    *    Update the extent of the label
+    *
+    *    This function goes backward from the current position until the
+    *    beginning of the word and updates the extent of the label, which
+    *    is later used for alignment.
+    *
+    *  @param[in] fontFace
+    *    The used font face
+    *  @param[in] index
+    *    Current character
+    *  @param[in] begin
+    *    The beginning of the text
+    *  @param[in] pen
+    *    Current typesetting position
+    *  @param[in] extent
+    *    Extent of the label
+    */
     static void typeset_extent(
         const FontFace & fontFace
     ,   std::u32string::const_iterator index
@@ -175,6 +266,21 @@ private:
     ,   glm::vec2 & pen
     ,   glm::vec2 & extent);
 
+    /**
+    *  @brief
+    *    Align glyphs
+    *
+    *  @param[in] pen
+    *    Current typesetting position
+    *  @param[in] alignment
+    *    Text alignment
+    *  @param[in,out] vertices
+    *    Vertex array
+    *  @param[in] begin
+    *    Index of first vertex
+    *  @param[in] end
+    *    Index of last vertex
+    */
     static void typeset_align(
         const glm::vec2 & pen
     ,   const Alignment alignment
@@ -182,6 +288,21 @@ private:
     ,   size_t begin
     ,   size_t end);
 
+    /**
+    *  @brief
+    *    Calculate anchor position for the current glyphs
+    *
+    *  @param[in] label
+    *    Label to layout
+    *  @param[in] fontFace
+    *    The used font face
+    *  @param[in,out] vertices
+    *    Vertex array
+    *  @param[in] begin
+    *    Index of first vertex
+    *  @param[in] end
+    *    Index of last vertex
+    */
     static void anchor_transform(
         const Label & label
     ,   const FontFace & fontFace
@@ -189,6 +310,23 @@ private:
     ,   size_t begin
     ,   size_t end);
 
+    /**
+    *  @brief
+    *    Calculate transformed positions for the current glyphs
+    *
+    *    This configures the final vertex information for each glyph.
+    *
+    *  @param[in] label
+    *    Label to layout
+    *  @param[in] textColor
+    *    Text color (rgba)
+    *  @param[in,out] vertices
+    *    Vertex array
+    *  @param[in] begin
+    *    Index of first vertex
+    *  @param[in] end
+    *    Index of last vertex
+    */
     static void vertex_transform(
         const glm::mat4 & label
     ,   const glm::vec4 & textColor
@@ -196,10 +334,31 @@ private:
     ,   size_t begin
     ,   size_t end);
 
+    /**
+    *  @brief
+    *    Transform extent from layouting space into output space
+    *
+    *  @param[in] label
+    *    Label to layout
+    *  @param[in] extent
+    *    Extent of the label (in layouting space)
+    *
+    *  @return
+    *    Extent of the label (in output space)
+    */
     static glm::vec2 extent_transform(
         const Label & label
     ,   const glm::vec2 & extent);
 
+    /**
+    *  @brief
+    *    Apply vertex array optimization
+    *
+    *  @param[in,out] vertices
+    *    Vertex array
+    *  @param[in] buckets
+    *    Buckets for sorting the vertices
+    */
     static void optimize_vertices(
         std::vector<GlyphVertexCloud::Vertex> & vertices
     ,   const std::map<size_t, std::vector<size_t>> & buckets);

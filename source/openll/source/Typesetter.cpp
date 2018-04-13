@@ -195,7 +195,7 @@ glm::vec2 Typesetter::typeset_label(std::vector<GlyphVertexCloud::Vertex> & vert
         // Typeset glyphs in vertex cloud (only if renderable)
         if (!dryrun && glyph.depictable()) {
             vertices.push_back(GlyphVertexCloud::Vertex());
-            typeset_glyph(fontFace, pen, glyph, vertices, buckets, vertex++, optimize && !dryrun);
+            typeset_glyph(vertices, buckets, vertex++, fontFace, pen, glyph, optimize && !dryrun);
         }
 
         pen.x += glyph.advance();
@@ -252,7 +252,7 @@ inline bool Typesetter::typeset_wordwrap(
 inline std::u32string::const_iterator Typesetter::typeset_forward(
   const Label & label
 , const FontFace & fontFace
-, const std::u32string::const_iterator & begin
+, const std::u32string::const_iterator & index
 , float & width)
 {
     // Setup common delimiters
@@ -264,9 +264,8 @@ inline std::u32string::const_iterator Typesetter::typeset_forward(
 
     width = 0.f; // reset the width
 
-    // Accumulate glyph advances (including kerning) up to the next
-    // delimiter occurence starting at begin of the string.
-    auto i = begin;
+    // Accumulate glyph advances (including kerning) up to the next delimiter occurence
+    auto i = index;
     while (i != iEnd && delimiters.find(*i) == delimiters.npos)
     {
         if (i != iBegin) {
@@ -280,12 +279,12 @@ inline std::u32string::const_iterator Typesetter::typeset_forward(
 }
 
 inline void Typesetter::typeset_glyph(
-  const FontFace & fontFace
-, const glm::vec2 & pen
-, const Glyph & glyph
-, std::vector<GlyphVertexCloud::Vertex> & vertices
+  std::vector<GlyphVertexCloud::Vertex> & vertices
 , std::map<size_t, std::vector<size_t>> & buckets
 , size_t index
+, const FontFace & fontFace
+, const glm::vec2 & pen
+, const Glyph & glyph
 , bool optimize)
 {
     auto & vertex = vertices[index];
