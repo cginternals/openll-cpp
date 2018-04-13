@@ -48,7 +48,7 @@ namespace
     std::u32string g_largeText;                         ///< Text to display (large)
     float          g_fontSize(16.0f);                   ///< Font size (in pt)
     glm::vec2      g_origin(-1.0f, 1.0f);               ///< Origin position ( (-1, -1)..(1, 1), relative to the defined viewport )
-    glm::vec4      g_margins(0.0f, 0.0f, 0.0f, 0.0f);   ///< Margins (top/right/bottom/left, in pt)
+    glm::vec4      g_margins(8.0f, 8.0f, 0.0f, 8.0f);   ///< Margins (top/right/bottom/left, in pt)
     float          g_pixelPerInch(72.0f);               ///< Number of pixels per inch
     bool           g_wordWrap(true);                    ///< Wrap words at the end of a line?
     float          g_lineWidth(0.0f);                   ///< Width of a line (in pt)
@@ -93,7 +93,7 @@ void loadFont(const std::string & filename)
 
 void createLabel()
 {
-    g_lineWidth = g_size.x / g_pixelPerInch * 72.0f;
+    g_lineWidth = g_size.x / g_pixelPerInch * 72.0f - (g_margins[0] + g_margins[1]);
 
     const auto scaledFontSize = g_fontSize; // * 16.0f;
     const auto scaledLineWidth = g_lineWidth; // * 160.0f;
@@ -106,8 +106,9 @@ void createLabel()
     g_label.setAlignment(g_alignment);
     g_label.setLineAnchor(g_lineAnchor);
     g_label.setTextColor(g_textColor);
+    g_label.setMargins(g_margins);
 
-    g_label.setTransform2D(g_origin, g_size, g_pixelPerInch, g_margins);
+    g_label.setTransform2D(g_origin, g_size, g_pixelPerInch);
 }
 
 void prepare()
@@ -179,11 +180,11 @@ void deinitialize()
 
 void resize()
 {
-    g_lineWidth = g_size.x / g_pixelPerInch * 72.0f;
+    g_lineWidth = g_size.x / g_pixelPerInch * 72.0f - (g_margins[0] + g_margins[1]);
 
     const auto scaledLineWidth = g_lineWidth;
 
-    g_label.setTransform2D(g_origin, g_size, g_pixelPerInch, g_margins);
+    g_label.setTransform2D(g_origin, g_size, g_pixelPerInch);
     g_label.setLineWidth(scaledLineWidth);
 
     // Typeset and transform all labels

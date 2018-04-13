@@ -143,6 +143,24 @@ public:
 
     /**
     *  @brief
+    *    Get margins for the label
+    *
+    *  @return
+    *    Margins (top/right/bottom/left, in pt)
+    */
+    const glm::vec4 & margins() const;
+
+    /**
+    *  @brief
+    *    Set margins for the label
+    *
+    *  @param[in] margins
+    *    Margins (top/right/bottom/left, in pt)
+    */
+    void setMargins(const glm::vec4 & margins);
+
+    /**
+    *  @brief
     *    Get horizontal text alignment
     *
     *  @return
@@ -228,13 +246,11 @@ public:
     *    Extend of the viewport (width, height) in px
     *  @param[in] pixelPerInch
     *    Number of pixels per inch
-    *  @param[in] margins
-    *    Margins (top/right/bottom/left, in pt)
     *
     *  @notes
     *    - Before calling this function, a valid font face has to be set on the label.
     */
-    void setTransform2D(const glm::vec2 & origin, const glm::uvec2 & viewportExtent, float pixelPerInch = 72.0f, const glm::vec4 & margins = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+    void setTransform2D(const glm::vec2 & origin, const glm::uvec2 & viewportExtent, float pixelPerInch = 72.0f);
 
     /**
     *  @brief
@@ -254,6 +270,7 @@ protected:
     float                 m_fontSize;  ///< Font size for rendering (in pt)
     bool                  m_wordWrap;  ///< Wrap words at the end of a line?
     float                 m_lineWidth; ///< Width of a line (in pt)
+    glm::vec4             m_margins;   ///< Margins (top/right/bottom/left, in pt)
     Alignment             m_alignment; ///< Horizontal text alignment
     LineAnchor            m_anchor;    ///< Vertical line anchor
     glm::mat4             m_transform; ///< Transformation for the label

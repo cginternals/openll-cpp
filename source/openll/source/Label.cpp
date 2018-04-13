@@ -86,6 +86,16 @@ void Label::setLineWidth(float lineWidth)
     m_lineWidth = lineWidth;
 }
 
+const glm::vec4 & Label::margins() const
+{
+    return m_margins;
+}
+
+void Label::setMargins(const glm::vec4 & margins)
+{
+    m_margins = margins;
+}
+
 Alignment Label::alignment() const
 {
     return m_alignment;
@@ -126,7 +136,7 @@ void Label::setTransform(const glm::mat4 & transform)
     m_transform = transform;
 }
 
-void Label::setTransform2D(const glm::vec2 & origin, const glm::uvec2 & viewportExtent, float pixelPerInch, const glm::vec4 & margins)
+void Label::setTransform2D(const glm::vec2 & origin, const glm::uvec2 & viewportExtent, float pixelPerInch)
 {
     assert(m_fontFace != nullptr);
 
@@ -152,9 +162,9 @@ void Label::setTransform2D(const glm::vec2 & origin, const glm::uvec2 & viewport
     // Translate to origin in point space - scale origin within
     // margined extent (i.e., viewport with margined areas removed)
     const auto marginedExtent = glm::vec2(viewportExtent.x, viewportExtent.y) / ppiScale
-        - glm::vec2(margins[3] + margins[1], margins[2] + margins[0]);
+        - glm::vec2(m_margins[3] + m_margins[1], m_margins[2] + m_margins[0]);
     m_transform = glm::translate(m_transform
-        , glm::vec3((0.5f * origin + 0.5f) * marginedExtent, 0.0f) + glm::vec3(margins[3], margins[2], 0.0f));
+        , glm::vec3((0.5f * origin + 0.5f) * marginedExtent, 0.0f) + glm::vec3(m_margins[3], m_margins[2], 0.0f));
 
     // Scale glyphs of font face to target font size
     m_transform = glm::scale(m_transform, glm::vec3(m_fontSize / m_fontFace->size()));
