@@ -120,9 +120,6 @@ void prepare()
     // Typeset and transform all labels
     auto extent = Typesetter::typeset(*g_vertexCloud, g_label, g_optimized);
     std::cout << "extent: (" << extent.x << ", " << extent.y << ")" << std::endl;
-
-    // [TODO] Problem: multiple labels, multiple font faces
-    g_vertexCloud->setTexture(g_fontFace->glyphTexture());
 }
 
 void prepareRendering()

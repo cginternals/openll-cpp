@@ -110,6 +110,10 @@ public:
     *
     *  @notes
     *    - Before calling this function, a valid font face has to be set on the label.
+    *    - Each label has to use the same font face, as the resulting vertex cloud can
+    *      only bind a single texture before rendering all glyphs. If this requirement
+    *      is not met, the vertex cloud will use the first font face found, and an
+    *      assertion will be thrown.
     */
     static glm::vec2 typeset(GlyphVertexCloud & vertexCloud, const std::vector<Label> & labels, bool optimize = false, bool dryrun = false);
 
@@ -137,6 +141,10 @@ public:
     *
     *  @notes
     *    - Before calling this function, a valid font face has to be set on the label.
+    *    - Each label has to use the same font face, as the resulting vertex cloud can
+    *      only bind a single texture before rendering all glyphs. If this requirement
+    *      is not met, the vertex cloud will use the first font face found, and an
+    *      assertion will be thrown.
     */
     static glm::vec2 typeset(GlyphVertexCloud & vertexCloud, const std::vector<const Label *> & labels, bool optimize = false, bool dryrun = false);
 

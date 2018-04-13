@@ -61,12 +61,17 @@ glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const Label & labe
     // Update vertex array
     vertexCloud.update();
 
+    // Set font texture
+    vertexCloud.setTexture(label.fontFace()->glyphTexture());
+
     // Give back extent
     return extent;
 }
 
 glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<Label> & labels, bool optimize, bool dryrun)
 {
+    const FontFace * fontFace = nullptr;
+
     // Clear vertex cloud
     vertexCloud.vertices().clear();
 
@@ -76,10 +81,18 @@ glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<
     // Typeset labels
     glm::vec2 extent(0.0f, 0.0f);
     for (const auto & label : labels) {
+        // Check that font face is valid and the same font face is used for all labels
         assert(label.fontFace() != nullptr);
+        assert(label.fontFace() == fontFace || fontFace == nullptr);
+
+        // Remember font face from first label
+        if (!fontFace) {
+            fontFace = label.fontFace();
+        }
 
         // Abort operation if no font face is set
         if (label.fontFace()) {
+            // Typeset label
             auto currenExtent = typeset_label(vertexCloud.vertices(), buckets, label, optimize, dryrun);
             extent = glm::vec2(glm::max(extent.x, currenExtent.x), glm::max(extent.y, currenExtent.y));
         }
@@ -93,12 +106,17 @@ glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<
     // Update vertex array
     vertexCloud.update();
 
+    // Set font texture
+    vertexCloud.setTexture(fontFace->glyphTexture());
+
     // Give back extent
     return extent;
 }
 
 glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<const Label *> & labels, bool optimize, bool dryrun)
 {
+    const FontFace * fontFace = nullptr;
+
     // Clear vertex cloud
     vertexCloud.vertices().clear();
 
@@ -112,9 +130,18 @@ glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<
         assert(label);
         if (!label) continue;
 
+        // Check that font face is valid and the same font face is used for all labels
+        assert(label.fontFace() != nullptr);
+        assert(label.fontFace() == fontFace || fontFace == nullptr);
+
         // Abort operation if no font face is set
-        assert(label->fontFace() != nullptr);
         if (label->fontFace()) {
+            // Remember font face from first label
+            if (!fontFace) {
+                fontFace = label->fontFace();
+            }
+
+            // Typeset label
             auto currenExtent = typeset_label(vertexCloud.vertices(), buckets, *label, optimize, dryrun);
             extent = glm::vec2(glm::max(extent.x, currenExtent.x), glm::max(extent.y, currenExtent.y));
         }
