@@ -49,7 +49,7 @@ namespace
     float          g_fontSize(16.0f);                   ///< Font size (in pt)
     glm::vec2      g_origin(-1.0f, 1.0f);               ///< Origin position ( (-1, -1)..(1, 1), relative to the defined viewport )
     glm::vec4      g_margins(0.0f, 0.0f, 0.0f, 0.0f);   ///< Margins (top/right/bottom/left, in pt)
-    float          g_pixelPerInch(96.0f);               ///< Number of pixels per inch
+    float          g_pixelPerInch(72.0f);               ///< Number of pixels per inch
     bool           g_wordWrap(true);                    ///< Wrap words at the end of a line?
     float          g_lineWidth(0.0f);                   ///< Width of a line (in pt)
     Alignment      g_alignment(Alignment::LeftAligned); ///< Horizontal text alignment

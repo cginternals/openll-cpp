@@ -126,29 +126,6 @@ void Label::setTransform(const glm::mat4 & transform)
     m_transform = transform;
 }
 
-void Label::setTransform2D(const glm::vec2 & origin, const glm::uvec2 & viewportExtent)
-{
-    assert(m_fontFace != nullptr);
-
-    // Abort operation if no font face is set
-    if (!m_fontFace) return;
-
-    // Start with identity matrix
-    m_transform = glm::mat4();
-
-    // Translate to lower left in NDC
-    m_transform = glm::translate(m_transform, glm::vec3(-1.0f, -1.0f, 0.0f));
-
-    // Translate to origin in screen space
-    m_transform = glm::translate(m_transform, glm::vec3(origin, 0.0f));
-
-    // Scale glyphs of font face to target normalized size
-    m_transform = glm::scale(m_transform, glm::vec3(viewportExtent.y * m_fontSize / m_fontFace->size()));
-
-    // Scale glyphs to NDC size
-    m_transform = glm::scale(m_transform, 2.0f / glm::vec3(viewportExtent.x, viewportExtent.y, 1.0f));
-}
-
 void Label::setTransform2D(const glm::vec2 & origin, const glm::uvec2 & viewportExtent, float pixelPerInch, const glm::vec4 & margins)
 {
     assert(m_fontFace != nullptr);

@@ -220,22 +220,7 @@ public:
 
     /**
     *  @brief
-    *    Set transformation matrix for rendering text in a 2D space
-    *
-    *  @param[in] origin
-    *    Point of origin (normalized device coordinates)
-    *  @param[in] viewportExtent
-    *    Extend of the viewport (width, height) in px
-    *
-    *  @remarks
-    *    [TODO] Uses default values: 72ppi, and no margins (results in a point == pixel mapping)
-    */
-    // [TODO] remove ?
-    void setTransform2D(const glm::vec2 & origin, const glm::uvec2 & viewportExtent);
-
-    /**
-    *  @brief
-    *    Set transformation matrix for rendering text in 2D space (???) [TODO]
+    *    Set transformation matrix for rendering text in 2D space
     *
     *  @param[in] origin
     *    Point of origin (normalized device coordinates)
@@ -246,7 +231,7 @@ public:
     *  @param[in] margins
     *    Margins (top/right/bottom/left, in pt)
     */
-    void setTransform2D(const glm::vec2 & origin, const glm::uvec2 & viewportExtent, float pixelPerInch, const glm::vec4 & margins = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+    void setTransform2D(const glm::vec2 & origin, const glm::uvec2 & viewportExtent, float pixelPerInch = 72.0f, const glm::vec4 & margins = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
 
     /**
     *  @brief
