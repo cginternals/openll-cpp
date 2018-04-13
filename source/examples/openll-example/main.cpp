@@ -103,7 +103,9 @@ void prepare()
 
     // Typeset and transform all labels
     auto extent = Typesetter::typeset(*g_vertexCloud, g_label, g_optimized);
-    std::cout << "extent: (" << extent.x << ", " << extent.y << ")" << std::endl;
+
+    // [DEBUG]
+//  std::cout << "extent: (" << extent.x << ", " << extent.y << ")" << std::endl;
 }
 
 void prepareRendering()
@@ -125,6 +127,8 @@ void initialize()
     auto end = std::chrono::high_resolution_clock::now();
     auto diff = end - start;
     auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count();
+
+    // [DEBUG]
     std::cout << "Preparation: " << ns << " ns." << std::endl;
 
     prepareRendering();
@@ -149,7 +153,9 @@ void resize()
 
     // Typeset and transform all labels
     auto extent = Typesetter::typeset(*g_vertexCloud, g_label, g_optimized);
-    std::cout << "extent: (" << extent.x << ", " << extent.y << ")" << std::endl;
+
+    // [DEBUG]
+//  std::cout << "extent: (" << extent.x << ", " << extent.y << ")" << std::endl;
 }
 
 void draw()
@@ -243,8 +249,8 @@ int main(int, char *[])
     g_size = glm::uvec2(width, height);
 
     // Prepare text
-    prepareText(1);    // 1 kB
-//  prepareText(1024); // 1 MB
+//  prepareText(1);    // 1 kB
+    prepareText(1024); // 1 MB
     std::cout << "Text size: " << g_text.size() << std::endl;
 
     // Initialize OpenGL objects in context
