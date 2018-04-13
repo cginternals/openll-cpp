@@ -230,6 +230,9 @@ public:
     *    Number of pixels per inch
     *  @param[in] margins
     *    Margins (top/right/bottom/left, in pt)
+    *
+    *  @notes
+    *    - Before calling this function, a valid font face has to be set on the label.
     */
     void setTransform2D(const glm::vec2 & origin, const glm::uvec2 & viewportExtent, float pixelPerInch = 72.0f, const glm::vec4 & margins = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
 

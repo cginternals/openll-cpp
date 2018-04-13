@@ -53,6 +53,9 @@ public:
     *    This function internally performs the typesetting of the
     *    text, but only returns its extent, disregarding the resulting
     *    vertex array.
+    *
+    *  @notes
+    *    - Before calling this function, a valid font face has to be set on the label.
     */
     static glm::vec2 extent(const Label & label);
 
@@ -77,6 +80,9 @@ public:
     *    itself and also needs a lot of memory, as the vertex array has
     *    to be sorted. Therefore, optimization might not be advisable for
     *    large texts.
+    *
+    *  @notes
+    *    - Before calling this function, a valid font face has to be set on the label.
     */
     static glm::vec2 typeset(GlyphVertexCloud & vertexCloud, const Label & label, bool optimize = false, bool dryrun = false);
 
@@ -101,6 +107,9 @@ public:
     *    itself and also needs a lot of memory, as the vertex array has
     *    to be sorted. Therefore, optimization might not be advisable for
     *    large texts.
+    *
+    *  @notes
+    *    - Before calling this function, a valid font face has to be set on the label.
     */
     static glm::vec2 typeset(GlyphVertexCloud & vertexCloud, const std::vector<Label> & labels, bool optimize = false, bool dryrun = false);
 
@@ -125,6 +134,9 @@ public:
     *    itself and also needs a lot of memory, as the vertex array has
     *    to be sorted. Therefore, optimization might not be advisable for
     *    large texts.
+    *
+    *  @notes
+    *    - Before calling this function, a valid font face has to be set on the label.
     */
     static glm::vec2 typeset(GlyphVertexCloud & vertexCloud, const std::vector<const Label *> & labels, bool optimize = false, bool dryrun = false);
 
