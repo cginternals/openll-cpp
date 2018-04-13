@@ -32,10 +32,7 @@ glm::vec2 Typesetter::extent(const Label & label)
     std::map<size_t, std::vector<size_t>> buckets;
 
     // Typeset text with default font size
-    auto extent = typeset_label(vertices, buckets, label, false, true);
-
-    // Scale result with the given font size
-    return extent * label.fontSize() / label.fontFace()->size();
+    return typeset_label(vertices, buckets, label, false, true);
 }
 
 glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const Label & label, bool optimize, bool dryrun)
@@ -216,7 +213,8 @@ glm::vec2 Typesetter::typeset_label(std::vector<GlyphVertexCloud::Vertex> & vert
         vertex_transform(label.transform(), label.textColor(), vertices, begin, vertex);
     }
 
-    return extent_transform(label, extent);
+    // Scale extent back to the label's font size (it has been computed with the font face's font size)
+    return extent_transform(label, extent) * label.fontSize() / label.fontFace()->size();
 }
 
 inline bool Typesetter::typeset_wordwrap(

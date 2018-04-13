@@ -47,7 +47,7 @@ public:
     *    Label to display
     *
     *  @return
-    *    Extent (width, height) of the text
+    *    Extent of the label (in output space)
     *
     *  @remarks
     *    This function internally performs the typesetting of the
@@ -73,7 +73,7 @@ public:
     *    Do not create output, just compute the extent?
     *
     *  @return
-    *    Extent (width, height) of the text ... in scaled space [TODO]
+    *    Extent of the label (in output space)
     *
     *  @remarks
     *    Keep in mind that optimizing the vertex array is a slow process
@@ -100,7 +100,7 @@ public:
     *    Do not create output, just compute the extent?
     *
     *  @return
-    *    Extent (width, height) of the text ... in scaled space [TODO]
+    *    Extent of the label (in output space)
     *
     *  @remarks
     *    Keep in mind that optimizing the vertex array is a slow process
@@ -127,7 +127,7 @@ public:
     *    Do not create output, just compute the extent?
     *
     *  @return
-    *    Extent (width, height) of the text ... in scaled space [TODO]
+    *    Extent of the label (in output space)
     *
     *  @remarks
     *    Keep in mind that optimizing the vertex array is a slow process
@@ -158,7 +158,7 @@ private:
     *    Do not create output, just compute the extent?
     *
     *  @return
-    *    Extent of the label
+    *    Extent of the label (in output space)
     */
     static glm::vec2 typeset_label(
         std::vector<GlyphVertexCloud::Vertex> & vertices
@@ -269,7 +269,7 @@ private:
     *  @param[in] pen
     *    Current typesetting position
     *  @param[in] extent
-    *    Extent of the label
+    *    Extent of the label (in layouting space)
     */
     static void typeset_extent(
         const FontFace & fontFace
@@ -356,7 +356,7 @@ private:
     *    Extent of the label (in layouting space)
     *
     *  @return
-    *    Extent of the label (in output space)
+    *    Extent of the label (in scaled output space)
     */
     static glm::vec2 extent_transform(
         const Label & label
