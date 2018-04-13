@@ -32,23 +32,22 @@ using namespace openll;
 namespace
 {
     // Text that is displayed
-    const auto s_text =
-    R"(Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Ste)";
+    const auto s_text = R"(Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.)";
 
     // Configuration of text rendering
-    std::string    g_fontFilename("opensansr36.fnt");   ///< Font file
-    std::u32string g_text;                              ///< Text to display
-    float          g_fontSize(16.0f);                   ///< Font size (in pt)
-    glm::vec2      g_origin(-1.0f, 1.0f);               ///< Origin position ( (-1, -1)..(1, 1), relative to the defined viewport )
-    glm::vec4      g_margins(8.0f, 8.0f, 0.0f, 8.0f);   ///< Margins (top/right/bottom/left, in pt)
-    float          g_pixelPerInch(72.0f);               ///< Number of pixels per inch
-    bool           g_wordWrap(true);                    ///< Wrap words at the end of a line?
-    float          g_lineWidth(0.0f);                   ///< Width of a line (in pt)
-    Alignment      g_alignment(Alignment::LeftAligned); ///< Horizontal text alignment
-    LineAnchor     g_lineAnchor(LineAnchor::Ascent);    ///< Vertical line anchor
-    bool           g_optimized(true);                   ///< Optimize rendering performance?
-    glm::uvec2     g_size;                              ///< Viewport size (in pixels)
-    glm::vec4      g_textColor(0.0f, 0.0f, 0.0f, 1.0f); ///< Text color
+    std::string    g_fontFilename("opensansr36.fnt");    ///< Font file
+    std::u32string g_text;                               ///< Text to display
+    float          g_fontSize(16.0f);                    ///< Font size (in pt)
+    glm::ivec2     g_pos(0, 0);                          ///< Text position (in px)
+    glm::ivec2     g_size(250, 50);                      ///< Text size (in px)
+    glm::ivec4     g_margins(10, 40, 0, 40);             ///< Margins (top/right/bottom/left, in px)
+    float          g_pixelPerInch(72.0f);                ///< Number of pixels per inch
+    bool           g_wordWrap(true);                     ///< Wrap words at the end of a line?
+    Alignment      g_alignment(Alignment::Centered);     ///< Horizontal text alignment
+    LineAnchor     g_lineAnchor(LineAnchor::Ascent);     ///< Vertical line anchor
+    bool           g_optimized(true);                    ///< Optimize rendering performance?
+    glm::uvec2     g_screenSize;                         ///< Screen size (in pixels)
+    glm::vec4      g_textColor(0.0f, 0.0f, 0.0f, 1.0f);  ///< Text color
 
     // Text rendering objects
     Label                             g_label;       ///< Label that is displayed
@@ -57,81 +56,28 @@ namespace
     std::unique_ptr<GlyphRenderer>    g_renderer;    ///< Label renderer
 }
 
-void prepareText(size_t size)
+void initialize()
 {
-    // Prepare text snippet
-    auto snippet = cppassist::string::encode(std::string(s_text), cppassist::Encoding::UTF8);
+    // Set text
+    g_text = cppassist::string::encode(std::string(s_text), cppassist::Encoding::UTF8);
 
-    // Prepare large text
-    for (unsigned int i=0; i<size; i++) {
-        g_text += snippet;
-        g_text += snippet;
-    }
-}
+    // Load font
+    g_fontFace = FontLoader::load(openll::dataPath() + "/openll/fonts/" + g_fontFilename);
 
-void loadFont(const std::string & filename)
-{
-    g_fontFace = FontLoader::load(filename);
-}
-
-void createLabel()
-{
-    g_lineWidth = g_size.x / g_pixelPerInch * 72.0f - (g_margins[0] + g_margins[1]);
-
-    const auto scaledFontSize = g_fontSize; // * 16.0f;
-    const auto scaledLineWidth = g_lineWidth; // * 160.0f;
-
+    // Create label
     g_label.setText(g_text);
     g_label.setFontFace(*g_fontFace);
-    g_label.setFontSize(scaledFontSize);
+    g_label.setFontSize(g_fontSize);
     g_label.setWordWrap(g_wordWrap);
-    g_label.setLineWidth(scaledLineWidth);
     g_label.setAlignment(g_alignment);
     g_label.setLineAnchor(g_lineAnchor);
     g_label.setTextColor(g_textColor);
-    g_label.setMargins(g_margins);
 
-    g_label.setTransform2D(g_origin, g_size, g_pixelPerInch);
-}
-
-void prepare()
-{
-    assert(g_fontFace.get() != nullptr);
-
-    // Prepare vertex cloud
+    // Create vertex cloud
     g_vertexCloud = std::unique_ptr<GlyphVertexCloud>(new GlyphVertexCloud);
 
-    // Typeset and transform all labels
-    auto extent = Typesetter::typeset(*g_vertexCloud, g_label, g_optimized);
-
-    // [DEBUG]
-//  std::cout << "extent: (" << extent.x << ", " << extent.y << ")" << std::endl;
-}
-
-void prepareRendering()
-{
+    // Create glyph renderer
     g_renderer = std::unique_ptr<GlyphRenderer>(new GlyphRenderer);
-}
-
-void initialize()
-{
-    // Load font
-    loadFont(openll::dataPath() + "/openll/fonts/" + g_fontFilename);
-
-    createLabel();
-
-    auto start = std::chrono::high_resolution_clock::now();
-
-    prepare();
-
-    auto end = std::chrono::high_resolution_clock::now();
-    auto diff = end - start;
-    auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count();
-
-    // [DEBUG]
-    std::cout << "Preparation: " << ns << " ns." << std::endl;
-
-    prepareRendering();
 }
 
 void deinitialize()
@@ -142,20 +88,37 @@ void deinitialize()
     g_fontFace.reset(nullptr);
 }
 
-void resize()
+void update()
 {
-    g_lineWidth = g_size.x / g_pixelPerInch * 72.0f - (g_margins[0] + g_margins[1]);
+    // Update label size to match the screen size
+    g_size = g_screenSize;
 
-    const auto scaledLineWidth = g_lineWidth;
+    // Calculate reference position according to alignment
+    int x = 0;
+         if (g_alignment == Alignment::LeftAligned)  x = g_pos.x;
+    else if (g_alignment == Alignment::RightAligned) x = g_pos.x + g_size.x - 1;
+    else if (g_alignment == Alignment::Centered)     x = g_pos.x + g_size.x / 2;
 
-    g_label.setTransform2D(g_origin, g_size, g_pixelPerInch);
-    g_label.setLineWidth(scaledLineWidth);
+    // Calculate label position in NDC
+    glm::vec2 origin(
+        2.0f * (float)x / (g_screenSize.x - 1) - 1.0f,
+        2.0f * (float)(g_screenSize.y - g_pos.y) / (g_screenSize.y - 1) - 1.0f
+    );
 
-    // Typeset and transform all labels
+    // Calculate margins in pt
+    glm::vec4 margins = g_margins;
+    margins *= 72.0f / (float)g_pixelPerInch;
+
+    // Calculate line width in pt
+    float lineWidth = g_size.x / g_pixelPerInch * 72.0f - (margins[1] + margins[3]);
+
+    // Update label
+    g_label.setLineWidth(lineWidth);
+    g_label.setMargins(margins);
+    g_label.setTransform2D(origin, g_screenSize, g_pixelPerInch);
+
+    // Execute typesetter
     auto extent = Typesetter::typeset(*g_vertexCloud, g_label, g_optimized);
-
-    // [DEBUG]
-//  std::cout << "extent: (" << extent.x << ", " << extent.y << ")" << std::endl;
 }
 
 void draw()
@@ -165,7 +128,7 @@ void draw()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Set viewport
-    gl::glViewport(0, 0, g_size.x, g_size.y);
+    gl::glViewport(0, 0, g_screenSize.x, g_screenSize.y);
 
     // Set rendering states
     gl::glDepthMask(gl::GL_FALSE);
@@ -190,8 +153,11 @@ void onError(int errnum, const char * errmsg)
 
 void onResize(GLFWwindow *, int width, int height)
 {
-    g_size = glm::uvec2(width, height);
-    resize();
+    // Set new screen size
+    g_screenSize = glm::uvec2(width, height);
+
+    // Update label
+    update();
 }
 
 void onKeyEvent(GLFWwindow * window, int key, int, int action, int)
@@ -246,15 +212,13 @@ int main(int, char *[])
     // Get framebuffer size
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
-    g_size = glm::uvec2(width, height);
-
-    // Prepare text
-//  prepareText(1);    // 1 kB
-    prepareText(1024); // 1 MB
-    std::cout << "Text size: " << g_text.size() << std::endl;
+    g_screenSize = glm::uvec2(width, height);
 
     // Initialize OpenGL objects in context
     initialize();
+
+    // Update label
+    update();
 
     // Main loop
     while (!glfwWindowShouldClose(window))
