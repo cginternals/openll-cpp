@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <map>
+#include <unordered_map>
 
 #include <glm/vec2.hpp>
 #include <glm/vec4.hpp>
@@ -232,6 +233,15 @@ public:
 
     /**
     *  @brief
+    *    Get the inverted size/extent of the glyph texture (in px)
+    *
+    *  @return
+    *    Inverse extent of the glyph texture (in px)
+    */
+    const glm::vec2 & inverseGlyphTextureExtent() const;
+
+    /**
+    *  @brief
     *    Get the padding applied to every glyph (in px)
     *
     *  @return
@@ -327,6 +337,7 @@ public:
     *    Glyph to add
     */
     void addGlyph(const Glyph & glyph);
+    void addGlyph(Glyph && glyph);
 
     /**
     *  @brief
@@ -395,14 +406,19 @@ public:
 
 
 protected:
-    float      m_ascent;              ///< Distance from the baseline to the tops of the tallest glyphs (ascenders) in pt
-    float      m_descent;             ///< Distance from the baseline to the lowest descenders in pt
-    float      m_linegap;             ///< Distance from the lowest descenders to the topmost ascenders of a subsequent text line in pt
-    glm::uvec2 m_glyphTextureExtent;  ///< The size of the glyph texture in px
-    glm::vec4  m_glyphTexturePadding; ///< The padding applied to every glyph in px
+    float      m_ascent;                    ///< Distance from the baseline to the tops of the tallest glyphs (ascenders) in pt
+    float      m_descent;                   ///< Distance from the baseline to the lowest descenders in pt
+    float      m_linegap;                   ///< Distance from the lowest descenders to the topmost ascenders of a subsequent text line in pt
+    glm::uvec2 m_glyphTextureExtent;        ///< The size of the glyph texture in px
+    glm::vec2  m_inverseGlyphTextureExtent; ///< The size of the glyph texture in px
+    glm::vec4  m_glyphTexturePadding;       ///< The padding applied to every glyph in px
 
     std::unique_ptr<globjects::Texture> m_glyphTexture; ///< The font face's associated glyph texture
-    std::map<size_t, Glyph>             m_glyphs;       ///< Quick-access container for all added glyphs
+    std::unordered_map<size_t, Glyph>             m_glyphs;       ///< Quick-access container for all added glyphs
+
+
+private:
+    mutable std::tuple<size_t, size_t, float> m_kerningRequestCache;
 };
 
 

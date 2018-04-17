@@ -1,6 +1,8 @@
 
 #include <openll/Typesetter.h>
 
+#include <set>
+
 #include <glm/common.hpp>
 #include <glm/geometric.hpp>
 #include <glm/vec2.hpp>
@@ -14,6 +16,19 @@
 #include <openll/Label.h>
 
 
+namespace
+{
+
+
+// Setup common delimiters for wordwrapping
+// Note: u32string::find outperforms set::count here (tested)
+static const auto delimiters = std::u32string({ '\x0A', ' ', ',', '.', '-', '/', '(', ')', '[', ']', '<', '>' });
+static const auto delimiterSet = std::set<char32_t>(delimiters.begin(), delimiters.end());
+
+
+} // namespace
+
+
 namespace openll
 {
 
@@ -23,7 +38,8 @@ glm::vec2 Typesetter::extent(const Label & label)
     assert(label.fontFace() != nullptr);
 
     // Abort operation if no font face is set
-    if (!label.fontFace()) {
+    if (!label.fontFace())
+    {
         return glm::vec2();
     }
 
@@ -40,7 +56,8 @@ glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const Label & labe
     assert(label.fontFace() != nullptr);
 
     // Abort operation if no font face is set
-    if (!label.fontFace()) {
+    if (!label.fontFace())
+    {
         return glm::vec2();
     }
 
@@ -54,7 +71,8 @@ glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const Label & labe
     auto extent = typeset_label(vertexCloud.vertices(), buckets, label, optimize, dryrun);
 
     // Optimize vertex cloud
-    if (optimize) {
+    if (optimize)
+    {
         optimize_vertices(vertexCloud.vertices(), buckets);
     }
 
@@ -80,18 +98,21 @@ glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<
 
     // Typeset labels
     glm::vec2 extent(0.0f, 0.0f);
-    for (const auto & label : labels) {
+    for (const auto & label : labels)
+    {
         // Check that font face is valid and the same font face is used for all labels
         assert(label.fontFace() != nullptr);
         assert(label.fontFace() == fontFace || fontFace == nullptr);
 
         // Remember font face from first label
-        if (!fontFace) {
+        if (!fontFace)
+        {
             fontFace = label.fontFace();
         }
 
         // Abort operation if no font face is set
-        if (label.fontFace()) {
+        if (label.fontFace())
+        {
             // Typeset label
             auto currenExtent = typeset_label(vertexCloud.vertices(), buckets, label, optimize, dryrun);
             extent = glm::vec2(glm::max(extent.x, currenExtent.x), glm::max(extent.y, currenExtent.y));
@@ -99,7 +120,8 @@ glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<
     }
 
     // Optimize vertex cloud
-    if (optimize) {
+    if (optimize)
+    {
         optimize_vertices(vertexCloud.vertices(), buckets);
     }
 
@@ -125,19 +147,25 @@ glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<
 
     // Typeset labels
     glm::vec2 extent(0.0f, 0.0f);
-    for (const auto * label : labels) {
+    for (const auto * label : labels)
+    {
         // Abort if label is not valid
         assert(label);
-        if (!label) continue;
+        if (!label)
+        {
+            continue;
+        }
 
         // Check that font face is valid and the same font face is used for all labels
-        assert(label.fontFace() != nullptr);
-        assert(label.fontFace() == fontFace || fontFace == nullptr);
+        assert(label->fontFace() != nullptr);
+        assert(fontFace == nullptr || label->fontFace() == fontFace);
 
         // Abort operation if no font face is set
-        if (label->fontFace()) {
+        if (label->fontFace())
+        {
             // Remember font face from first label
-            if (!fontFace) {
+            if (!fontFace)
+            {
                 fontFace = label->fontFace();
             }
 
@@ -148,7 +176,8 @@ glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<
     }
 
     // Optimize vertex cloud
-    if (optimize) {
+    if (optimize)
+    {
         optimize_vertices(vertexCloud.vertices(), buckets);
     }
 
@@ -162,13 +191,14 @@ glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<
 glm::vec2 Typesetter::typeset_label(std::vector<GlyphVertexCloud::Vertex> & vertices, std::map<size_t, std::vector<size_t>> & buckets, const Label & label, bool optimize, bool dryrun)
 {
     // Get font face
-    auto & fontFace = *label.fontFace();
+    const auto & fontFace = *label.fontFace();
 
     // Append vertex cloud: the maximum number of visible glyphs is the size of the string
     vertices.reserve(vertices.size() + label.text()->text().size());
 
     // Create first vertex
-    if (!dryrun) {
+    if (!dryrun)
+    {
         vertices.push_back(GlyphVertexCloud::Vertex());
     }
     size_t begin = vertices.size() - 1;
@@ -201,7 +231,8 @@ glm::vec2 Typesetter::typeset_label(std::vector<GlyphVertexCloud::Vertex> & vert
             typeset_extent(fontFace, i - 1, iBegin, pen, extent);
 
             // Handle alignment (when line feed occurs)
-            if (!dryrun) {
+            if (!dryrun)
+            {
                 typeset_align(pen, label.alignment(), vertices, feedVertex, vertex);
             }
 
@@ -217,7 +248,8 @@ glm::vec2 Typesetter::typeset_label(std::vector<GlyphVertexCloud::Vertex> & vert
         }
 
         // Typeset glyphs in vertex cloud (only if renderable)
-        if (!dryrun && glyph.depictable()) {
+        if (!dryrun && glyph.depictable())
+        {
             vertices.push_back(GlyphVertexCloud::Vertex());
             typeset_glyph(vertices, buckets, vertex++, fontFace, pen, glyph, optimize && !dryrun);
         }
@@ -229,13 +261,15 @@ glm::vec2 Typesetter::typeset_label(std::vector<GlyphVertexCloud::Vertex> & vert
             // Handle alignment (when last line of the label is processed)
             typeset_extent(fontFace, i, iBegin, pen, extent);
 
-            if (!dryrun) {
+            if (!dryrun)
+            {
                 typeset_align(pen, label.alignment(), vertices, feedVertex, vertex);
             }
         }
     }
 
-    if (!dryrun) {
+    if (!dryrun)
+    {
         anchor_transform(label, fontFace, vertices, begin, vertex);
         vertex_transform(label.transform(), label.textColor(), vertices, begin, vertex);
     }
@@ -264,6 +298,7 @@ inline bool Typesetter::typeset_wordwrap(
         && (glyph.advance() <= lineWidth || pen.x > 0.f);
 
     auto wrap_forward = false;
+
     if (!wrap_glyph && index >= safe_forward)
     {
         safe_forward = typeset_forward(label, fontFace, index, width_forward);
@@ -279,27 +314,28 @@ inline std::u32string::const_iterator Typesetter::typeset_forward(
 , const std::u32string::const_iterator & index
 , float & width)
 {
-    // Setup common delimiters
-    // Note: u32string::find outperforms set::count here (tested)
-    static const auto delimiters = std::u32string({ '\x0A', ' ', ',', '.', '-', '/', '(', ')', '[', ']', '<', '>' });
-
     const auto iBegin = label.text()->text().cbegin();
     const auto iEnd = label.text()->text().cend();
 
     width = 0.f; // reset the width
 
     // Accumulate glyph advances (including kerning) up to the next delimiter occurence
-    auto i = index;
-    while (i != iEnd && delimiters.find(*i) == delimiters.npos)
+    auto current = index;
+    auto prev = current-1;
+    while (current != iEnd && delimiterSet.find(*current) == delimiterSet.end())
     {
-        if (i != iBegin) {
-            width += fontFace.kerning(*(i - 1), *i);
+        if (current != iBegin)
+        {
+            width += fontFace.kerning(*prev, *current);
         }
 
-        width += fontFace.glyph(*i++).advance();
+        width += fontFace.glyph(*current).advance();
+
+        prev = current;
+        ++current;
     }
 
-    return i;
+    return current;
 }
 
 inline void Typesetter::typeset_glyph(
@@ -321,14 +357,15 @@ inline void Typesetter::typeset_glyph(
     vertex.vtan   = glm::vec3(glyph.extent().x + padding[1] + padding[3], 0.f, 0.f);
     vertex.vbitan = glm::vec3(0.f, glyph.extent().y + padding[0] + padding[2], 0.f);
 
-    const auto extentScale = 1.f / glm::vec2(fontFace.glyphTextureExtent());
+    const auto & extentScale = fontFace.inverseGlyphTextureExtent();
     const auto ll = glyph.subTextureOrigin()
         - glm::vec2(padding[3], padding[2]) * extentScale;
     const auto ur = glyph.subTextureOrigin() + glyph.subTextureExtent()
         + glm::vec2(padding[1], padding[0]) * extentScale;
     vertex.uvRect = glm::vec4(ll, ur);
 
-    if (optimize) {
+    if (optimize)
+    {
         auto glyphIndex = glyph.index();
         buckets[glyphIndex].push_back(index);
     }
@@ -344,8 +381,10 @@ inline void Typesetter::typeset_extent(
     // On line feed, revert advance of preceding, not depictable glyphs
     while (index > begin)
     {
-        auto precedingGlyph = fontFace.glyph(*index);
-        if (precedingGlyph.depictable()) {
+        const auto & precedingGlyph = fontFace.glyph(*index);
+
+        if (precedingGlyph.depictable())
+        {
             break;
         }
 
@@ -364,18 +403,21 @@ inline void Typesetter::typeset_align(
 , size_t begin
 , size_t end)
 {
-    if (alignment == Alignment::LeftAligned) {
+    if (alignment == Alignment::LeftAligned)
+    {
         return;
     }
 
     auto penOffset = -pen.x;
 
-    if (alignment == Alignment::Centered) {
+    if (alignment == Alignment::Centered)
+    {
         penOffset *= 0.5f;
     }
 
     // Origin is expected to be in 'font face space' (not transformed)
-    for (auto i = begin; i != end; ++i) {
+    for (auto i = begin; i != end; ++i)
+    {
         auto & v = vertices[i];
         v.origin.x += penOffset;
     }
@@ -409,7 +451,8 @@ inline void Typesetter::anchor_transform(
         return;
     }
 
-    for (auto i = begin; i != end; ++i) {
+    for (auto i = begin; i != end; ++i)
+    {
         auto & v = vertices[i];
         v.origin.y -= offset;
     }
@@ -426,9 +469,9 @@ inline void Typesetter::vertex_transform(
     {
         auto & v = vertices[i];
 
-        auto ll = transform * glm::vec4(v.origin, 1.f);
-        auto lr = transform * glm::vec4(v.origin + v.vtan, 1.f);
-        auto ul = transform * glm::vec4(v.origin + v.vbitan, 1.f);
+        const auto ll = transform * glm::vec4(v.origin, 1.f);
+        const auto lr = transform * glm::vec4(v.origin + v.vtan, 1.f);
+        const auto ul = transform * glm::vec4(v.origin + v.vbitan, 1.f);
 
         v.origin = glm::vec3(ll);
         v.vtan   = glm::vec3(lr - ll);
@@ -441,9 +484,9 @@ inline glm::vec2 Typesetter::extent_transform(
   const Label & label
 , const glm::vec2 & extent)
 {
-    auto ll = label.transform() * glm::vec4(     0.f,      0.f, 0.f, 1.f);
-    auto lr = label.transform() * glm::vec4(extent.x,      0.f, 0.f, 1.f);
-    auto ul = label.transform() * glm::vec4(     0.f, extent.y, 0.f, 1.f);
+    const auto ll = label.transform() * glm::vec4(     0.f,      0.f, 0.f, 1.f);
+    const auto lr = label.transform() * glm::vec4(extent.x,      0.f, 0.f, 1.f);
+    const auto ul = label.transform() * glm::vec4(     0.f, extent.y, 0.f, 1.f);
 
     return glm::vec2(glm::distance(lr, ll), glm::distance(ul, ll));
 }
@@ -454,11 +497,11 @@ inline void Typesetter::optimize_vertices(std::vector<GlyphVertexCloud::Vertex> 
 
     sorted.reserve(vertices.size());
 
-    for (auto & it : buckets)
+    for (const auto & it : buckets)
     {
-        auto & bucket = it.second;
+        const auto & bucket = it.second;
 
-        for (size_t i=0; i<bucket.size(); i++)
+        for (size_t i=0; i<bucket.size(); ++i)
         {
             sorted.emplace_back(vertices[bucket[i]]);
         }

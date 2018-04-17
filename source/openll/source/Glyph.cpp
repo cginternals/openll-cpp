@@ -98,10 +98,13 @@ void Glyph::setAdvance(const float advance)
 float Glyph::kerning(size_t subsequentIndex) const
 {
     // Get kerning between this glyph and the subsequent glyph
-    auto it = m_kernings.find(subsequentIndex);
-    if (it != m_kernings.cend()) {
+    const auto it = m_kernings.find(subsequentIndex);
+    if (it != m_kernings.cend())
+    {
         return it->second;
-    } else {
+    }
+    else
+    {
         return 0.0f;
     }
 }

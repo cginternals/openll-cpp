@@ -9,8 +9,9 @@
 #include <cppassist/string/conversion.h>
 
 #include <glbinding/gl/gl.h>
-#include <glbinding/ContextInfo.h>
+#include <glbinding-aux/ContextInfo.h>
 #include <glbinding/Version.h>
+#include <glbinding-aux/types_to_string.h>
 
 #include <globjects/globjects.h>
 
@@ -58,8 +59,15 @@ namespace
 
 void initialize()
 {
+    auto text = std::string(s_text);
+
+    for (auto i = 0; i < 11; ++i)
+    {
+         text += text;
+    }
+
     // Set text
-    g_text = cppassist::string::encode(std::string(s_text), cppassist::Encoding::UTF8);
+    g_text = cppassist::string::encode(std::string(text), cppassist::Encoding::UTF8);
 
     // Load font
     g_fontFace = FontLoader::load(openll::dataPath() + "/openll/fonts/" + g_fontFilename);
@@ -117,8 +125,16 @@ void update()
     g_label.setMargins(margins);
     g_label.setTransform2D(origin, g_screenSize, g_pixelPerInch);
 
+    const auto start = std::chrono::high_resolution_clock::now();
+
     // Execute typesetter
     auto extent = Typesetter::typeset(*g_vertexCloud, g_label, g_optimized);
+
+    const auto end = std::chrono::high_resolution_clock::now();
+
+    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
+
+    (void)extent;
 }
 
 void draw()
@@ -163,7 +179,8 @@ void onResize(GLFWwindow *, int width, int height)
 void onKeyEvent(GLFWwindow * window, int key, int, int action, int)
 {
     // Escape: Close window
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE)
+    {
         glfwSetWindowShouldClose(window, true);
     }
 }
@@ -171,7 +188,8 @@ void onKeyEvent(GLFWwindow * window, int key, int, int action, int)
 int main(int, char *[])
 {
     // Initialize GLFW
-    if (!glfwInit()) {
+    if (!glfwInit())
+    {
         // Abort on error
         return 1;
     }
@@ -201,13 +219,13 @@ int main(int, char *[])
     glfwMakeContextCurrent(window);
 
     // Initialize globjects (internally initializes glbinding and registers the current context)
-    globjects::init();
+    globjects::init(glfwGetProcAddress);
 
     // Output OpenGL version information
     std::cout << std::endl
-        << "OpenGL Version:  " << glbinding::ContextInfo::version() << std::endl
-        << "OpenGL Vendor:   " << glbinding::ContextInfo::vendor() << std::endl
-        << "OpenGL Renderer: " << glbinding::ContextInfo::renderer() << std::endl << std::endl;
+        << "OpenGL Version:  " << glbinding::aux::ContextInfo::version() << std::endl
+        << "OpenGL Vendor:   " << glbinding::aux::ContextInfo::vendor() << std::endl
+        << "OpenGL Renderer: " << glbinding::aux::ContextInfo::renderer() << std::endl << std::endl;
 
     // Get framebuffer size
     int width, height;

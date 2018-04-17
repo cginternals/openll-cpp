@@ -28,7 +28,8 @@ std::unique_ptr<FontFace> FontLoader::load(const std::string & filename)
 {
     // Open file
     std::ifstream in(filename, std::ios::in | std::ios::binary);
-    if (!in) {
+    if (!in)
+    {
         return nullptr;
     }
 
@@ -55,22 +56,32 @@ std::unique_ptr<FontFace> FontLoader::load(const std::string & filename)
         }
 
         // Parse line
-        if (identifier == "info") {
+        if (identifier == "info")
+        {
             parseInfo(ss, *fontFace, fontSize);
-        } else if (identifier == "common") {
+        }
+        else if (identifier == "common")
+        {
             parseCommon(ss, *fontFace, fontSize);
-        } else if (identifier == "page") {
+        }
+        else if (identifier == "page")
+        {
             parsePage(ss, *fontFace, filename);
-        } else if (identifier == "char") {
+        }
+        else if (identifier == "char")
+        {
             parseChar(ss, *fontFace);
-        } else if (identifier == "kerning") {
+        }
+        else if (identifier == "kerning")
+        {
             parseKerning(ss, *fontFace);
         }
     }
 
     // Check if font has been loaded successfully
-    if (fontFace->glyphTexture()) {
-        return std::move(fontFace);
+    if (fontFace->glyphTexture())
+    {
+        return fontFace;
     }
 
     // Otherwise delete font face and return error
@@ -201,11 +212,13 @@ std::map<std::string, std::string> FontLoader::readKeyValuePairs(std::stringstre
 
     while (stream)
     {
-        if (!std::getline(stream, key, '=')) {
+        if (!std::getline(stream, key, '='))
+        {
             continue;
         }
 
-        if (!std::getline(stream, value, ' ')) {
+        if (!std::getline(stream, value, ' '))
+        {
             continue;
         }
 
@@ -219,7 +232,8 @@ std::map<std::string, std::string> FontLoader::readKeyValuePairs(std::stringstre
         valid |= (pairs.find(mandatoryKey) != pairs.cend());
     }
 
-    if (!valid) {
+    if (!valid)
+    {
         return std::map<std::string, std::string>();
     }
 

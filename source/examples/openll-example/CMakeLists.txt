@@ -3,7 +3,7 @@
 # External dependencies
 #
 
-find_package(GLFW      REQUIRED)
+find_package(glfw3     REQUIRED)
 find_package(glm       REQUIRED)
 find_package(cppassist REQUIRED)
 find_package(glbinding REQUIRED)
@@ -63,7 +63,6 @@ target_include_directories(${target}
     ${DEFAULT_INCLUDE_DIRECTORIES}
     ${PROJECT_BINARY_DIR}/source/include
     SYSTEM
-    ${GLFW_INCLUDE_DIR}
 )
 
 
@@ -74,7 +73,7 @@ target_include_directories(${target}
 target_link_libraries(${target}
     PRIVATE
     ${DEFAULT_LIBRARIES}
-    ${GLFW_LIBRARIES}
+    glfw
     cppassist::cppassist
     glbinding::glbinding
     globjects::globjects
