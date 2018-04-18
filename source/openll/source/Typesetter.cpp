@@ -207,7 +207,7 @@ glm::vec2 Typesetter::typeset_label(std::vector<GlyphVertexCloud::Vertex> & vert
 
     size_t glyphCloudStart = vertices.size();
 
-    auto extent = glm::vec2(0.f);
+    auto extent = glm::vec2(0.0f, 0.0f);
 
     const auto itBegin = label.text()->text().cbegin();
     const auto itEnd = label.text()->text().cend();
@@ -252,10 +252,6 @@ glm::vec2 Typesetter::typeset_label(std::vector<GlyphVertexCloud::Vertex> & vert
                     auto & v = vertices[j];
                     v.origin.x -= xOffset;
 
-                    if (j == lineForward.startGlyphIndex)
-                    {
-                        v.origin.x = 0.0f;
-                    }
                     v.origin.y -= lineHeight;
                 }
 
@@ -377,6 +373,7 @@ inline void Typesetter::typeset_align(
 {
     if (alignment == Alignment::LeftAligned)
     {
+        assert(vertices[begin].origin.x <= std::numeric_limits<float>::epsilon());
         return;
     }
 
