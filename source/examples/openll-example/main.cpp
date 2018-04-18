@@ -37,13 +37,13 @@ namespace
 
     // Configuration of text rendering
     std::string    g_fontFilename("opensansr36.fnt");    ///< Font file
-    float          g_fontSize(24.0f);                    ///< Font size (in pt)
+    float          g_fontSize(36.0f);                    ///< Font size (in pt)
     glm::ivec2     g_pos(0, 0);                          ///< Text position (in px)
     glm::ivec2     g_size(250, 50);                      ///< Text size (in px)
     glm::ivec4     g_margins(10, 40, 0, 40);             ///< Margins (top/right/bottom/left, in px)
     float          g_pixelPerInch(72.0f);                ///< Number of pixels per inch
     bool           g_wordWrap(true);                     ///< Wrap words at the end of a line?
-    Alignment      g_alignment(Alignment::RightAligned); ///< Horizontal text alignment
+    Alignment      g_alignment(Alignment::LeftAligned);     ///< Horizontal text alignment
     LineAnchor     g_lineAnchor(LineAnchor::Ascent);     ///< Vertical line anchor
     bool           g_optimized(true);                    ///< Optimize rendering performance?
     glm::uvec2     g_screenSize;                         ///< Screen size (in pixels)
@@ -60,9 +60,9 @@ void initialize()
 {
     auto text = std::string(s_text);
 
-    for (auto i = 0; i < 14; ++i)
+    for (auto i = 0; i < 4; ++i)
     {
-         text += " " + text;
+         text += "\n" + text;
     }
 
     std::cout << "Using a text with " << text.size() << " characters (" << static_cast<float>(text.size() / 1024.0 / 1024.0) << "MB)" << std::endl;
