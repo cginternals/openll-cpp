@@ -240,47 +240,6 @@ public:
     */
     void setAdvance(float advance);
 
-    /**
-    *  @brief
-    *    Get the glyph's kerning w.r.t. a subsequent glyph (in pt)
-    *
-    *    The kerning between two glyphs provides an offset along the baseline,
-    *    which can be used to move the pen-position respectively. It is usually negative.
-    *    For example, the subsequent pen-position is computed as follows:
-    *        pen-position = pen-position + advance + kerning
-    *
-    *  @param[in] subsequentIndex
-    *    The subsequent glyph's index
-    *
-    *  @return
-    *    The kerning (usually negative) between the two glyphs in pt.
-    *    If no specific kerning for the glyph pair is available, a zero
-    *    kerning is returned.
-    */
-    float kerning(size_t subsequentIndex) const;
-
-    /**
-    *  @brief
-    *    Set the glyph's kerning w.r.t. a subsequent glyph (in pt)
-    *
-    *    The kerning between two glyphs provides an offset along the baseline,
-    *    which can be used to move the pen-position respectively. It is usually negative.
-    *    For example, the subsequent pen-position is computed as follows:
-    *        pen-position = pen-position + advance + kerning
-    *
-    *  @param[in] subsequentIndex
-    *    The subsequent glyph's index
-    *  @param[in] kerning
-    *    The kerning (usually negative) between the two glyphs in pt.
-    *
-    * @notes
-    *    - The kerning should usually be a negative value, but is not
-    *    enforced in terms of assertion or clamping
-    *    - If kerning data for the subsequent glyph is already
-    *    available, it will be updated to the new value
-    */
-    void setKerning(size_t subsequentIndex, float kerning);
-
 
 protected:
     size_t    m_index;            ///< Index of the glyph in the associated FontFace
@@ -289,8 +248,7 @@ protected:
     glm::vec2 m_bearing;          ///< x and y offsets w.r.t. to the pen-position on the baseline
     glm::vec2 m_extent;           ///< Width and height of the glyph in pt
     float     m_advance;          ///< Glyph's horizontal overall advance in pt
-
-    std::unordered_map<size_t, float> m_kernings; ///< Kerning information map with upcoming glyph as key
+    bool      m_depictable;       ///< Flag if the glyph is depictable/renderable
 };
 
 

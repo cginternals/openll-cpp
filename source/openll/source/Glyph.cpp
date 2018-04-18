@@ -52,11 +52,12 @@ void Glyph::setSubTextureExtent(const glm::vec2 & extent)
     assert(extent.y <= 1.0f);
 
     m_subtextureExtent = extent;
+    m_depictable = m_subtextureExtent.x > 0.0f && m_subtextureExtent.y > 0.0f;
 }
 
 bool Glyph::depictable() const
 {
-    return m_subtextureExtent.x > 0.0f && m_subtextureExtent.y > 0.0f;
+    return m_depictable;
 }
 
 const glm::vec2 & Glyph::bearing() const
@@ -93,26 +94,6 @@ float Glyph::advance() const
 void Glyph::setAdvance(const float advance)
 {
     m_advance = advance;
-}
-
-float Glyph::kerning(size_t subsequentIndex) const
-{
-    // Get kerning between this glyph and the subsequent glyph
-    const auto it = m_kernings.find(subsequentIndex);
-    if (it != m_kernings.cend())
-    {
-        return it->second;
-    }
-    else
-    {
-        return 0.0f;
-    }
-}
-
-void Glyph::setKerning(size_t subsequentIndex, const float kerning)
-{
-    // Set kerning between this glyph and the subsequent glyph
-    m_kernings[subsequentIndex] = kerning;
 }
 
 

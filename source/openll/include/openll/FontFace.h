@@ -413,8 +413,13 @@ protected:
     glm::vec2  m_inverseGlyphTextureExtent; ///< The size of the glyph texture in px
     glm::vec4  m_glyphTexturePadding;       ///< The padding applied to every glyph in px
 
-    std::unique_ptr<globjects::Texture> m_glyphTexture; ///< The font face's associated glyph texture
-    std::unordered_map<size_t, Glyph>             m_glyphs;       ///< Quick-access container for all added glyphs
+    std::unique_ptr<globjects::Texture>      m_glyphTexture; ///< The font face's associated glyph texture
+    std::unordered_map<size_t, Glyph>        m_glyphs;       ///< Quick-access container for all added glyphs
+    std::unordered_map<std::uint64_t, float> m_kernings;     ///< Kerning Look-up-table; the key is the concatenation of the two glyph indices
+
+
+protected:
+    static std::uint64_t kerningIndex(char32_t firstIndex, char32_t secondIndex);
 
 
 private:

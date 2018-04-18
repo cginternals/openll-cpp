@@ -183,14 +183,14 @@ private:
     *    Label to layout
     *  @param[in] fontFace
     *    The used font face
+    *  @param[in] lineWidth
+    *    The maximum line width
     *  @param[in] pen
     *    Current typesetting position
     *  @param[in] glyph
     *    Glyph that is rendered
     *  @param[in] index
     *    Current character
-    *  @param[in,out] safe_forward
-    *    The last character that was included in the forward accumulation
     *
     *  @return
     *    'true' if word need to be wrapped, else 'false'
@@ -198,36 +198,10 @@ private:
     static bool typeset_wordwrap(
         const Label & label
     ,   const FontFace & fontFace
+    ,   float lineWidth
     ,   const glm::vec2 & pen
     ,   const Glyph & glyph
-    ,   const std::u32string::const_iterator & index
-    ,   std::u32string::const_iterator & safe_forward);
-
-    /**
-    *  @brief
-    *    Get width from the current location to the next delimiter or line feed
-    *
-    *    Accumulates glyph advances (including kerning) up to the next
-    *    delimiter or line feed occurrence starting at the given index
-    *    for the given label.
-    *
-    *  @param[in] label
-    *    Label to layout
-    *  @param[in] fontFace
-    *    The used font face
-    *  @param[in,out] index
-    *    Current character
-    *  @param[out] width
-    *    The accumulated width up to the next delimiter (reset to 0)
-    *
-    *  @return
-    *    The last character that was included in the forward accumulation
-    */
-    static std::u32string::const_iterator typeset_forward(
-        const Label & label
-    ,   const FontFace & fontFace
-    ,   const std::u32string::const_iterator & index
-    ,   float & width);
+    ,   const std::u32string::const_iterator & index);
 
     /**
     *  @brief
@@ -259,32 +233,6 @@ private:
     ,   const glm::vec2 & pen
     ,   const Glyph & glyph
     ,   bool optimize);
-
-    /**
-    *  @brief
-    *    Update the extent of the label
-    *
-    *    This function goes backward from the current position until the
-    *    beginning of the word and updates the extent of the label, which
-    *    is later used for alignment.
-    *
-    *  @param[in] fontFace
-    *    The used font face
-    *  @param[in] index
-    *    Current character
-    *  @param[in] begin
-    *    The beginning of the text
-    *  @param[in] pen
-    *    Current typesetting position
-    *  @param[in] extent
-    *    Extent of the label (in layouting space)
-    */
-    static void typeset_extent(
-        const FontFace & fontFace
-    ,   std::u32string::const_iterator index
-    ,   const std::u32string::const_iterator & begin
-    ,   glm::vec2 & pen
-    ,   glm::vec2 & extent);
 
     /**
     *  @brief

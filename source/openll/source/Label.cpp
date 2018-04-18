@@ -46,6 +46,12 @@ void Label::setText(const std::u32string & text)
     m_text->setText(text);
 }
 
+void Label::setText(std::u32string && text)
+{
+    m_text = std::shared_ptr<Text>(new Text);
+    m_text->setText(std::move(text));
+}
+
 const FontFace * Label::fontFace() const
 {
     return m_fontFace;

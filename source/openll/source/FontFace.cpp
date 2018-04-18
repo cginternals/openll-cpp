@@ -202,14 +202,15 @@ float FontFace::kerning(const size_t index, const size_t subsequentIndex) const
         return std::get<2>(m_kerningRequestCache);
     }
 
-    const auto it = m_glyphs.find(index);
+    const auto key = kerningIndex(index, subsequentIndex);
 
-    if (it == m_glyphs.cend())
+    const auto it = m_kernings.find(key);
+
+    auto kerning = 0.0f;
+    if (it != m_kernings.cend())
     {
-        return 0.0f;
+        kerning = it->second;
     }
-
-    const auto kerning = it->second.kerning(subsequentIndex);
 
     std::get<0>(m_kerningRequestCache) = index;
     std::get<1>(m_kerningRequestCache) = subsequentIndex;
@@ -223,14 +224,14 @@ void FontFace::setKerning(const size_t index, const size_t subsequentIndex, cons
     assert(hasGlyph(index));
     assert(hasGlyph(subsequentIndex));
 
-    const auto it = m_glyphs.find(index);
-    if (it == m_glyphs.cend())
-    {
-        assert(false);
-        return;
-    }
+    const auto key = kerningIndex(index, subsequentIndex);
 
-    it->second.setKerning(subsequentIndex, kerning);
+    m_kernings[key] = kerning;
+}
+
+std::uint64_t FontFace::kerningIndex(char32_t firstIndex, char32_t secondIndex)
+{
+    return static_cast<std::uint64_t>(firstIndex) << 32 | static_cast<std::uint64_t>(secondIndex);
 }
 
 

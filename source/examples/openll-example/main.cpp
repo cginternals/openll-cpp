@@ -37,14 +37,13 @@ namespace
 
     // Configuration of text rendering
     std::string    g_fontFilename("opensansr36.fnt");    ///< Font file
-    std::u32string g_text;                               ///< Text to display
-    float          g_fontSize(16.0f);                    ///< Font size (in pt)
+    float          g_fontSize(24.0f);                    ///< Font size (in pt)
     glm::ivec2     g_pos(0, 0);                          ///< Text position (in px)
     glm::ivec2     g_size(250, 50);                      ///< Text size (in px)
     glm::ivec4     g_margins(10, 40, 0, 40);             ///< Margins (top/right/bottom/left, in px)
     float          g_pixelPerInch(72.0f);                ///< Number of pixels per inch
     bool           g_wordWrap(true);                     ///< Wrap words at the end of a line?
-    Alignment      g_alignment(Alignment::Centered);     ///< Horizontal text alignment
+    Alignment      g_alignment(Alignment::RightAligned); ///< Horizontal text alignment
     LineAnchor     g_lineAnchor(LineAnchor::Ascent);     ///< Vertical line anchor
     bool           g_optimized(true);                    ///< Optimize rendering performance?
     glm::uvec2     g_screenSize;                         ///< Screen size (in pixels)
@@ -61,19 +60,21 @@ void initialize()
 {
     auto text = std::string(s_text);
 
-    for (auto i = 0; i < 11; ++i)
+    for (auto i = 0; i < 14; ++i)
     {
-         text += text;
+         text += " " + text;
     }
 
+    std::cout << "Using a text with " << text.size() << " characters (" << static_cast<float>(text.size() / 1024.0 / 1024.0) << "MB)" << std::endl;
+
     // Set text
-    g_text = cppassist::string::encode(std::string(text), cppassist::Encoding::UTF8);
+    const auto encodedText = cppassist::string::encode(std::string(text), cppassist::Encoding::UTF8);
 
     // Load font
     g_fontFace = FontLoader::load(openll::dataPath() + "/openll/fonts/" + g_fontFilename);
 
     // Create label
-    g_label.setText(g_text);
+    g_label.setText(std::move(encodedText));
     g_label.setFontFace(*g_fontFace);
     g_label.setFontSize(g_fontSize);
     g_label.setWordWrap(g_wordWrap);

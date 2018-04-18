@@ -68,6 +68,7 @@ public:
     *    Text (32 bit unicode string)
     */
     void setText(const std::u32string & text);
+    void setText(std::u32string && text);
 
     /**
     *  @brief

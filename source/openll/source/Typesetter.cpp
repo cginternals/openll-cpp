@@ -22,7 +22,7 @@ namespace
 
 // Setup common delimiters for wordwrapping
 // Note: u32string::find outperforms set::count here (tested)
-static const auto delimiters = std::u32string({ '\x0A', ' ', ',', '.', '-', '/', '(', ')', '[', ']', '<', '>' });
+static const auto delimiters = std::u32string({ '\x0A', ' ', ',', '.', '-', '/', '(', ')', '[', ']', '<', '>', '.' });
 static const auto delimiterSet = std::set<char32_t>(delimiters.begin(), delimiters.end());
 
 
@@ -190,88 +190,127 @@ glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<
 
 glm::vec2 Typesetter::typeset_label(std::vector<GlyphVertexCloud::Vertex> & vertices, std::map<size_t, std::vector<size_t>> & buckets, const Label & label, bool optimize, bool dryrun)
 {
+    struct LineEndInformation
+    {
+        glm::vec2 pen;
+        glm::vec2 lastDepictablePen;
+        size_t startGlyphIndex;
+        size_t endGlyphIndex;
+    };
+
     // Get font face
     const auto & fontFace = *label.fontFace();
 
     // Append vertex cloud: the maximum number of visible glyphs is the size of the string
-    vertices.reserve(vertices.size() + label.text()->text().size());
-
-    // Create first vertex
     if (!dryrun)
     {
-        vertices.push_back(GlyphVertexCloud::Vertex());
+        vertices.reserve(vertices.size() + label.text()->text().size());
     }
-    size_t begin = vertices.size() - 1;
 
-    auto pen = glm::vec2(0.f);
-    auto vertex = begin;
+    size_t glyphCloudStart = vertices.size();
+
     auto extent = glm::vec2(0.f);
 
-    const auto iBegin = label.text()->text().cbegin();
-    const auto iEnd = label.text()->text().cend();
+    const auto itBegin = label.text()->text().cbegin();
+    const auto itEnd = label.text()->text().cend();
 
-    // Iterator used to reduce the number of wordwrap forward passes
-    auto safe_forward = iBegin;
+    LineEndInformation currentLine = { glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), glyphCloudStart, glyphCloudStart };
+    LineEndInformation lineForward = { glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f), glyphCloudStart, glyphCloudStart };
 
-    auto feedLine = false;
-    auto feedVertex = vertex;
+    const auto lineWidth = glm::max(label.lineWidth() * label.fontFace()->size() / label.fontSize(), 0.0f);
 
-    for (auto i = iBegin; i != iEnd; ++i)
+    auto index = glyphCloudStart;
+    for (auto it = itBegin; it != itEnd; ++it)
     {
-        const auto & glyph = fontFace.glyph(*i);
+        const auto & glyph = fontFace.glyph(*it);
 
         // Handle line feeds as well as word wrap for next word
         // (or next glyph if word width exceeds the max line width)
-        feedLine = *i == label.text()->lineFeed() || (label.wordWrap() &&
-            typeset_wordwrap(label, fontFace, pen, glyph, i, safe_forward));
+        const auto feedLine = *it == label.text()->lineFeed() || (label.wordWrap() &&
+            typeset_wordwrap(label, fontFace, lineWidth, lineForward.pen, glyph, it));
 
         if (feedLine)
         {
-            assert(i != iBegin);
-            typeset_extent(fontFace, i - 1, iBegin, pen, extent);
+            assert(it != itBegin);
 
-            // Handle alignment (when line feed occurs)
+            extent.x = glm::max(currentLine.pen.x, extent.x);
+            extent.y += fontFace.lineHeight();
+
+            const auto lineHeight = fontFace.lineHeight();
+            lineForward.pen.y -= lineHeight;
+
+            // Handle newline and alignment
+            auto newPenX = lineForward.pen.x - currentLine.pen.x;
             if (!dryrun)
             {
-                typeset_align(pen, label.alignment(), vertices, feedVertex, vertex);
+                typeset_align(currentLine.lastDepictablePen, label.alignment(), vertices, currentLine.startGlyphIndex, currentLine.endGlyphIndex);
+
+                const auto xOffset = vertices[lineForward.startGlyphIndex].origin.x;
+
+                for (auto j = lineForward.startGlyphIndex; j != lineForward.endGlyphIndex; ++j)
+                {
+                    auto & v = vertices[j];
+                    v.origin.x -= xOffset;
+                    v.origin.y -= lineHeight;
+                }
+
+                if (lineForward.startGlyphIndex >= index)
+                {
+                    newPenX = 0.0f;
+                }
+                else
+                {
+                    newPenX = lineForward.pen.x - xOffset;
+                }
             }
 
-            pen.x = 0.f;
-            pen.y -= fontFace.lineHeight();
-
-            feedLine = false;
-            feedVertex = vertex;
+            currentLine.pen = glm::vec2(newPenX, lineForward.pen.y);
+            currentLine.startGlyphIndex = lineForward.startGlyphIndex;
+            currentLine.endGlyphIndex = lineForward.endGlyphIndex;
+            currentLine.lastDepictablePen = currentLine.pen;
+            lineForward.startGlyphIndex = lineForward.endGlyphIndex;
+            lineForward.pen = currentLine.pen;
+            lineForward.lastDepictablePen = lineForward.pen;
         }
-        else if (i != iBegin)
+        else if (index > currentLine.startGlyphIndex)
         {   // Apply kerning
-            pen.x += fontFace.kerning(*(i - 1), *i);
+            lineForward.pen.x += fontFace.kerning(*(it - 1), *it);
         }
 
         // Typeset glyphs in vertex cloud (only if renderable)
         if (!dryrun && glyph.depictable())
         {
             vertices.push_back(GlyphVertexCloud::Vertex());
-            typeset_glyph(vertices, buckets, vertex++, fontFace, pen, glyph, optimize && !dryrun);
+            typeset_glyph(vertices, buckets, index, fontFace, lineForward.pen, glyph, optimize && !dryrun);
+            ++index;
+            lineForward.endGlyphIndex = index;
         }
 
-        pen.x += glyph.advance();
+        lineForward.pen.x += glyph.advance();
 
-        if (i + 1 == iEnd)
+        if (glyph.depictable())
         {
-            // Handle alignment (when last line of the label is processed)
-            typeset_extent(fontFace, i, iBegin, pen, extent);
+            lineForward.lastDepictablePen = lineForward.pen;
+        }
 
-            if (!dryrun)
-            {
-                typeset_align(pen, label.alignment(), vertices, feedVertex, vertex);
-            }
+        if (feedLine || delimiterSet.find(glyph.index()) != delimiterSet.end())
+        {
+            currentLine.lastDepictablePen = lineForward.lastDepictablePen;
+            currentLine.endGlyphIndex = lineForward.endGlyphIndex;
+            currentLine.pen = lineForward.lastDepictablePen;
+            lineForward.startGlyphIndex = lineForward.endGlyphIndex;
         }
     }
 
+    // Handle alignment (when last line of the label is processed)
+    extent.x = glm::max(lineForward.lastDepictablePen.x, extent.x);
+    extent.y += fontFace.lineHeight();
+
     if (!dryrun)
     {
-        anchor_transform(label, fontFace, vertices, begin, vertex);
-        vertex_transform(label.transform(), label.textColor(), vertices, begin, vertex);
+        typeset_align(lineForward.lastDepictablePen, label.alignment(), vertices, currentLine.startGlyphIndex, lineForward.endGlyphIndex);
+        anchor_transform(label, fontFace, vertices, glyphCloudStart, lineForward.endGlyphIndex);
+        vertex_transform(label.transform(), label.textColor(), vertices, glyphCloudStart, lineForward.endGlyphIndex);
     }
 
     return extent_transform(label, extent);
@@ -280,62 +319,24 @@ glm::vec2 Typesetter::typeset_label(std::vector<GlyphVertexCloud::Vertex> & vert
 inline bool Typesetter::typeset_wordwrap(
   const Label & label
 , const FontFace & fontFace
+, float lineWidth
 , const glm::vec2 & pen
 , const Glyph & glyph
-, const std::u32string::const_iterator & index
-, std::u32string::const_iterator & safe_forward)
+, const std::u32string::const_iterator & index)
 {
     assert(label.wordWrap());
 
-    const auto lineWidth = glm::max(label.lineWidth() * label.fontFace()->size() / label.fontSize(), 0.0f);
-    auto width_forward = 0.f;
+    if (!glyph.depictable())
+    {
+        return false;
+    }
 
     const auto pen_glyph =
         pen.x + glyph.advance() +
             (index != label.text()->text().cbegin() ? fontFace.kerning(*(index - 1), *index) : 0.f);
 
-    const auto wrap_glyph = glyph.depictable() && pen_glyph > lineWidth
-        && (glyph.advance() <= lineWidth || pen.x > 0.f);
-
-    auto wrap_forward = false;
-
-    if (!wrap_glyph && index >= safe_forward)
-    {
-        safe_forward = typeset_forward(label, fontFace, index, width_forward);
-        wrap_forward = width_forward <= lineWidth && (pen.x + width_forward) > lineWidth;
-    }
-
-    return wrap_forward || wrap_glyph;
-}
-
-inline std::u32string::const_iterator Typesetter::typeset_forward(
-  const Label & label
-, const FontFace & fontFace
-, const std::u32string::const_iterator & index
-, float & width)
-{
-    const auto iBegin = label.text()->text().cbegin();
-    const auto iEnd = label.text()->text().cend();
-
-    width = 0.f; // reset the width
-
-    // Accumulate glyph advances (including kerning) up to the next delimiter occurence
-    auto current = index;
-    auto prev = current-1;
-    while (current != iEnd && delimiterSet.find(*current) == delimiterSet.end())
-    {
-        if (current != iBegin)
-        {
-            width += fontFace.kerning(*prev, *current);
-        }
-
-        width += fontFace.glyph(*current).advance();
-
-        prev = current;
-        ++current;
-    }
-
-    return current;
+    return pen_glyph > lineWidth
+            && (glyph.advance() <= lineWidth || pen.x > 0.f);
 }
 
 inline void Typesetter::typeset_glyph(
@@ -369,31 +370,6 @@ inline void Typesetter::typeset_glyph(
         auto glyphIndex = glyph.index();
         buckets[glyphIndex].push_back(index);
     }
-}
-
-inline void Typesetter::typeset_extent(
-  const FontFace & fontFace
-, std::u32string::const_iterator index
-, const std::u32string::const_iterator & begin
-, glm::vec2 & pen
-, glm::vec2 & extent)
-{
-    // On line feed, revert advance of preceding, not depictable glyphs
-    while (index > begin)
-    {
-        const auto & precedingGlyph = fontFace.glyph(*index);
-
-        if (precedingGlyph.depictable())
-        {
-            break;
-        }
-
-        pen.x -= precedingGlyph.advance();
-        --index;
-    }
-
-    extent.x = glm::max(pen.x, extent.x);
-    extent.y += fontFace.lineHeight();
 }
 
 inline void Typesetter::typeset_align(
