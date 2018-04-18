@@ -43,7 +43,7 @@ namespace
     glm::ivec4     g_margins(10, 40, 0, 40);             ///< Margins (top/right/bottom/left, in px)
     float          g_pixelPerInch(72.0f);                ///< Number of pixels per inch
     bool           g_wordWrap(true);                     ///< Wrap words at the end of a line?
-    Alignment      g_alignment(Alignment::LeftAligned);     ///< Horizontal text alignment
+    Alignment      g_alignment(Alignment::LeftAligned);  ///< Horizontal text alignment
     LineAnchor     g_lineAnchor(LineAnchor::Ascent);     ///< Vertical line anchor
     bool           g_optimized(true);                    ///< Optimize rendering performance?
     glm::uvec2     g_screenSize;                         ///< Screen size (in pixels)
@@ -60,7 +60,7 @@ void initialize()
 {
     auto text = std::string(s_text);
 
-    for (auto i = 0; i < 4; ++i)
+    for (auto i = 0; i < 0; ++i)
     {
          text += "\n" + text;
     }

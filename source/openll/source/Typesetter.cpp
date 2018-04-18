@@ -114,7 +114,7 @@ glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<
         if (label.fontFace())
         {
             // Typeset label
-            auto currenExtent = typeset_label(vertexCloud.vertices(), buckets, label, optimize, dryrun);
+            const auto currenExtent = typeset_label(vertexCloud.vertices(), buckets, label, optimize, dryrun);
             extent = glm::vec2(glm::max(extent.x, currenExtent.x), glm::max(extent.y, currenExtent.y));
         }
     }
@@ -267,7 +267,7 @@ glm::vec2 Typesetter::typeset_label(std::vector<GlyphVertexCloud::Vertex> & vert
             lineForward.startGlyphIndex = index;
             lineForward.lastDepictablePen = currentPen;
         }
-        else if (index > currentLine.startGlyphIndex)
+        else if (index - 1 > currentLine.startGlyphIndex)
         {   // Apply kerning
             currentPen.x += fontFace.kerning(*(it - 1), *it);
         }
@@ -340,12 +340,14 @@ inline void Typesetter::typeset_glyph(
 , const Glyph & glyph
 , bool optimize)
 {
+    assert(pen.x >= 0.0f);
+
     auto & vertex = vertices[index];
 
     const auto & padding = fontFace.glyphTexturePadding();
-    vertex.origin    = glm::vec3(pen, 0.f);
-    vertex.origin.x += glyph.bearing().x - padding[3];
-    vertex.origin.y += glyph.bearing().y - glyph.extent().y - padding[2];
+    vertex.origin.x = pen.x + glyph.bearing().x - padding[3];
+    vertex.origin.y = pen.y + glyph.bearing().y - glyph.extent().y - padding[2];
+    vertex.origin.z = 0.0f;
 
     vertex.vtan   = glm::vec3(glyph.extent().x + padding[1] + padding[3], 0.f, 0.f);
     vertex.vbitan = glm::vec3(0.f, glyph.extent().y + padding[0] + padding[2], 0.f);
@@ -356,6 +358,8 @@ inline void Typesetter::typeset_glyph(
     const auto ur = glyph.subTextureOrigin() + glyph.subTextureExtent()
         + glm::vec2(padding[1], padding[0]) * extentScale;
     vertex.uvRect = glm::vec4(ll, ur);
+
+    assert(vertex.origin.z == 0.0f);
 
     if (optimize)
     {
@@ -373,7 +377,6 @@ inline void Typesetter::typeset_align(
 {
     if (alignment == Alignment::LeftAligned)
     {
-        assert(vertices[begin].origin.x <= std::numeric_limits<float>::epsilon());
         return;
     }
 
@@ -437,6 +440,8 @@ inline void Typesetter::vertex_transform(
     for (auto i = begin; i != end; ++i)
     {
         auto & v = vertices[i];
+
+        assert(v.origin.z == 0.0f);
 
         const auto ll = transform * glm::vec4(v.origin, 1.f);
         const auto lr = transform * glm::vec4(v.origin + v.vtan, 1.f);

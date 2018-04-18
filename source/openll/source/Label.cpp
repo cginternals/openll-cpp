@@ -163,7 +163,7 @@ void Label::setTransform2D(const glm::vec2 & origin, const glm::uvec2 & viewport
     m_transform = glm::scale(m_transform, 2.0f / glm::vec3(viewportExtent.x, viewportExtent.y, 1.0f));
 
     // Scale glyphs to pixel size with respect to the displays ppi
-    m_transform = glm::scale(m_transform, glm::vec3(ppiScale));
+    m_transform = glm::scale(m_transform, glm::vec3(ppiScale, ppiScale, 1.0f));
 
     // Translate to origin in point space - scale origin within
     // margined extent (i.e., viewport with margined areas removed)
@@ -173,7 +173,7 @@ void Label::setTransform2D(const glm::vec2 & origin, const glm::uvec2 & viewport
         , glm::vec3((0.5f * origin + 0.5f) * marginedExtent, 0.0f) + glm::vec3(m_margins[3], m_margins[2], 0.0f));
 
     // Scale glyphs of font face to target font size
-    m_transform = glm::scale(m_transform, glm::vec3(m_fontSize / m_fontFace->size()));
+    m_transform = glm::scale(m_transform, glm::vec3(glm::vec2(m_fontSize / m_fontFace->size()), 1.0f));
 }
 
 void Label::setTransform3D(const glm::vec3 & origin, const glm::mat4 & transform)
