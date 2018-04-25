@@ -181,27 +181,24 @@ private:
     *
     *  @param[in] label
     *    Label to layout
-    *  @param[in] fontFace
-    *    The used font face
     *  @param[in] lineWidth
     *    The maximum line width
     *  @param[in] pen
     *    Current typesetting position
     *  @param[in] glyph
     *    Glyph that is rendered
-    *  @param[in] index
-    *    Current character
+    *  @param[in] kerning
+    *    Kerning space to previous character
     *
     *  @return
     *    'true' if word need to be wrapped, else 'false'
     */
     static bool typeset_wordwrap(
         const Label & label
-    ,   const FontFace & fontFace
     ,   float lineWidth
     ,   const glm::vec2 & pen
     ,   const Glyph & glyph
-    ,   const std::u32string::const_iterator & index);
+    ,   float kerning);
 
     /**
     *  @brief

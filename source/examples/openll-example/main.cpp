@@ -37,7 +37,7 @@ namespace
 
     // Configuration of text rendering
     std::string    g_fontFilename("opensansr36.fnt");    ///< Font file
-    float          g_fontSize(36.0f);                    ///< Font size (in pt)
+    float          g_fontSize(12.0f);                    ///< Font size (in pt)
     glm::ivec2     g_pos(0, 0);                          ///< Text position (in px)
     glm::ivec2     g_size(250, 50);                      ///< Text size (in px)
     glm::ivec4     g_margins(10, 40, 0, 40);             ///< Margins (top/right/bottom/left, in px)
@@ -133,7 +133,7 @@ void update()
 
     const auto end = std::chrono::high_resolution_clock::now();
 
-    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
+    //std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
 
     (void)extent;
 }
