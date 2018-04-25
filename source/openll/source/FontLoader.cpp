@@ -160,7 +160,7 @@ void FontLoader::parseChar(std::stringstream & stream, FontFace & fontFace)
     auto index = cppassist::string::fromString<size_t>(pairs.at("id"));
     assert(index > 0);
 
-    auto glyph = Glyph();
+    auto glyph = Glyph(nullptr);
 
     glyph.setIndex(index);
 

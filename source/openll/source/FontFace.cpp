@@ -142,7 +142,7 @@ Glyph & FontFace::glyph(const size_t index)
         return existing->second;
     }
 
-    auto glyph = Glyph();
+    auto glyph = Glyph(this);
     glyph.setIndex(index);
 
     const auto inserted = m_glyphs.emplace(glyph.index(), std::move(glyph));
@@ -152,7 +152,7 @@ Glyph & FontFace::glyph(const size_t index)
 
 const Glyph & FontFace::glyph(const size_t index) const
 {
-    static const auto empty = Glyph();
+    static const auto empty = Glyph(this);
 
     const auto & existing = m_glyphs.find(index);
     if (existing != m_glyphs.cend())
@@ -167,13 +167,16 @@ void FontFace::addGlyph(const Glyph & glyph)
 {
     assert(m_glyphs.find(glyph.index()) == m_glyphs.cend());
 
-    m_glyphs.emplace(glyph.index(), glyph);
+    Glyph copy = glyph;
+    copy.setFontFace(this);
+    m_glyphs.emplace(glyph.index(), std::move(copy));
 }
 
 void FontFace::addGlyph(Glyph && glyph)
 {
     assert(m_glyphs.find(glyph.index()) == m_glyphs.cend());
 
+    glyph.setFontFace(this);
     m_glyphs.emplace(glyph.index(), std::move(glyph));
 }
 

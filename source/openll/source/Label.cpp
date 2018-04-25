@@ -122,6 +122,28 @@ void Label::setLineAnchor(LineAnchor anchor)
     m_anchor = anchor;
 }
 
+float Label::lineAnchorOffset() const
+{
+    switch (m_anchor)
+    {
+    case LineAnchor::Ascent:
+        return -m_fontFace->ascent();
+        break;
+
+    case LineAnchor::Center:
+        return -m_fontFace->size() * 0.5f + m_fontFace->descent();
+        break;
+
+    case LineAnchor::Descent:
+        return -m_fontFace->descent();
+        break;
+
+    case LineAnchor::Baseline:
+    default:
+        return 0.0f;
+    }
+}
+
 const glm::vec4 & Label::textColor() const
 {
     return m_textColor;

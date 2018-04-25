@@ -198,6 +198,15 @@ public:
 
     /**
     *  @brief
+    *    Get line anchor offset for pen initialization during typesetting.
+    *
+    *  @return
+    *    The line anchor offset.
+    */
+    float lineAnchorOffset() const;
+
+    /**
+    *  @brief
     *    Get text color (rgba)
     *
     *  @return

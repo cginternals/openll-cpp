@@ -231,7 +231,7 @@ inline glm::vec2 Typesetter::typeset_label(std::vector<GlyphVertexCloud::Vertex>
     const auto itBegin = label.text()->text().cbegin();
     const auto itEnd = label.text()->text().cend();
 
-    auto currentPen = glm::vec2(0.0f, 0.0f);
+    auto currentPen = glm::vec2(0.0f, label.lineAnchorOffset());
     SegmentInformation currentLine = { currentPen, currentPen, glyphCloudStart };
     SegmentInformation lineForward = { currentPen, currentPen, glyphCloudStart };
 
@@ -304,7 +304,7 @@ inline glm::vec2 Typesetter::typeset_label(std::vector<GlyphVertexCloud::Vertex>
         if (!dryrun && glyph.depictable())
         {
             vertices.push_back(GlyphVertexCloud::Vertex());
-            typeset_glyph(vertices, buckets, index, fontFace, currentPen, glyph, optimize);
+            typeset_glyph(vertices, buckets, index, currentPen, glyph, optimize);
             ++index;
         }
 
@@ -334,7 +334,6 @@ inline glm::vec2 Typesetter::typeset_label(std::vector<GlyphVertexCloud::Vertex>
     if (!dryrun)
     {
         typeset_align(lineForward.lastDepictablePen, label.alignment(), vertices, currentLine.startGlyphIndex, index);
-        anchor_transform(label, fontFace, vertices, glyphCloudStart, index);
         vertex_transform(label.transform(), label.textColor(), vertices, glyphCloudStart, index);
     }
 
@@ -362,7 +361,6 @@ inline void Typesetter::typeset_glyph(
   std::vector<GlyphVertexCloud::Vertex> & vertices
 , std::map<size_t, std::vector<size_t>> & buckets
 , size_t index
-, const FontFace & fontFace
 , const glm::vec2 & pen
 , const Glyph & glyph
 , bool optimize)
@@ -371,22 +369,10 @@ inline void Typesetter::typeset_glyph(
 
     auto & vertex = vertices[index];
 
-    const auto & padding = fontFace.glyphTexturePadding();
-    vertex.origin.x = pen.x + glyph.bearing().x - padding[3];
-    vertex.origin.y = pen.y + glyph.bearing().y - glyph.extent().y - padding[2];
-    vertex.origin.z = 0.0f;
-
-    vertex.vtan   = glm::vec3(glyph.extent().x + padding[1] + padding[3], 0.f, 0.f);
-    vertex.vbitan = glm::vec3(0.f, glyph.extent().y + padding[0] + padding[2], 0.f);
-
-    const auto & extentScale = fontFace.inverseGlyphTextureExtent();
-    const auto ll = glyph.subTextureOrigin()
-        - glm::vec2(padding[3], padding[2]) * extentScale;
-    const auto ur = glyph.subTextureOrigin() + glyph.subTextureExtent()
-        + glm::vec2(padding[1], padding[0]) * extentScale;
-    vertex.uvRect = glm::vec4(ll, ur);
-
-    assert(vertex.origin.z == 0.0f);
+    vertex.origin = glm::vec3(pen + glyph.penOrigin(), 0.0f);
+    vertex.vtan   = glm::vec3(glyph.penTangent(), 0.f);
+    vertex.vbitan = glm::vec3(glyph.penBitangent(), 0.f);
+    vertex.uvRect = glyph.subtextureRectangle();
 
     if (optimize)
     {
@@ -419,41 +405,6 @@ inline void Typesetter::typeset_align(
     {
         auto & v = vertices[i];
         v.origin.x += penOffset;
-    }
-}
-
-inline void Typesetter::anchor_transform(
-  const Label & label
-, const FontFace & fontFace
-, std::vector<GlyphVertexCloud::Vertex> & vertices
-, size_t begin
-, size_t end)
-{
-    auto offset = 0.f;
-
-    switch (label.lineAnchor())
-    {
-    case LineAnchor::Ascent:
-        offset = fontFace.ascent();
-        break;
-
-    case LineAnchor::Center:
-        offset = fontFace.size() * 0.5f + fontFace.descent();
-        break;
-
-    case LineAnchor::Descent:
-        offset = fontFace.descent();
-        break;
-
-    case LineAnchor::Baseline:
-    default:
-        return;
-    }
-
-    for (auto i = begin; i != end; ++i)
-    {
-        auto & v = vertices[i];
-        v.origin.y -= offset;
     }
 }
 

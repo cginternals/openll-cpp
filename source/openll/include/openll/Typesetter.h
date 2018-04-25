@@ -226,7 +226,6 @@ private:
         std::vector<GlyphVertexCloud::Vertex> & vertices
     ,   std::map<size_t, std::vector<size_t>> & buckets
     ,   size_t index
-    ,   const FontFace & fontFace
     ,   const glm::vec2 & pen
     ,   const Glyph & glyph
     ,   bool optimize);
@@ -249,28 +248,6 @@ private:
     static void typeset_align(
         const glm::vec2 & pen
     ,   const Alignment alignment
-    ,   std::vector<GlyphVertexCloud::Vertex> & vertices
-    ,   size_t begin
-    ,   size_t end);
-
-    /**
-    *  @brief
-    *    Calculate anchor position for the current glyphs
-    *
-    *  @param[in] label
-    *    Label to layout
-    *  @param[in] fontFace
-    *    The used font face
-    *  @param[in,out] vertices
-    *    Vertex array
-    *  @param[in] begin
-    *    Index of first vertex
-    *  @param[in] end
-    *    Index of last vertex
-    */
-    static void anchor_transform(
-        const Label & label
-    ,   const FontFace & fontFace
     ,   std::vector<GlyphVertexCloud::Vertex> & vertices
     ,   size_t begin
     ,   size_t end);
