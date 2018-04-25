@@ -37,13 +37,13 @@ namespace
 
     // Configuration of text rendering
     std::string    g_fontFilename("opensansr36.fnt");    ///< Font file
-    float          g_fontSize(12.0f);                    ///< Font size (in pt)
+    float          g_fontSize(16.0f);                    ///< Font size (in pt)
     glm::ivec2     g_pos(0, 0);                          ///< Text position (in px)
     glm::ivec2     g_size(250, 50);                      ///< Text size (in px)
     glm::ivec4     g_margins(10, 40, 0, 40);             ///< Margins (top/right/bottom/left, in px)
     float          g_pixelPerInch(72.0f);                ///< Number of pixels per inch
     bool           g_wordWrap(true);                     ///< Wrap words at the end of a line?
-    Alignment      g_alignment(Alignment::LeftAligned);  ///< Horizontal text alignment
+    Alignment      g_alignment(Alignment::Centered);     ///< Horizontal text alignment
     LineAnchor     g_lineAnchor(LineAnchor::Ascent);     ///< Vertical line anchor
     bool           g_optimized(true);                    ///< Optimize rendering performance?
     glm::uvec2     g_screenSize;                         ///< Screen size (in pixels)
@@ -60,9 +60,9 @@ void initialize()
 {
     auto text = std::string(s_text);
 
-    for (auto i = 0; i < 0; ++i)
+    for (auto i = 0; i < 11; ++i)
     {
-         text += "\n" + text;
+         text += text;
     }
 
     std::cout << "Using a text with " << text.size() << " characters (" << static_cast<float>(text.size() / 1024.0 / 1024.0) << "MB)" << std::endl;
@@ -133,7 +133,7 @@ void update()
 
     const auto end = std::chrono::high_resolution_clock::now();
 
-    //std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
+    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
 
     (void)extent;
 }
