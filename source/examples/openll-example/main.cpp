@@ -9,8 +9,9 @@
 #include <cppassist/string/conversion.h>
 
 #include <glbinding/gl/gl.h>
-#include <glbinding/ContextInfo.h>
+#include <glbinding-aux/ContextInfo.h>
 #include <glbinding/Version.h>
+#include <glbinding-aux/types_to_string.h>
 
 #include <globjects/globjects.h>
 
@@ -36,14 +37,13 @@ namespace
 
     // Configuration of text rendering
     std::string    g_fontFilename("opensansr36.fnt");    ///< Font file
-    std::u32string g_text;                               ///< Text to display
     float          g_fontSize(16.0f);                    ///< Font size (in pt)
     glm::ivec2     g_pos(0, 0);                          ///< Text position (in px)
     glm::ivec2     g_size(250, 50);                      ///< Text size (in px)
     glm::ivec4     g_margins(10, 40, 0, 40);             ///< Margins (top/right/bottom/left, in px)
     float          g_pixelPerInch(72.0f);                ///< Number of pixels per inch
     bool           g_wordWrap(true);                     ///< Wrap words at the end of a line?
-    Alignment      g_alignment(Alignment::Centered);     ///< Horizontal text alignment
+    Alignment      g_alignment(Alignment::LeftAligned);  ///< Horizontal text alignment
     LineAnchor     g_lineAnchor(LineAnchor::Ascent);     ///< Vertical line anchor
     bool           g_optimized(true);                    ///< Optimize rendering performance?
     glm::uvec2     g_screenSize;                         ///< Screen size (in pixels)
@@ -58,14 +58,34 @@ namespace
 
 void initialize()
 {
+    auto text = std::string(s_text);
+
+    for (auto i = 0; i < 4; ++i)
+    {
+         text += text;
+    }
+
+    if (text.size() > 1024 * 1024 * 1024)
+    {
+        std::cout << "Using a text with " << text.size() << " characters (" << static_cast<float>(text.size() / 1024.0 / 1024.0 / 1024.0) << "GB)" << std::endl;
+    }
+    else if (text.size() > 1024 * 1024)
+    {
+        std::cout << "Using a text with " << text.size() << " characters (" << static_cast<float>(text.size() / 1024.0 / 1024.0) << "MB)" << std::endl;
+    }
+    else
+    {
+        std::cout << "Using a text with " << text.size() << " characters (" << static_cast<float>(text.size() / 1024.0) << "kB)" << std::endl;
+    }
+
     // Set text
-    g_text = cppassist::string::encode(std::string(s_text), cppassist::Encoding::UTF8);
+    const auto encodedText = cppassist::string::encode(std::string(text), cppassist::Encoding::UTF8);
 
     // Load font
     g_fontFace = FontLoader::load(openll::dataPath() + "/openll/fonts/" + g_fontFilename);
 
     // Create label
-    g_label.setText(g_text);
+    g_label.setText(std::move(encodedText));
     g_label.setFontFace(*g_fontFace);
     g_label.setFontSize(g_fontSize);
     g_label.setWordWrap(g_wordWrap);
@@ -117,8 +137,16 @@ void update()
     g_label.setMargins(margins);
     g_label.setTransform2D(origin, g_screenSize, g_pixelPerInch);
 
+    const auto start = std::chrono::high_resolution_clock::now();
+
     // Execute typesetter
     auto extent = Typesetter::typeset(*g_vertexCloud, g_label, g_optimized);
+
+    const auto end = std::chrono::high_resolution_clock::now();
+
+    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
+
+    (void)extent;
 }
 
 void draw()
@@ -163,7 +191,8 @@ void onResize(GLFWwindow *, int width, int height)
 void onKeyEvent(GLFWwindow * window, int key, int, int action, int)
 {
     // Escape: Close window
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE)
+    {
         glfwSetWindowShouldClose(window, true);
     }
 }
@@ -171,7 +200,8 @@ void onKeyEvent(GLFWwindow * window, int key, int, int action, int)
 int main(int, char *[])
 {
     // Initialize GLFW
-    if (!glfwInit()) {
+    if (!glfwInit())
+    {
         // Abort on error
         return 1;
     }
@@ -183,7 +213,7 @@ int main(int, char *[])
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true);
 
     // Create window and context
-    GLFWwindow * window = glfwCreateWindow(640, 480, "globjects Texture", NULL, NULL);
+    GLFWwindow * window = glfwCreateWindow(640, 480, "openLL Typesetting Example", nullptr, nullptr);
     if (!window)
     {
         // Abort if window creation failed
@@ -201,13 +231,13 @@ int main(int, char *[])
     glfwMakeContextCurrent(window);
 
     // Initialize globjects (internally initializes glbinding and registers the current context)
-    globjects::init();
+    globjects::init(glfwGetProcAddress);
 
     // Output OpenGL version information
     std::cout << std::endl
-        << "OpenGL Version:  " << glbinding::ContextInfo::version() << std::endl
-        << "OpenGL Vendor:   " << glbinding::ContextInfo::vendor() << std::endl
-        << "OpenGL Renderer: " << glbinding::ContextInfo::renderer() << std::endl << std::endl;
+        << "OpenGL Version:  " << glbinding::aux::ContextInfo::version() << std::endl
+        << "OpenGL Vendor:   " << glbinding::aux::ContextInfo::vendor() << std::endl
+        << "OpenGL Renderer: " << glbinding::aux::ContextInfo::renderer() << std::endl << std::endl;
 
     // Get framebuffer size
     int width, height;

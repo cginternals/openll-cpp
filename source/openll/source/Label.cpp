@@ -46,6 +46,12 @@ void Label::setText(const std::u32string & text)
     m_text->setText(text);
 }
 
+void Label::setText(std::u32string && text)
+{
+    m_text = std::shared_ptr<Text>(new Text);
+    m_text->setText(std::move(text));
+}
+
 const FontFace * Label::fontFace() const
 {
     return m_fontFace;
@@ -116,6 +122,28 @@ void Label::setLineAnchor(LineAnchor anchor)
     m_anchor = anchor;
 }
 
+float Label::lineAnchorOffset() const
+{
+    switch (m_anchor)
+    {
+    case LineAnchor::Ascent:
+        return -m_fontFace->ascent();
+        break;
+
+    case LineAnchor::Center:
+        return -m_fontFace->size() * 0.5f + m_fontFace->descent();
+        break;
+
+    case LineAnchor::Descent:
+        return -m_fontFace->descent();
+        break;
+
+    case LineAnchor::Baseline:
+    default:
+        return 0.0f;
+    }
+}
+
 const glm::vec4 & Label::textColor() const
 {
     return m_textColor;
@@ -157,7 +185,7 @@ void Label::setTransform2D(const glm::vec2 & origin, const glm::uvec2 & viewport
     m_transform = glm::scale(m_transform, 2.0f / glm::vec3(viewportExtent.x, viewportExtent.y, 1.0f));
 
     // Scale glyphs to pixel size with respect to the displays ppi
-    m_transform = glm::scale(m_transform, glm::vec3(ppiScale));
+    m_transform = glm::scale(m_transform, glm::vec3(ppiScale, ppiScale, 1.0f));
 
     // Translate to origin in point space - scale origin within
     // margined extent (i.e., viewport with margined areas removed)
@@ -167,7 +195,7 @@ void Label::setTransform2D(const glm::vec2 & origin, const glm::uvec2 & viewport
         , glm::vec3((0.5f * origin + 0.5f) * marginedExtent, 0.0f) + glm::vec3(m_margins[3], m_margins[2], 0.0f));
 
     // Scale glyphs of font face to target font size
-    m_transform = glm::scale(m_transform, glm::vec3(m_fontSize / m_fontFace->size()));
+    m_transform = glm::scale(m_transform, glm::vec3(glm::vec2(m_fontSize / m_fontFace->size()), 1.0f));
 }
 
 void Label::setTransform3D(const glm::vec3 & origin, const glm::mat4 & transform)

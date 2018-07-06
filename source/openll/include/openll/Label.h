@@ -68,6 +68,7 @@ public:
     *    Text (32 bit unicode string)
     */
     void setText(const std::u32string & text);
+    void setText(std::u32string && text);
 
     /**
     *  @brief
@@ -194,6 +195,15 @@ public:
     *    Vertical anchor point
     */
     void setLineAnchor(LineAnchor anchor);
+
+    /**
+    *  @brief
+    *    Get line anchor offset for pen initialization during typesetting.
+    *
+    *  @return
+    *    The line anchor offset.
+    */
+    float lineAnchorOffset() const;
 
     /**
     *  @brief

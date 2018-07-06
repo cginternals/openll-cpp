@@ -1,19 +1,42 @@
 
 #include <openll/Glyph.h>
 
+#include <openll/FontFace.h>
+
 
 namespace openll
 {
 
 
-Glyph::Glyph()
-: m_index(0u)
+Glyph::Glyph(const FontFace * fontFace)
+: m_fontFace(fontFace)
+, m_index(0u)
 , m_advance(0.0f)
 {
 }
 
 Glyph::~Glyph()
 {
+}
+
+void Glyph::setFontFace(const FontFace * fontFace)
+{
+    m_fontFace = fontFace;
+
+    if (m_fontFace != nullptr)
+    {
+        const auto & padding = m_fontFace->glyphTexturePadding();
+        m_penOrigin = glm::vec2(m_bearing.x - padding[3], m_bearing.y - m_extent.y - padding[2]);
+        m_penTangent = glm::vec2(m_extent.x + padding[1] + padding[3], 0.f);
+        m_penBitangent = glm::vec2(0.f, m_extent.y + padding[0] + padding[2]);
+
+        const auto & extentScale = m_fontFace->inverseGlyphTextureExtent();
+        const auto ll = m_subtextureOrigin
+            - glm::vec2(padding[3], padding[2]) * extentScale;
+        const auto ur = m_subtextureOrigin + m_subtextureExtent
+            + glm::vec2(padding[1], padding[0]) * extentScale;
+        m_subtextureRect = glm::vec4(ll, ur);
+    }
 }
 
 size_t Glyph::index() const
@@ -39,6 +62,17 @@ void Glyph::setSubTextureOrigin(const glm::vec2 & origin)
     //assert(origin.y <= 1.0f);
 
     m_subtextureOrigin = origin;
+
+    if (m_fontFace != nullptr)
+    {
+        const auto & padding = m_fontFace->glyphTexturePadding();
+        const auto & extentScale = m_fontFace->inverseGlyphTextureExtent();
+        const auto ll = m_subtextureOrigin
+            - glm::vec2(padding[3], padding[2]) * extentScale;
+        const auto ur = m_subtextureOrigin + m_subtextureExtent
+            + glm::vec2(padding[1], padding[0]) * extentScale;
+        m_subtextureRect = glm::vec4(ll, ur);
+    }
 }
 
 const glm::vec2 & Glyph::subTextureExtent() const
@@ -52,11 +86,23 @@ void Glyph::setSubTextureExtent(const glm::vec2 & extent)
     assert(extent.y <= 1.0f);
 
     m_subtextureExtent = extent;
+    m_depictable = m_subtextureExtent.x > 0.0f && m_subtextureExtent.y > 0.0f;
+
+    if (m_fontFace != nullptr)
+    {
+        const auto & padding = m_fontFace->glyphTexturePadding();
+        const auto & extentScale = m_fontFace->inverseGlyphTextureExtent();
+        const auto ll = m_subtextureOrigin
+            - glm::vec2(padding[3], padding[2]) * extentScale;
+        const auto ur = m_subtextureOrigin + m_subtextureExtent
+            + glm::vec2(padding[1], padding[0]) * extentScale;
+        m_subtextureRect = glm::vec4(ll, ur);
+    }
 }
 
 bool Glyph::depictable() const
 {
-    return m_subtextureExtent.x > 0.0f && m_subtextureExtent.y > 0.0f;
+    return m_depictable;
 }
 
 const glm::vec2 & Glyph::bearing() const
@@ -67,12 +113,24 @@ const glm::vec2 & Glyph::bearing() const
 void Glyph::setBearing(const glm::vec2 & bearing)
 {
     m_bearing = bearing;
+
+    if (m_fontFace != nullptr)
+    {
+        const auto & padding = m_fontFace->glyphTexturePadding();
+        m_penOrigin = glm::vec2(m_bearing.x - padding[3], m_bearing.y - m_extent.y - padding[2]);
+    }
 }
 
 void Glyph::setBearing(const float fontAscent, const float xOffset, const float yOffset)
 {
     m_bearing.x = xOffset;
     m_bearing.y = fontAscent - yOffset;
+
+    if (m_fontFace != nullptr)
+    {
+        const auto & padding = m_fontFace->glyphTexturePadding();
+        m_penOrigin = glm::vec2(m_bearing.x - padding[3], m_bearing.y - m_extent.y - padding[2]);
+    }
 }
 
 const glm::vec2 & Glyph::extent() const
@@ -83,6 +141,14 @@ const glm::vec2 & Glyph::extent() const
 void Glyph::setExtent(const glm::vec2 & extent)
 {
     m_extent = extent;
+
+    if (m_fontFace != nullptr)
+    {
+        const auto & padding = m_fontFace->glyphTexturePadding();
+        m_penOrigin = glm::vec2(m_bearing.x - padding[3], m_bearing.y - m_extent.y - padding[2]);
+        m_penTangent = glm::vec2(m_extent.x + padding[1] + padding[3], 0.f);
+        m_penBitangent = glm::vec2(0.f, m_extent.y + padding[0] + padding[2]);
+    }
 }
 
 float Glyph::advance() const
@@ -95,21 +161,25 @@ void Glyph::setAdvance(const float advance)
     m_advance = advance;
 }
 
-float Glyph::kerning(size_t subsequentIndex) const
+const glm::vec2 & Glyph::penOrigin() const
 {
-    // Get kerning between this glyph and the subsequent glyph
-    auto it = m_kernings.find(subsequentIndex);
-    if (it != m_kernings.cend()) {
-        return it->second;
-    } else {
-        return 0.0f;
-    }
+    return m_penOrigin;
 }
 
-void Glyph::setKerning(size_t subsequentIndex, const float kerning)
+
+const glm::vec2 & Glyph::penTangent() const
 {
-    // Set kerning between this glyph and the subsequent glyph
-    m_kernings[subsequentIndex] = kerning;
+    return m_penTangent;
+}
+
+const glm::vec2 & Glyph::penBitangent() const
+{
+    return m_penBitangent;
+}
+
+const glm::vec4 & Glyph::subtextureRectangle() const
+{
+    return m_subtextureRect;
 }
 
 

@@ -78,7 +78,8 @@ void GlyphRenderer::setProgram(std::unique_ptr<globjects::Program> && program)
 void GlyphRenderer::render(const GlyphVertexCloud & vertexCloud) const
 {
     // Abort if vertex array is empty
-    if (vertexCloud.vertices().empty()) {
+    if (vertexCloud.vertices().empty())
+    {
         return;
     }
 

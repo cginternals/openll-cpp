@@ -31,6 +31,11 @@ void Text::setText(const std::u32string & text)
     m_text = text;
 }
 
+void Text::setText(std::u32string && text)
+{
+    m_text = std::move(text);
+}
+
 char32_t Text::lineFeed() const
 {
     return m_linefeed;

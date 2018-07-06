@@ -3,15 +3,21 @@
 
 
 #include <cstdint>
+#include <map>
 #include <unordered_map>
 
 #include <glm/vec2.hpp>
+#include <glm/vec4.hpp>
 
 #include <openll/openll_api.h>
 
 
 namespace openll
 {
+
+
+class FontFace;
+
 
 /**
 *  @brief
@@ -31,13 +37,22 @@ public:
     *  @brief
     *    Constructor
     */
-    Glyph();
+    Glyph(const FontFace * fontFace);
 
     /**
     *  @brief
     *    Destructor
     */
     ~Glyph();
+
+    /**
+    *  @brief
+    *    Update owning font face
+    *
+    *  @param[in] fontFace
+    *    The new owning font face
+    */
+    void setFontFace(const FontFace * fontFace);
 
     /**
     *  @brief
@@ -241,55 +256,55 @@ public:
 
     /**
     *  @brief
-    *    Get the glyph's kerning w.r.t. a subsequent glyph (in pt)
-    *
-    *    The kerning between two glyphs provides an offset along the baseline,
-    *    which can be used to move the pen-position respectively. It is usually negative.
-    *    For example, the subsequent pen-position is computed as follows:
-    *        pen-position = pen-position + advance + kerning
-    *
-    *  @param[in] subsequentIndex
-    *    The subsequent glyph's index
+    *    Return origin offset used with current pen for typesetting.
     *
     *  @return
-    *    The kerning (usually negative) between the two glyphs in pt.
-    *    If no specific kerning for the glyph pair is available, a zero
-    *    kerning is returned.
+    *    Glyph origin offset
     */
-    float kerning(size_t subsequentIndex) const;
+    const glm::vec2 & penOrigin() const;
 
     /**
     *  @brief
-    *    Set the glyph's kerning w.r.t. a subsequent glyph (in pt)
+    *    Return tangent used with current pen for typesetting.
     *
-    *    The kerning between two glyphs provides an offset along the baseline,
-    *    which can be used to move the pen-position respectively. It is usually negative.
-    *    For example, the subsequent pen-position is computed as follows:
-    *        pen-position = pen-position + advance + kerning
-    *
-    *  @param[in] subsequentIndex
-    *    The subsequent glyph's index
-    *  @param[in] kerning
-    *    The kerning (usually negative) between the two glyphs in pt.
-    *
-    * @notes
-    *    - The kerning should usually be a negative value, but is not
-    *    enforced in terms of assertion or clamping
-    *    - If kerning data for the subsequent glyph is already
-    *    available, it will be updated to the new value
+    *  @return
+    *    Glyph texture tangent
     */
-    void setKerning(size_t subsequentIndex, float kerning);
+    const glm::vec2 & penTangent() const;
+
+    /**
+    *  @brief
+    *    Return bitangent used with current pen for typesetting.
+    *
+    *  @return
+    *    Glyph texture bitangent
+    */
+    const glm::vec2 & penBitangent() const;
+
+
+    /**
+    *  @brief
+    *    Return subtexture rectangle used for glyph vertex clouds.
+    *
+    *  @return
+    *    Glyph subtexture rectangle
+    */
+    const glm::vec4 & subtextureRectangle() const;
 
 
 protected:
-    size_t    m_index;            ///< Index of the glyph in the associated FontFace
-    glm::vec2 m_subtextureOrigin; ///< Upper left position of the glyph's sub-texture
-    glm::vec2 m_subtextureExtent; ///< Width and height of the glyph's sub-texture
-    glm::vec2 m_bearing;          ///< x and y offsets w.r.t. to the pen-position on the baseline
-    glm::vec2 m_extent;           ///< Width and height of the glyph in pt
-    float     m_advance;          ///< Glyph's horizontal overall advance in pt
-
-    std::unordered_map<size_t, float> m_kernings; ///< Kerning information map with upcoming glyph as key
+    const FontFace * m_fontFace;         ///< The owning font face
+    size_t           m_index;            ///< Index of the glyph in the associated FontFace
+    glm::vec4        m_subtextureRect;   ///< Cached subtexture rectangle used for glyph vertex clouds
+    glm::vec2        m_subtextureOrigin; ///< Upper left position of the glyph's sub-texture
+    glm::vec2        m_subtextureExtent; ///< Width and height of the glyph's sub-texture
+    glm::vec2        m_bearing;          ///< x and y offsets w.r.t. to the pen-position on the baseline
+    glm::vec2        m_extent;           ///< Width and height of the glyph in pt
+    glm::vec2        m_penOrigin;        ///< Cached origin to get used with a pen during typesetting
+    glm::vec2        m_penTangent;       ///< Cached tangent to get used with a pen during typesetting
+    glm::vec2        m_penBitangent;     ///< Cached bitangent to get used with a pen during typesetting
+    float            m_advance;          ///< Glyph's horizontal overall advance in pt
+    bool             m_depictable;       ///< Cached Flag if the glyph is depictable/renderable
 };
 
 

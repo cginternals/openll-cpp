@@ -61,8 +61,9 @@ void FontFace::setLinegap(const float linegap)
 
 float FontFace::linespace() const
 {
-    if (lineHeight() == 0.0f) {
-        return lineHeight();
+    if (lineHeight() == 0.0f)
+    {
+        return 0.0f;
     }
 
     return size() / lineHeight();
@@ -94,6 +95,12 @@ void FontFace::setGlyphTextureExtent(const glm::uvec2 & extent)
     assert(extent.y > 0);
 
     m_glyphTextureExtent = extent;
+    m_inverseGlyphTextureExtent = 1.0f / glm::vec2(m_glyphTextureExtent);
+}
+
+const glm::vec2 & FontFace::inverseGlyphTextureExtent() const
+{
+    return m_inverseGlyphTextureExtent;
 }
 
 const glm::vec4 & FontFace::glyphTexturePadding() const
@@ -128,26 +135,31 @@ bool FontFace::hasGlyph(const size_t index) const
 
 Glyph & FontFace::glyph(const size_t index)
 {
-    const auto existing = m_glyphs.find(index);
-    if (existing != m_glyphs.cend()) {
+    const auto & existing = m_glyphs.find(index);
+
+    if (existing != m_glyphs.cend())
+    {
         return existing->second;
     }
 
-    auto glyph = Glyph();
+    auto glyph = Glyph(this);
     glyph.setIndex(index);
 
-    const auto inserted = m_glyphs.emplace(glyph.index(), glyph);
+    const auto inserted = m_glyphs.emplace(glyph.index(), std::move(glyph));
+
     return inserted.first->second;
 }
 
 const Glyph & FontFace::glyph(const size_t index) const
 {
-    const auto existing = m_glyphs.find(index);
-    if (existing != m_glyphs.cend()) {
+    static const auto empty = Glyph(this);
+
+    const auto & existing = m_glyphs.find(index);
+    if (existing != m_glyphs.cend())
+    {
         return existing->second;
     }
 
-    static const auto empty = Glyph();
     return empty;
 }
 
@@ -155,13 +167,26 @@ void FontFace::addGlyph(const Glyph & glyph)
 {
     assert(m_glyphs.find(glyph.index()) == m_glyphs.cend());
 
-    m_glyphs.emplace(glyph.index(), glyph);
+    Glyph copy = glyph;
+    copy.setFontFace(this);
+    m_glyphs.emplace(glyph.index(), std::move(copy));
+}
+
+void FontFace::addGlyph(Glyph && glyph)
+{
+    assert(m_glyphs.find(glyph.index()) == m_glyphs.cend());
+
+    glyph.setFontFace(this);
+    m_glyphs.emplace(glyph.index(), std::move(glyph));
 }
 
 std::vector<size_t> FontFace::glyphs() const
 {
     auto glyphs = std::vector<size_t>();
-    for (const auto & i : m_glyphs) {
+    glyphs.reserve(m_glyphs.size());
+
+    for (const auto & i : m_glyphs)
+    {
         glyphs.push_back(i.first);
     }
 
@@ -175,24 +200,41 @@ bool FontFace::depictable(const size_t index) const
 
 float FontFace::kerning(const size_t index, const size_t subsequentIndex) const
 {
-    const auto it = m_glyphs.find(index);
-    if (it == m_glyphs.cend()) {
-        return 0.0f;
+    if (index == std::get<0>(m_kerningRequestCache) && subsequentIndex == std::get<1>(m_kerningRequestCache))
+    {
+        return std::get<2>(m_kerningRequestCache);
     }
 
-    return it->second.kerning(subsequentIndex);
+    const auto key = kerningIndex(index, subsequentIndex);
+
+    const auto it = m_kernings.find(key);
+
+    auto kerning = 0.0f;
+    if (it != m_kernings.cend())
+    {
+        kerning = it->second;
+    }
+
+    std::get<0>(m_kerningRequestCache) = index;
+    std::get<1>(m_kerningRequestCache) = subsequentIndex;
+    std::get<2>(m_kerningRequestCache) = kerning;
+
+    return kerning;
 }
 
 void FontFace::setKerning(const size_t index, const size_t subsequentIndex, const float kerning)
 {
-    const auto it = m_glyphs.find(index);
-    if (it == m_glyphs.cend() || !hasGlyph(subsequentIndex))
-    {
-        assert(false);
-        return;
-    }
+    assert(hasGlyph(index));
+    assert(hasGlyph(subsequentIndex));
 
-    it->second.setKerning(subsequentIndex, kerning);
+    const auto key = kerningIndex(index, subsequentIndex);
+
+    m_kernings[key] = kerning;
+}
+
+std::uint64_t FontFace::kerningIndex(char32_t firstIndex, char32_t secondIndex)
+{
+    return static_cast<std::uint64_t>(firstIndex) << 32 | static_cast<std::uint64_t>(secondIndex);
 }
 
 
