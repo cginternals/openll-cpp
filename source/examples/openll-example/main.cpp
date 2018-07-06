@@ -43,7 +43,7 @@ namespace
     glm::ivec4     g_margins(10, 40, 0, 40);             ///< Margins (top/right/bottom/left, in px)
     float          g_pixelPerInch(72.0f);                ///< Number of pixels per inch
     bool           g_wordWrap(true);                     ///< Wrap words at the end of a line?
-    Alignment      g_alignment(Alignment::Centered);     ///< Horizontal text alignment
+    Alignment      g_alignment(Alignment::LeftAligned);  ///< Horizontal text alignment
     LineAnchor     g_lineAnchor(LineAnchor::Ascent);     ///< Vertical line anchor
     bool           g_optimized(true);                    ///< Optimize rendering performance?
     glm::uvec2     g_screenSize;                         ///< Screen size (in pixels)
@@ -60,12 +60,23 @@ void initialize()
 {
     auto text = std::string(s_text);
 
-    for (auto i = 0; i < 11; ++i)
+    for (auto i = 0; i < 4; ++i)
     {
          text += text;
     }
 
-    std::cout << "Using a text with " << text.size() << " characters (" << static_cast<float>(text.size() / 1024.0 / 1024.0) << "MB)" << std::endl;
+    if (text.size() > 1024 * 1024 * 1024)
+    {
+        std::cout << "Using a text with " << text.size() << " characters (" << static_cast<float>(text.size() / 1024.0 / 1024.0 / 1024.0) << "GB)" << std::endl;
+    }
+    else if (text.size() > 1024 * 1024)
+    {
+        std::cout << "Using a text with " << text.size() << " characters (" << static_cast<float>(text.size() / 1024.0 / 1024.0) << "MB)" << std::endl;
+    }
+    else
+    {
+        std::cout << "Using a text with " << text.size() << " characters (" << static_cast<float>(text.size() / 1024.0) << "kB)" << std::endl;
+    }
 
     // Set text
     const auto encodedText = cppassist::string::encode(std::string(text), cppassist::Encoding::UTF8);
@@ -202,7 +213,7 @@ int main(int, char *[])
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true);
 
     // Create window and context
-    GLFWwindow * window = glfwCreateWindow(640, 480, "globjects Texture", NULL, NULL);
+    GLFWwindow * window = glfwCreateWindow(640, 480, "openLL Typesetting Example", nullptr, nullptr);
     if (!window)
     {
         // Abort if window creation failed
