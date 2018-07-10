@@ -86,7 +86,7 @@ void initialize()
 
     // Create label
     g_label.setText(std::move(encodedText));
-    g_label.setFontFace(*g_fontFace);
+    g_label.setFontFace(g_fontFace.get());
     g_label.setFontSize(g_fontSize);
     g_label.setWordWrap(g_wordWrap);
     g_label.setAlignment(g_alignment);

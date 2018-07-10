@@ -52,8 +52,26 @@ GlyphVertexCloud::GlyphVertexCloud()
     m_vao->enable(4);
 }
 
+GlyphVertexCloud::GlyphVertexCloud(GlyphVertexCloud && other)
+: m_vertices(std::move(other.m_vertices))
+, m_buffer(std::move(other.m_buffer))
+, m_vao(std::move(other.m_vao))
+, m_texture(std::move(other.m_texture))
+{
+}
+
 GlyphVertexCloud::~GlyphVertexCloud()
 {
+}
+
+GlyphVertexCloud & GlyphVertexCloud::operator=(GlyphVertexCloud && other)
+{
+    m_vertices = std::move(other.m_vertices);
+    m_buffer = std::move(other.m_buffer);
+    m_vao = std::move(other.m_vao);
+    m_texture = std::move(other.m_texture);
+
+    return *this;
 }
 
 const std::vector<GlyphVertexCloud::Vertex> & GlyphVertexCloud::vertices() const

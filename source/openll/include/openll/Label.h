@@ -86,7 +86,7 @@ public:
     *  @param[in] fontFace
     *    The used font face
     */
-    void setFontFace(FontFace & fontFace);
+    void setFontFace(const FontFace * fontFace);
 
     /**
     *  @brief
@@ -276,7 +276,7 @@ public:
 
 protected:
     std::shared_ptr<Text> m_text;      ///< Text that is rendered
-    FontFace            * m_fontFace;  ///< The used font face
+    const FontFace      * m_fontFace;  ///< The used font face
     float                 m_fontSize;  ///< Font size for rendering (in pt)
     bool                  m_wordWrap;  ///< Wrap words at the end of a line?
     float                 m_lineWidth; ///< Width of a line (in pt)

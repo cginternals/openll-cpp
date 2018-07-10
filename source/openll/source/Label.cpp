@@ -57,9 +57,9 @@ const FontFace * Label::fontFace() const
     return m_fontFace;
 }
 
-void Label::setFontFace(FontFace & fontFace)
+void Label::setFontFace(const FontFace * fontFace)
 {
-    m_fontFace = &fontFace;
+    m_fontFace = fontFace;
 }
 
 float Label::fontSize() const

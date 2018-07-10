@@ -56,6 +56,12 @@ public:
 
     /**
     *  @brief
+    *    Move constructor
+    */
+    GlyphVertexCloud(GlyphVertexCloud && other);
+
+    /**
+    *  @brief
     *    Destructor
     *
     *  @remarks
@@ -65,6 +71,9 @@ public:
 
     // Forbid copying
     GlyphVertexCloud & operator=(const GlyphVertexCloud &) = delete;
+
+    // Allow moving
+    GlyphVertexCloud & operator=(GlyphVertexCloud && other);
 
     /**
     *  @brief
