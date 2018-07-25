@@ -98,6 +98,8 @@ public:
     *    Optimize vertex cloud for rendering performance? (slow for large texts!)
     *  @param[in] dryrun
     *    Do not create output, just compute the extent?
+    *  @param[out] positions
+    *    The indices of the labels in the resulting attributed vertex cloud
     *
     *  @return
     *    Extent of the label (in output space)
@@ -115,7 +117,7 @@ public:
     *      is not met, the vertex cloud will use the first font face found, and an
     *      assertion will be thrown.
     */
-    static glm::vec2 typeset(GlyphVertexCloud & vertexCloud, const std::vector<Label> & labels, bool optimize = false, bool dryrun = false);
+    static glm::vec2 typeset(GlyphVertexCloud & vertexCloud, const std::vector<Label> & labels, bool optimize = false, bool dryrun = false, std::vector<std::pair<std::uint32_t, std::uint32_t>> * positions = nullptr);
 
     /**
     *  @brief

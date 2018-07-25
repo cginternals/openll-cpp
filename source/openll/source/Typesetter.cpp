@@ -104,7 +104,7 @@ glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const Label & labe
     return extent;
 }
 
-glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<Label> & labels, bool optimize, bool dryrun)
+glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<Label> & labels, bool optimize, bool dryrun, std::vector<std::pair<std::uint32_t, std::uint32_t>> * positions)
 {
     const FontFace * fontFace = nullptr;
 
@@ -132,8 +132,15 @@ glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<
         if (label.fontFace())
         {
             // Typeset label
+            const auto startIndex = std::uint32_t(vertexCloud.vertices().size());
             const auto currentExtent = typeset_label(vertexCloud.vertices(), buckets, label, optimize, dryrun);
             extent = glm::max(extent, currentExtent);
+
+            if (positions != nullptr)
+            {
+                const auto endIndex = std::uint32_t(vertexCloud.vertices().size());
+                positions->emplace_back(startIndex, endIndex);
+            }
         }
     }
 
