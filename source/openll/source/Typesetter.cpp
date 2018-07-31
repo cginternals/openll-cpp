@@ -154,7 +154,10 @@ glm::vec2 Typesetter::typeset(GlyphVertexCloud & vertexCloud, const std::vector<
     vertexCloud.update();
 
     // Set font texture
-    vertexCloud.setTexture(fontFace->glyphTexture());
+    if (fontFace != nullptr)
+    {
+        vertexCloud.setTexture(fontFace->glyphTexture());
+    }
 
     // Give back extent
     return extent;
