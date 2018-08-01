@@ -84,7 +84,7 @@ void GlyphRenderer::render(const GlyphVertexCloud & vertexCloud) const
     }
 
     // Update uniform values
-    m_program->setUniform("viewProjectionMatrix", glm::mat4());
+    m_program->setUniform("viewProjectionMatrix", glm::mat4(1.0f));
 
     // Bind shader program and texture
     m_program->use();

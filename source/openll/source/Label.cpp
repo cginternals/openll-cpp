@@ -201,7 +201,7 @@ void Label::setTransform2D(const glm::vec2 & origin, const glm::uvec2 & viewport
 void Label::setTransform3D(const glm::vec3 & origin, const glm::mat4 & transform)
 {
     // Start with identity matrix
-    m_transform = glm::mat4();
+    m_transform = glm::mat4(1.0f);
 
     // Translate to origin position
     m_transform = glm::translate(m_transform, origin);
