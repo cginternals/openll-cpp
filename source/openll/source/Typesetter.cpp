@@ -53,8 +53,6 @@ namespace openll
 
 glm::vec2 Typesetter::extent(const Label & label)
 {
-    assert(label.fontFace() != nullptr);
-
     // Abort operation if no font face is set
     if (!label.fontFace())
     {
