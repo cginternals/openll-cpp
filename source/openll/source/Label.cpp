@@ -176,7 +176,7 @@ void Label::setTransform2D(const glm::vec2 & origin, const glm::uvec2 & viewport
     const auto ppiScale = pixelPerInch / pointsPerInch;
 
     // Start with identity matrix
-    m_transform = glm::mat4();
+    m_transform = glm::mat4(1.0f);
 
     // Translate to lower left in NDC
     m_transform = glm::translate(m_transform, glm::vec3(-1.0f, -1.0f, 0.0f));
