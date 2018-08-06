@@ -94,7 +94,7 @@ void FontLoader::parseInfo(std::stringstream & stream, FontFace & fontFace, floa
 
     fontSize = cppassist::string::fromString<float>(pairs.at("size"));
 
-    auto values = cppassist::string::split(pairs.at("padding"), ',');
+    auto values = cppassist::string::split(pairs.at("padding"), ',', true);
     assert(values.size() == 4);
 
     auto padding = glm::vec4();
