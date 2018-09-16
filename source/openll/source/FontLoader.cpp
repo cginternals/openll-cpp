@@ -12,8 +12,9 @@
 #include <cppassist/logging/logging.h>
 #include <cppassist/string/conversion.h>
 #include <cppassist/string/manipulation.h>
-#include <cppassist/fs//FilePath.h>
 #include <cppassist/fs/RawFile.h>
+
+#include <cppfs/FilePath.h>
 
 #include <glbinding/gl/enum.h>
 
@@ -126,7 +127,7 @@ void FontLoader::parsePage(std::stringstream & stream, FontFace & fontFace, cons
 {
     auto pairs = readKeyValuePairs(stream, { "file" });
 
-    const auto path = cppassist::FilePath(filename).directoryPath();
+    const auto path = cppfs::FilePath(filename).directoryPath();
     const auto file = cppassist::string::stripped(pairs.at("file"), { '"', '\r' });
 
     if (cppassist::string::hasSuffix(file, ".raw"))

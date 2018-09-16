@@ -8,6 +8,7 @@ find_package(cppassist REQUIRED)
 find_package(cpplocate REQUIRED)
 find_package(glbinding REQUIRED)
 find_package(globjects REQUIRED)
+find_package(cppfs     REQUIRED)
 
 
 #
@@ -142,6 +143,7 @@ target_link_libraries(${target}
     cpplocate::cpplocate
     glbinding::glbinding
     globjects::globjects
+    cppfs::cppfs
 
     PUBLIC
     ${DEFAULT_LIBRARIES}
