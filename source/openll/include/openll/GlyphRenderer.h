@@ -127,13 +127,13 @@ public:
 
 
 protected:
-    std::unique_ptr<globjects::Program>              m_program;              ///< Program used for rendering
-    std::unique_ptr<globjects::Shader>               m_vertexShader;         ///< Vertex shader
-    std::unique_ptr<globjects::Shader>               m_geometryShader;       ///< Geometry shader
-    std::unique_ptr<globjects::Shader>               m_fragmentShader;       ///< Fragment shader
     std::unique_ptr<globjects::AbstractStringSource> m_vertexShaderSource;   ///< Shader source for the vertex shader
     std::unique_ptr<globjects::AbstractStringSource> m_geometryShaderSource; ///< Shader source for the geometry shader
     std::unique_ptr<globjects::AbstractStringSource> m_fragmentShaderSource; ///< Shader source for the fragment shader
+    std::unique_ptr<globjects::Shader>               m_vertexShader;         ///< Vertex shader
+    std::unique_ptr<globjects::Shader>               m_geometryShader;       ///< Geometry shader
+    std::unique_ptr<globjects::Shader>               m_fragmentShader;       ///< Fragment shader
+    std::unique_ptr<globjects::Program>              m_program;              ///< Program used for rendering
 };
 
 
