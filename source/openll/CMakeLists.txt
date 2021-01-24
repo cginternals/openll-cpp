@@ -138,7 +138,7 @@ target_include_directories(${target}
 
 target_link_libraries(${target}
     PRIVATE
-    glm
+    glm::glm
     cppassist::cppassist
     cpplocate::cpplocate
     glbinding::glbinding
